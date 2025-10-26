@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -30,6 +31,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.remote.miniflux.BASE_URL
+import cn.coolbet.orbit.remote.miniflux.MinifluxClient
+import cn.coolbet.orbit.remote.miniflux.ProfileApi
 import cn.coolbet.orbit.ui.theme.ElementSize
 import cn.coolbet.orbit.ui.theme.M11White00
 import cn.coolbet.orbit.ui.theme.M15White00
@@ -54,6 +58,8 @@ enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
 
 @Composable
 fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
+    val profileApi: ProfileApi = remember { MinifluxClient.provideProfileApi() }
+
     val iconSize = FeedIconSize.get(size)
     Box(modifier = Modifier
         .size(iconSize.size)
@@ -88,6 +94,10 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
         )
     }
 }
+
+
+
+
 
 @Preview(showBackground = true)
 @Composable

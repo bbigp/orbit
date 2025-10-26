@@ -19,8 +19,7 @@ import cn.coolbet.orbit.ui.theme.AppTypography
 @Composable
 fun CountBadge() {
     Box(
-        modifier = Modifier
-            .padding(end = 4.dp),
+        modifier = Modifier,
         contentAlignment = Alignment.CenterEnd,
     ) {
         Text(

@@ -27,6 +27,12 @@ object MinifluxClient {
 
     @Provides
     @Singleton
+    fun provideProfileApi(): ProfileApi {
+        return createRetrofit(this.createOkHttpClient()).create(ProfileApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun createRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)

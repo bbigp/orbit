@@ -59,5 +59,10 @@ fun Feed.toEntity(): FeedEntity {
 }
 
 fun FeedEntity.to(): Feed {
-    return Feed.EMPTY
+    return Feed(
+        id = this.id, userId = this.userId, feedURL = this.feedURL, siteURL = this.siteURL,
+        title = this.title, errorCount = this.errorCount, errorMsg = this.errorMsg,
+        folderId = this.folderId, desc = "", hideGlobally = this.hideGlobally,
+        onlyShowUnread = this.onlyShowUnread, order = this.orderx, iconURL = this.iconURL,
+    )
 }
