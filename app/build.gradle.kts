@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.material3:material3-window-size-class") // 包含 PullToRefreshBox
     implementation(libs.androidx.compose.foundation)
     implementation(libs.io.coil.kt.coil3)
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
