@@ -3,10 +3,12 @@ package cn.coolbet.orbit
 import android.graphics.pdf.models.ListItem
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresExtension
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,26 +45,79 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.coolbet.orbit.dao.FeedMapper
+import cn.coolbet.orbit.module.FeedIcon
+import cn.coolbet.orbit.module.ShimmerContainer
+import cn.coolbet.orbit.module.home.PreviewFeedTile
+import cn.coolbet.orbit.remote.miniflux.FeedApi
+import cn.coolbet.orbit.remote.miniflux.MinifluxClient
+import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.theme.OrbitTheme
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.net.URL
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var feedApi: FeedApi
+    @Inject lateinit var feedMapper: FeedMapper
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        testInternetPermission()
+
         setContent {
             OrbitTheme {
                 Surface (modifier = Modifier.fillMaxSize()){
-
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center // <-- 关键：让内容居中
+                    ) {
+                        Column {
+                            PreviewFeedTile()
+                        }
+                    }
                 }
             }
         }
     }
+
+
+    private fun testInternetPermission() {
+        lifecycleScope.launch {
+            try {
+                val feeds = feedApi.getFeeds()
+                feedMapper.batchSave(feeds)
+
+                Log.e("PermissionTest", "HTTP 连接测试成功")
+
+            } catch (e: IOException) {
+                // 捕获所有网络相关的错误 (权限拒绝、DNS失败、超时等)
+                Log.e("PermissionTest", "HTTP 连接测试失败: ${e.message}")
+            }
+        }
+    }
+
 }
+
+
+
+
 // 2. 模拟数据获取函数
 /**
  * 模拟网络请求，获取指定页码的数据
@@ -227,7 +282,6 @@ fun DataListScreen() {
                         // 列表底部的"没有更多数据"提示
                         if (!canLoadMore && listItems.isNotEmpty()) {
                             item {
-                                NoMoreDataIndicator()
                             }
                         }
                     }
@@ -278,30 +332,5 @@ fun DataListScreen() {
 //    }
 //}
 
-// 没有更多数据指示器 Composable
-@Composable
-fun NoMoreDataIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            "--- 到底了，没有更多数据 ---",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-    }
-}
 
-/**
- * 预览 Composable
- */
-@Preview(showBackground = true)
-@Composable
-fun DataListScreenPreview() {
-    OrbitTheme {
-        NoMoreDataIndicator()
-    }
-}
+

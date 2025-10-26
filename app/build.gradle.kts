@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt") // 启用 Kotlin 注解处理器
+    id("com.google.dagger.hilt.android") // Hilt 插件
 }
 
 android {
@@ -39,6 +41,7 @@ android {
     buildFeatures {
         compose = true
     }
+    buildToolsVersion = "35.0.0"
 }
 
 dependencies {
@@ -51,6 +54,36 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.io.coil.kt.coil3)
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
+    // Kotlin Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
+    // Retrofit (HTTP Client)
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    // JSON Converter (使用 Gson)
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    // Retrofit 的 OkHttp 拦截器 (用于日志调试)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // ViewModel 和 Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    // Hilt 核心依赖
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    // Hilt 注解处理器 (需要使用 kapt)
+    kapt("com.google.dagger:hilt-compiler:2.51.1")
+    // 针对 Compose Navigation 的集成 (您之前使用了 Compose)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // 如果您需要在 Activity/Fragment 中使用 Hilt，可能还需要以下依赖：
+    // kapt("androidx.hilt:hilt-compiler:1.2.0")
+    // Room 核心库和 KTX (协程支持)
+    val roomVersion = "2.8.0" // 稳定版本，兼容 Kotlin 2.0.x
+    implementation("androidx.room:room-runtime:${roomVersion}")
+    implementation("androidx.room:room-ktx:${roomVersion}")
+    // Room 编译器 (使用 KSP)
+    kapt("androidx.room:room-compiler:$roomVersion")
+    // Hilt 编译器的 KSP 版本也需要检查，通常它也会使用匹配的 KSP 版本
+    kapt("com.google.dagger:hilt-compiler:2.51.1") // 确保您的 Hilt 版本也是最新的
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
