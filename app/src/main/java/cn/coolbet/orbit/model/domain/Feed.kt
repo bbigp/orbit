@@ -20,7 +20,7 @@ interface Meta {
 }
 
 data class Feed(
-    val id: Long = 0,
+    val id: Long,
     val userId: Long = 0,
     val feedURL: String = "",
     override val siteURL: String = "",
@@ -38,21 +38,7 @@ data class Feed(
 
     // 在 Kotlin 中可以作为 companion object 的常量或 object 实例
     companion object {
-        val EMPTY = Feed(
-            id = 0L,
-            userId = 0L,
-            feedURL = "",
-            siteURL = "",
-            title = "",
-            errorCount = 0,
-            errorMsg = "",
-            folderId = 0L,
-            desc = "",
-            hideGlobally = false,
-            onlyShowUnread = false,
-            order = OrderPublishedAt,
-            iconURL = ""
-        )
+        val EMPTY = Feed(id = 0L)
     }
 
 

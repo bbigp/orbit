@@ -51,8 +51,10 @@ import coil3.decode.ImageSource
 import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
+import coil3.key.Keyer
 import coil3.map.Mapper
 import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import coil3.request.Options
 import coil3.util.DebugLogger
 import coil3.util.Logger
@@ -143,6 +145,7 @@ fun rememberMinifluxIconImageLoader(): ImageLoader {
         ImageLoader.Builder(context).components {
             add(MinifluxIconURLMapper())
             add(MinifluxIconFetcher.Factory(profileApi))
+            add(MinifluxIconKeyer())
         }
             .diskCachePolicy(CachePolicy.ENABLED)
             .logger(DebugLogger(minLevel = Logger.Level.Debug))
@@ -150,6 +153,11 @@ fun rememberMinifluxIconImageLoader(): ImageLoader {
     }
 }
 
+class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
+    override fun key(data: MinifluxIconURLModel, options: Options): String {
+        return data.url
+    }
+}
 data class MinifluxIconURLModel(val url: String)
 class MinifluxIconFetcher(private val iconURL: MinifluxIconURLModel, private val profileApi: ProfileApi) : Fetcher {
 

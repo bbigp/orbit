@@ -59,6 +59,9 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
             ) {
+                item {
+                    PreviewFolderTile()
+                }
                 items(state.feeds, key = { it.id }) { item ->
                     FeedTile(item)
                     HorizontalDivider(

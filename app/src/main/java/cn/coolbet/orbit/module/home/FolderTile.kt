@@ -21,29 +21,41 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.module.CountBadge
-import cn.coolbet.orbit.module.FeedIcon
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.theme.Black08
-import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black50
-import cn.coolbet.orbit.ui.theme.ElementSize
-
 
 @Composable
-fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
+fun FolderTile(folder: Folder) {
     Row (
         modifier = Modifier.height(52.dp).fillMaxWidth()
             .padding(start = 8.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ){
-        if (hasIndicator) LeadingIndicator() else Spacer(modifier = Modifier.width(32.dp).height(32.dp))
+        Box(
+            modifier = Modifier.height(32.dp)
+                .width(32.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.triangle_right),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                contentScale = ContentScale.Inside,
+                colorFilter = ColorFilter.tint(Black50)
+            )
+        }
         Spacer(modifier = Modifier.width(4.dp))
-        FeedIcon(url = feed.iconURL, alt = feed.title, size = ElementSize.MEDIUM)
+        Image(
+            painter = painterResource(id = R.drawable.group),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            contentScale = ContentScale.Inside,
+        )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = feed.title,
+            text = folder.title,
             modifier = Modifier.weight(1f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -56,31 +68,10 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
 
 @Preview(showBackground = true)
 @Composable
-fun LeadingIndicator() {
-    Box(
-        modifier = Modifier.height(32.dp)
-            .width(32.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.dot_s),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(Black25)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewFeedTile(){
+fun PreviewFolderTile() {
+    val folder = Folder(id = 1, title = "土豆")
     Column {
-        FeedTile(feed = Feed(id = 0, title = "少数派",
-            iconURL = "https://cdn-static.sspai.com/favicon/sspai.ico",
-        ))
-        FeedTile(feed = Feed(id = 0, title = "少数派",
-            iconURL = "https://cdn-static.sspai.com/favicon/sspai.ico",
-        ), hasIndicator = false)
+        FolderTile(folder)
+        PreviewFeedTile()
     }
 }
