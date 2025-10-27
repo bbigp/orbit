@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.module
 
+import android.util.Base64
 import android.util.Log
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.LinearEasing
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,6 +27,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -37,10 +40,28 @@ import cn.coolbet.orbit.remote.miniflux.ProfileApi
 import cn.coolbet.orbit.ui.theme.ElementSize
 import cn.coolbet.orbit.ui.theme.M11White00
 import cn.coolbet.orbit.ui.theme.M15White00
+import coil3.ColorImage
 import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.AsyncImagePreviewHandler
+import coil3.compose.LocalAsyncImagePreviewHandler
 import coil3.compose.SubcomposeAsyncImage
+import coil3.decode.DataSource
+import coil3.decode.ImageSource
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.SourceFetchResult
+import coil3.map.Mapper
 import coil3.request.CachePolicy
-import okhttp3.OkHttpClient
+import coil3.request.Options
+import coil3.util.DebugLogger
+import coil3.util.Logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okio.Buffer
+import okio.BufferedSource
+import okio.FileSystem
+import java.io.IOException
 
 
 enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
@@ -58,40 +79,10 @@ enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
     }
 }
 
-fun createOkHttpClient(): OkHttpClient {
-    return OkHttpClient.Builder().addInterceptor { chain ->
-        val originalRequest = chain.request()
-//                        if (originalRequest.url.toString().startsWith("v1/")) {
-//                            originalRequest.newBuilder().apply {  data = "" }
-//                            chain.proceed(newRequest)
-//                        } else {
-        chain.proceed(originalRequest)
-//                        }
-    }.build()
-}
-
-@Composable
-fun rememberCustomImageLoader(): ImageLoader {
-    val context = LocalContext.current
-    return remember {
-        ImageLoader.Builder(context)
-            .components {
-                add(Base64JsonFetcher.Factory())
-            }
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .build()
-    }
-}
-
-
-
-
-
 
 @Composable
 fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
-    val profileApi: ProfileApi = remember { MinifluxClient.provideProfileApi() }
-
+    val miniIconImageLoader = rememberMinifluxIconImageLoader()
     val iconSize = FeedIconSize.get(size)
     Box(modifier = Modifier
         .size(iconSize.size)
@@ -99,6 +90,7 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
         contentAlignment = Alignment.Center) {
         SubcomposeAsyncImage(
             model = url,
+            imageLoader = miniIconImageLoader,
             contentDescription = alt,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
@@ -110,10 +102,13 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
             },
             error = {
                 val initial = alt.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
-                Box(modifier = Modifier.fillMaxSize()
+                Box(modifier = Modifier
+                    .fillMaxSize()
                     .background(
-                        Brush.verticalGradient(colors = listOf(Color(0x80555555), Color(0xBF555555))
-                    )),
+                        Brush.verticalGradient(
+                            colors = listOf(Color(0x80555555), Color(0xBF555555))
+                        )
+                    ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -128,13 +123,84 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
 }
 
 
-
-
-
+@OptIn(ExperimentalCoilApi::class)
 @Preview(showBackground = true)
 @Composable
 fun PreviewFeedIcon(){
-    FeedIcon(url = "https://cdn-static.sspai.com/favicon/sspai.ico", alt = "少数派")
+    val previewHandler = AsyncImagePreviewHandler {
+        ColorImage(Color.Red.toArgb())
+    }
+    CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
+        FeedIcon(url = "https://cdn-static.sspai.com/favicon/sspai.ico", alt = "少数派")
+    }
+}
+
+@Composable
+fun rememberMinifluxIconImageLoader(): ImageLoader {
+    val context = LocalContext.current
+    val profileApi: ProfileApi = remember { MinifluxClient.provideProfileApi() }
+    return remember {
+        ImageLoader.Builder(context).components {
+            add(MinifluxIconURLMapper())
+            add(MinifluxIconFetcher.Factory(profileApi))
+        }
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .logger(DebugLogger(minLevel = Logger.Level.Debug))
+            .build()
+    }
+}
+
+data class MinifluxIconURLModel(val url: String)
+class MinifluxIconFetcher(private val iconURL: MinifluxIconURLModel, private val profileApi: ProfileApi) : Fetcher {
+
+    override suspend fun fetch(): FetchResult = withContext(Dispatchers.IO) {
+        try {
+            val rep = profileApi.icon(iconURL.url)
+            val byteArray = Base64.decode(rep.data.split("base64,")[1], Base64.NO_WRAP)
+            val bufferedSource: BufferedSource = Buffer()
+                .write(byteArray)
+                .buffer()
+            val imageSource = ImageSource(
+                source = bufferedSource,
+                fileSystem = FileSystem.SYSTEM,
+                metadata = SimpleMimeTypeMetadata(mimeType = rep.mimeType)
+            )
+            SourceFetchResult(
+                source = imageSource,
+                mimeType = "image/jpeg",
+                dataSource = DataSource.NETWORK// 标记为网络源，实现磁盘缓存
+            )
+        } catch (e: Exception) {
+            throw IOException("Failed to process Base64 data for ${iconURL.url}", e)
+        }
+    }
+
+    class Factory(private val profileApi: ProfileApi) : Fetcher.Factory<MinifluxIconURLModel> {
+        override fun create(data: MinifluxIconURLModel, options: Options, imageLoader: ImageLoader): Fetcher {
+            return MinifluxIconFetcher(data, profileApi)
+        }
+    }
+
+}
+class MinifluxIconURLMapper : Mapper<String, MinifluxIconURLModel> {
+
+    override fun map(data: String, options: Options): MinifluxIconURLModel? {
+        if (!data.startsWith("v1/", ignoreCase = true)) {
+            return null // 如果不是，返回 null，让 Coil 尝试其他 Mapper/Fetcher (例如默认的网络 Fetcher)
+        }
+        return MinifluxIconURLModel(url = data)
+    }
+}
+class SimpleMimeTypeMetadata(val mimeType: String) : ImageSource.Metadata() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is SimpleMimeTypeMetadata) return false
+        return mimeType == other.mimeType
+    }
+
+    override fun hashCode(): Int {
+        return mimeType.hashCode()
+    }
 }
 
 
@@ -175,7 +241,8 @@ fun Modifier.shimmer(
 
     // 修正：我们不在这里调用 clip()。
     // 我们将渐变作为背景应用，并让外部的 Modifier 负责裁剪。
-    this.background(Color.White) // 首先给一个基础背景色 (可选)
+    this
+        .background(Color.White) // 首先给一个基础背景色 (可选)
         .drawWithCache {
             // 使用 drawWithCache 更精确地控制绘制，避免 graphicsLayer 导致的其他副作用
             val size = this.size

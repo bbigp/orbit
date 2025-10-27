@@ -2,10 +2,11 @@ package cn.coolbet.orbit.remote.miniflux
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface ProfileApi {
-    @GET("v1/icons/{iconID}")
-    suspend fun icon(): IconFileResponse
+    @GET("{path}")
+    suspend fun icon(@Path("path") path: String): IconFileResponse
 }
 
 data class IconFileResponse(
