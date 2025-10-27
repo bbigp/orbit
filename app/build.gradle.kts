@@ -55,7 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material3:material3-window-size-class") // 包含 PullToRefreshBox
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.io.coil.kt.coil3)
+    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")

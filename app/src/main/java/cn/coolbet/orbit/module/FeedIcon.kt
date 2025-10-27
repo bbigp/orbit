@@ -26,18 +26,21 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cn.coolbet.orbit.remote.miniflux.BASE_URL
 import cn.coolbet.orbit.remote.miniflux.MinifluxClient
 import cn.coolbet.orbit.remote.miniflux.ProfileApi
 import cn.coolbet.orbit.ui.theme.ElementSize
 import cn.coolbet.orbit.ui.theme.M11White00
 import cn.coolbet.orbit.ui.theme.M15White00
+import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
+import coil3.request.CachePolicy
+import okhttp3.OkHttpClient
 
 
 enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
@@ -54,6 +57,35 @@ enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
         }
     }
 }
+
+fun createOkHttpClient(): OkHttpClient {
+    return OkHttpClient.Builder().addInterceptor { chain ->
+        val originalRequest = chain.request()
+//                        if (originalRequest.url.toString().startsWith("v1/")) {
+//                            originalRequest.newBuilder().apply {  data = "" }
+//                            chain.proceed(newRequest)
+//                        } else {
+        chain.proceed(originalRequest)
+//                        }
+    }.build()
+}
+
+@Composable
+fun rememberCustomImageLoader(): ImageLoader {
+    val context = LocalContext.current
+    return remember {
+        ImageLoader.Builder(context)
+            .components {
+                add(Base64JsonFetcher.Factory())
+            }
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .build()
+    }
+}
+
+
+
+
 
 
 @Composable
