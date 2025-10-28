@@ -54,14 +54,14 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
             ) {
-                items(state.folders, key = { it.id }) { item ->
+                items(state.folders, key = { it.metaId }) { item ->
                     CompositionLocalProvider(
                         LocalExpandFolder provides viewModel::toggleExpanded,
                     ) {
                         FolderTile(item)
                     }
                 }
-                items(state.feeds, key = { it.id }) { item ->
+                items(state.feeds, key = { it.metaId }) { item ->
                     FeedTile(item)
                 }
                 if (!state.hasMore) {

@@ -48,6 +48,7 @@ import coil3.compose.LocalAsyncImagePreviewHandler
 import coil3.compose.SubcomposeAsyncImage
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
+import coil3.disk.DiskCache
 import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
@@ -58,7 +59,6 @@ import coil3.request.Options
 import coil3.util.DebugLogger
 import coil3.util.Logger
 import okio.Buffer
-import okio.BufferedSource
 import okio.FileSystem
 
 
@@ -155,30 +155,106 @@ class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
     }
 }
 data class MinifluxIconURLModel(val url: String)
-class MinifluxIconFetcher(private val iconURL: MinifluxIconURLModel, private val profileApi: ProfileApi) : Fetcher {
+class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
+    private val iconURL: MinifluxIconURLModel,
+    private val profileApi: ProfileApi,
+    private val diskCache: Lazy<DiskCache?>,
+    private val options: Options,
+) : Fetcher {
 
     override suspend fun fetch(): FetchResult {
+        var snapshot = diskCache.value?.openSnapshot(diskCacheKey)
+        if (snapshot != null) {
+            if (fileSystem.metadata(snapshot.metadata).size == 0L) {
+                return SourceFetchResult(
+                    source = snapshot.toImageSource(),
+                    mimeType = "image/*",
+                    dataSource = DataSource.DISK,
+                )
+            }
+            var mimeType = ""
+            fileSystem.read(snapshot.metadata) {
+                mimeType = this.readUtf8LineStrict()
+            }
+            return SourceFetchResult(
+                source = snapshot.toImageSource(),
+                mimeType = mimeType,
+                dataSource = DataSource.DISK,
+            )
+        }
+
         val rep = profileApi.icon(iconURL.url)
         val byteArray = Base64.decode(rep.data.split("base64,")[1], Base64.NO_WRAP)
-        val bufferedSource: BufferedSource = Buffer()
-            .write(byteArray)
-            .buffer()
-        val imageSource = ImageSource(
-            source = bufferedSource,
-            fileSystem = FileSystem.SYSTEM,
-            metadata = SimpleMimeTypeMetadata(mimeType = rep.mimeType)
-        )
+        val buffer: Buffer = Buffer().write(byteArray)
+
+        snapshot = writeToDiskCache(snapshot, rep.mimeType, buffer)
+        if (snapshot != null) {
+            return SourceFetchResult(
+                source = snapshot.toImageSource(),
+                mimeType = rep.mimeType,
+                dataSource = DataSource.DISK,
+            )
+        }
         return SourceFetchResult(
-            source = imageSource,
+            source = buffer.toImageSource(),
             mimeType = rep.mimeType,
-            dataSource = DataSource.NETWORK// 标记为网络源，实现磁盘缓存
+            dataSource = DataSource.NETWORK
         )
 
     }
 
+    private fun writeToDiskCache(
+        snapshot: DiskCache.Snapshot?,
+        mimeType: String,
+        data: Buffer,
+    ): DiskCache.Snapshot? {
+
+        val editor = if (snapshot != null) {
+            snapshot.closeAndOpenEditor()
+        } else {
+            diskCache.value?.openEditor(diskCacheKey)
+        } ?: return null
+
+        try {
+            fileSystem.write(editor.metadata) {
+                this.writeUtf8(mimeType)
+            }
+            fileSystem.write(editor.data) {
+                data.readAll(this)
+            }
+            return editor.commitAndOpenSnapshot()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private fun Buffer.toImageSource(): ImageSource {
+        return ImageSource(
+            source = this,
+            fileSystem = fileSystem,
+        )
+    }
+
+    private fun DiskCache.Snapshot.toImageSource(): ImageSource {
+        return ImageSource(
+            file = data,
+            fileSystem = fileSystem,
+            diskCacheKey = diskCacheKey,
+            closeable = this,
+        )
+    }
+
+    private val diskCacheKey: String
+        get() = options.diskCacheKey ?: iconURL.url
+
+    private val fileSystem: FileSystem
+        get() = diskCache.value?.fileSystem ?: options.fileSystem
+
     class Factory(private val profileApi: ProfileApi) : Fetcher.Factory<MinifluxIconURLModel> {
         override fun create(data: MinifluxIconURLModel, options: Options, imageLoader: ImageLoader): Fetcher {
-            return MinifluxIconFetcher(data, profileApi)
+            return MinifluxIconFetcher(data, profileApi,
+                diskCache = lazy { imageLoader.diskCache }, options = options,
+            )
         }
     }
 

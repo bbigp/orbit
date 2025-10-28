@@ -19,9 +19,8 @@ import javax.inject.Singleton
 private const val DATABASE_NAME = "orbit_db"
 
 @Database(
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
     entities = [FeedEntity::class, FolderEntity::class],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
