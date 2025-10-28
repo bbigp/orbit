@@ -54,16 +54,12 @@ import coil3.fetch.SourceFetchResult
 import coil3.key.Keyer
 import coil3.map.Mapper
 import coil3.request.CachePolicy
-import coil3.request.ImageRequest
 import coil3.request.Options
 import coil3.util.DebugLogger
 import coil3.util.Logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okio.Buffer
 import okio.BufferedSource
 import okio.FileSystem
-import java.io.IOException
 
 
 enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
@@ -161,26 +157,23 @@ class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
 data class MinifluxIconURLModel(val url: String)
 class MinifluxIconFetcher(private val iconURL: MinifluxIconURLModel, private val profileApi: ProfileApi) : Fetcher {
 
-    override suspend fun fetch(): FetchResult = withContext(Dispatchers.IO) {
-        try {
-            val rep = profileApi.icon(iconURL.url)
-            val byteArray = Base64.decode(rep.data.split("base64,")[1], Base64.NO_WRAP)
-            val bufferedSource: BufferedSource = Buffer()
-                .write(byteArray)
-                .buffer()
-            val imageSource = ImageSource(
-                source = bufferedSource,
-                fileSystem = FileSystem.SYSTEM,
-                metadata = SimpleMimeTypeMetadata(mimeType = rep.mimeType)
-            )
-            SourceFetchResult(
-                source = imageSource,
-                mimeType = "image/jpeg",
-                dataSource = DataSource.NETWORK// 标记为网络源，实现磁盘缓存
-            )
-        } catch (e: Exception) {
-            throw IOException("Failed to process Base64 data for ${iconURL.url}", e)
-        }
+    override suspend fun fetch(): FetchResult {
+        val rep = profileApi.icon(iconURL.url)
+        val byteArray = Base64.decode(rep.data.split("base64,")[1], Base64.NO_WRAP)
+        val bufferedSource: BufferedSource = Buffer()
+            .write(byteArray)
+            .buffer()
+        val imageSource = ImageSource(
+            source = bufferedSource,
+            fileSystem = FileSystem.SYSTEM,
+            metadata = SimpleMimeTypeMetadata(mimeType = rep.mimeType)
+        )
+        return SourceFetchResult(
+            source = imageSource,
+            mimeType = rep.mimeType,
+            dataSource = DataSource.NETWORK// 标记为网络源，实现磁盘缓存
+        )
+
     }
 
     class Factory(private val profileApi: ProfileApi) : Fetcher.Factory<MinifluxIconURLModel> {
