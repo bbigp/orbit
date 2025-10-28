@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,6 +43,7 @@ class HomeActivity : ComponentActivity() {
 
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
+val LocalListIsScrolling = compositionLocalOf { false }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -48,8 +51,15 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
 
+    val isScrolling by remember {
+        derivedStateOf { lazyListState.isScrollInProgress }
+    }
+
     Scaffold { paddingValues ->
-        CompositionLocalProvider(LocalOverscrollFactory provides null) {
+        CompositionLocalProvider(
+            LocalOverscrollFactory provides null,
+            LocalListIsScrolling provides isScrolling
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,

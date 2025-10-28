@@ -8,6 +8,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -58,6 +59,8 @@ import coil3.request.CachePolicy
 import coil3.request.Options
 import coil3.util.DebugLogger
 import coil3.util.Logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okio.Buffer
 import okio.FileSystem
 
@@ -90,13 +93,15 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
             model = url,
             imageLoader = miniIconImageLoader,
             contentDescription = alt,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.size(iconSize.size),
             contentScale = ContentScale.Crop,
             onError = {state ->
                 Log.e("ImageLoadError", "Error: ${state.result.throwable.localizedMessage}")
             },
             loading = {
-                ShimmerContainer(size = iconSize.size)
+                Box(modifier = Modifier.size(iconSize.size).background(Color.LightGray))
+                //列表滚动停止时，停止时：使用 Shimmer 动画
+//                ShimmerContainer(size = iconSize.size)
             },
             error = {
                 val initial = alt.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
@@ -162,11 +167,11 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
     private val options: Options,
 ) : Fetcher {
 
-    override suspend fun fetch(): FetchResult {
+    override suspend fun fetch(): FetchResult = withContext(Dispatchers.IO) {
         var snapshot = diskCache.value?.openSnapshot(diskCacheKey)
         if (snapshot != null) {
             if (fileSystem.metadata(snapshot.metadata).size == 0L) {
-                return SourceFetchResult(
+                return@withContext SourceFetchResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
                     dataSource = DataSource.DISK,
@@ -176,7 +181,7 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
             fileSystem.read(snapshot.metadata) {
                 mimeType = this.readUtf8LineStrict()
             }
-            return SourceFetchResult(
+            return@withContext SourceFetchResult(
                 source = snapshot.toImageSource(),
                 mimeType = mimeType,
                 dataSource = DataSource.DISK,
@@ -189,18 +194,17 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
 
         snapshot = writeToDiskCache(snapshot, rep.mimeType, buffer)
         if (snapshot != null) {
-            return SourceFetchResult(
+            return@withContext SourceFetchResult(
                 source = snapshot.toImageSource(),
                 mimeType = rep.mimeType,
                 dataSource = DataSource.DISK,
             )
         }
-        return SourceFetchResult(
+        SourceFetchResult(
             source = buffer.toImageSource(),
             mimeType = rep.mimeType,
             dataSource = DataSource.NETWORK
         )
-
     }
 
     private fun writeToDiskCache(
