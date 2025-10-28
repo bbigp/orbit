@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Orbit">
         <activity
-            android:name=".module.home.HomeActivity"
+            android:name=".view.home.HomeActivity"
             android:exported="true"
             android:theme="@style/Theme.Orbit">
             <intent-filter>

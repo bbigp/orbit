@@ -2,6 +2,7 @@ package cn.coolbet.orbit
 
 import cn.coolbet.orbit.dao.FeedMapper
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.Folder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +22,7 @@ class MemoryStore @Inject constructor(
     private val feedMapper: FeedMapper,
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
-    private val _folders = MutableStateFlow<List<String>>(emptyList())
+    private val _folders = MutableStateFlow<List<Folder>>(emptyList())
     private val mutex = Mutex()
 
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -31,7 +32,7 @@ class MemoryStore @Inject constructor(
     }
 
     fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
-    fun allFolders(): Flow<List<String>> = _folders.asStateFlow()
+    fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()
 
     fun feed(id: Long): Flow<Feed> {
         return _feeds.map { feeds ->
@@ -51,5 +52,8 @@ class MemoryStore @Inject constructor(
 
     suspend fun loadInitialData() {
         _feeds.value = feedMapper.getFeeds()
+        val folder = Folder(id = 1, title = "土豆")
+        val folder1 = Folder(id = 2, title = "All")
+        _folders.value = listOf(folder, folder1.copy(feeds = _feeds.value))
     }
 }

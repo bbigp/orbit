@@ -1,34 +1,27 @@
-package cn.coolbet.orbit.module.home
+package cn.coolbet.orbit.view.home
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cn.coolbet.orbit.common.ConsumerLong
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
-import cn.coolbet.orbit.ui.theme.Black04
-import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.theme.OrbitTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,6 +39,8 @@ class HomeActivity : ComponentActivity() {
     }
 }
 
+
+val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -55,20 +50,19 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
 
     Scaffold { paddingValues ->
         CompositionLocalProvider(LocalOverscrollFactory provides null) {
-            LazyColumn (
+            LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = lazyListState,
             ) {
-                item {
-                    PreviewFolderTile()
+                items(state.folders, key = { it.id }) { item ->
+                    CompositionLocalProvider(
+                        LocalExpandFolder provides viewModel::toggleExpanded,
+                    ) {
+                        FolderTile(item)
+                    }
                 }
                 items(state.feeds, key = { it.id }) { item ->
                     FeedTile(item)
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 80.dp, end = 16.dp),
-                        thickness = 0.5.dp,
-                        color = Black08
-                    )
                 }
                 if (!state.hasMore) {
                     item {
@@ -77,6 +71,8 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
                 }
             }
         }
+    }
+}
 //        CompositionLocalProvider(LocalOverscrollFactory provides null) {
 //            PullToRefreshBox(
 //                isRefreshing = state.isLoading,
@@ -106,7 +102,5 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
 //                }
 //            }
 //        }
-    }
-}
 
 

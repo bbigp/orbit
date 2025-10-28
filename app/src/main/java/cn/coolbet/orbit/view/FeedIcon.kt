@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.module
+package cn.coolbet.orbit.view
 
 import android.util.Base64
 import android.util.Log
