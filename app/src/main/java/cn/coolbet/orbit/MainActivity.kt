@@ -36,8 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import cn.coolbet.orbit.dao.FeedMapper
+import cn.coolbet.orbit.dao.FolderMapper
 import cn.coolbet.orbit.view.home.PreviewFeedTile
 import cn.coolbet.orbit.remote.miniflux.FeedApi
+import cn.coolbet.orbit.remote.miniflux.FolderApi
 import cn.coolbet.orbit.ui.theme.OrbitTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -49,6 +51,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var feedApi: FeedApi
     @Inject lateinit var feedMapper: FeedMapper
+    @Inject lateinit var folderApi: FolderApi
+    @Inject lateinit var folderMapper: FolderMapper
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +83,10 @@ class MainActivity : ComponentActivity() {
             try {
                 val feeds = feedApi.getFeeds()
                 feedMapper.batchSave(feeds)
+
+                val folders = folderApi.getFolders()
+                folderMapper.batchSave(folders)
+
 
                 Log.e("PermissionTest", "HTTP 连接测试成功")
 

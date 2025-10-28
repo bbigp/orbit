@@ -82,17 +82,6 @@ data class FeedResponse(
     val icon: IconResponse?
 )
 
-data class CategoryResponse(
-    val id: Long,
-    val title: String,
-
-    @SerializedName("user_id")
-    val userId: Long,
-
-    @SerializedName("hide_globally")
-    val hideGlobally: Boolean
-)
-
 data class IconResponse(
     @SerializedName("feed_id")
     val feedId: Long,

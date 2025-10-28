@@ -27,6 +27,12 @@ object MinifluxClient {
 
     @Provides
     @Singleton
+    fun provideMiniFolderApi(retrofit: Retrofit): MiniFolderApi {
+        return retrofit.create(MiniFolderApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideProfileApi(): ProfileApi {
         return createRetrofit(this.createOkHttpClient()).create(ProfileApi::class.java)
     }
