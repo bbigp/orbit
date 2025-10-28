@@ -2,23 +2,6 @@ package cn.coolbet.orbit.model.domain
 
 import cn.coolbet.orbit.model.OrderPublishedAt
 
-enum class EntryStatus(val status: String) {
-    UNREAD("unread"),
-    READ("read");
-
-    override fun toString(): String = status
-}
-
-interface Meta {
-    val siteURL: String
-    val title: String
-    val hideGlobally: Boolean
-    val onlyShowUnread: Boolean
-    val order: String
-    val metaId: String
-    val url: String
-}
-
 data class Feed(
     val id: Long,
     val userId: Long = 0,
