@@ -2,7 +2,6 @@ package cn.coolbet.orbit.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.entity.FolderEntity
 import cn.coolbet.orbit.model.entity.to

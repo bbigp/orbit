@@ -32,7 +32,6 @@ import cn.coolbet.orbit.ui.theme.ElementSize
 
 @Composable
 fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
-    val isScrolling = LocalListIsScrolling.current
     Column (modifier = Modifier.fillMaxWidth()){
         Row (
             modifier = Modifier.height(52.dp).fillMaxWidth()
@@ -41,11 +40,7 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
         ){
             if (hasIndicator) LeadingIndicator() else Spacer(modifier = Modifier.width(32.dp).height(32.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            if (isScrolling) {
-                Box(modifier = Modifier.size(24.dp))
-            } else {
-                FeedIcon(url = feed.iconURL, alt = feed.title, size = ElementSize.MEDIUM)
-            }
+            FeedIcon(url = feed.iconURL, alt = feed.title, size = ElementSize.MEDIUM)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = feed.title,
