@@ -57,6 +57,6 @@ class FeedMapper @Inject constructor(
 @Dao
 interface RFeedDao {
 
-    @Query("select * from feeds order by id desc")
+    @Query("select * from feeds")
     suspend fun getFeeds(): List<FeedEntity>;
 }

@@ -18,7 +18,7 @@ fun CountBadge() {
         contentAlignment = Alignment.CenterEnd,
     ) {
         Text(
-            text = "999+",
+            text = "",
             style = AppTypography.M13B25,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

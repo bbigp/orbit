@@ -1,7 +1,6 @@
 package cn.coolbet.orbit.view.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -43,30 +42,22 @@ fun FolderTile(folder: Folder) {
         SpacerDivider(Modifier.padding(start = 80.dp, end = 16.dp))
         AnimatedVisibility(
             visible = folder.expanded,
-            // 展开动画：使用 tween 明确指定时长和曲线
             enter = expandVertically(
-                animationSpec = tween(
-                    durationMillis = 300, // 模仿 Flutter 的 300ms
-                    easing = EaseInOut     // 模仿 Flutter 的 Curves.easeInOut
-                )
+                animationSpec = tween(durationMillis = 200, easing = EaseInOut)
             ),
-
-            // 收起动画：同样使用 tween 明确指定时长和曲线
             exit = shrinkVertically(
-                animationSpec = tween(
-                    durationMillis = 300, // 模仿 Flutter 的 300ms
-                    easing = EaseInOut     // 模仿 Flutter 的 Curves.easeInOut
-                )
+                animationSpec = tween(durationMillis = 200, easing = EaseInOut)
             )
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
-            ) {
+                    .height((52 * folder.feeds.size).dp))
+            {
                 folder.feeds.forEach { feed ->
                     FeedTile(feed, hasIndicator = false)
-                    SpacerDivider(Modifier.padding(start = 80.dp, end = 16.dp))
                 }
             }
+
         }
 
     }

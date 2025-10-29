@@ -37,7 +37,13 @@ class HomeViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
         }
         .onEach { (feeds, folders) ->
-            _uiState.update { it.copy(isLoading = false, feeds = feeds, folders = folders) }
+            val rootFolder  = 1L;
+            _uiState.update {
+                it.copy(isLoading = false,
+                    feeds = feeds.asSequence().filter { it.folderId == rootFolder }.toList(),
+                    folders = folders.asSequence().filter { it.id != rootFolder }.toList()
+                )
+            }
         }
        .launchIn(viewModelScope)
     }

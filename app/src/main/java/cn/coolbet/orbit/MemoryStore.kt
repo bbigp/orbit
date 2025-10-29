@@ -55,8 +55,22 @@ class MemoryStore @Inject constructor(
     suspend fun loadInitialData() {
         _feeds.value = feedMapper.getFeeds()
         val folders = folderMapper.getFolders()
-        val folder = Folder(id = 1, title = "土豆")
-        val folder1 = Folder(id = 2, title = "All")
-        _folders.value = listOf(folder, folder1.copy(feeds = _feeds.value))
+        _folders.value = associateFeedsWithFolders(_feeds.value, folders)
+    }
+
+
+    fun associateFeedsWithFolders(
+        feeds: List<Feed>,
+        folders: List<Folder>,
+    ): List<Folder> {
+        val folderFeedsMap = feeds.groupBy { it.folderId }
+        return folders
+            .asSequence()
+            .map { item ->
+                item.copy(
+                    feeds = folderFeedsMap[item.id] ?: emptyList() // 建议设置为 emptyList() 而不是 null
+                )
+            }
+            .toList()
     }
 }

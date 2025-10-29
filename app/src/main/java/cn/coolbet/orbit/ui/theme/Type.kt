@@ -23,7 +23,7 @@ val MonoFontFamily = FontFamily(
 )
 
 val R15 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W400, lineHeight = 20.sp, color = Black95, fontFamily = SansFontFamily)
-
+val M17 = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.W500, lineHeight = 22.sp, color = Black95, fontFamily = SansFontFamily)
 val M13B25 = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.W500, lineHeight = 18.sp, color = Black25, fontFamily = SansFontFamily)
 val M11White00 = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.W500, lineHeight = 13.sp, color = Color.White, fontFamily = SansFontFamily)
 val M15White00 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W500, lineHeight = 20.sp, color = Color.White, fontFamily = SansFontFamily)
@@ -35,6 +35,7 @@ data class OrBitTypography(
 //    val M22: TextStyle,
 //    val M20: TextStyle,
     val R15: TextStyle,
+    val M17: TextStyle,
     val M13B25: TextStyle,
     val M11White00: TextStyle,
     val M15White00: TextStyle,
@@ -42,6 +43,7 @@ data class OrBitTypography(
 
 val AppTypography = OrBitTypography(
     R15 = R15,
+    M17 = M17,
     M13B25 = M13B25,
     M11White00 = M11White00,
     M15White00 = M15White00,
