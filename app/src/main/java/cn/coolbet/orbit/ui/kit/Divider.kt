@@ -16,7 +16,7 @@ import cn.coolbet.orbit.ui.theme.Black08
 
 
 @Composable
-fun SpacerDivider(modifier: Modifier, thickness: Dp = 0.5.dp, color: Color = Black08) {
+fun SpacerDivider(modifier: Modifier = Modifier, thickness: Dp = 0.5.dp, color: Color = Black08) {
     HorizontalDivider(
         modifier = modifier,
         thickness = thickness,

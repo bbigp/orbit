@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material3:material3-window-size-class") // 包含 PullToRefreshBox
     implementation(libs.androidx.compose.foundation)
-    implementation("androidx.navigation:navigation-compose")
+//    implementation("androidx.navigation:navigation-compose")
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.1.0")
     // Kotlin Coroutines
@@ -86,6 +86,14 @@ dependencies {
     kapt("androidx.room:room-compiler:$roomVersion")
     // Hilt 编译器的 KSP 版本也需要检查，通常它也会使用匹配的 KSP 版本
     kapt("com.google.dagger:hilt-compiler:2.51.1") // 确保您的 Hilt 版本也是最新的
+    // https://mvnrepository.com/artifact/cafe.adriel.voyager/voyager-navigator
+    val voyagerVersion = "1.1.0-beta03"
+    // 核心导航库
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    // 核心状态管理（ScreenModel）
+    implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+    // 🚀 Hilt 集成，确保 ScreenModel 可以被 Hilt 注入
+    implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

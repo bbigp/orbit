@@ -1,12 +1,17 @@
 package cn.coolbet.orbit.view.home
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.hilt.ScreenModelKey
 import cn.coolbet.orbit.MemoryStore
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.multibindings.IntoMap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,13 +22,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeScreenModel @Inject constructor(
     memoryStore: MemoryStore
-) : ViewModel() {
+) : ScreenModel {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeScreenState())
+    val uiState: StateFlow<HomeScreenState> = _uiState.asStateFlow()
 
     init {
         Log.d("HomeViewModel", "ViewModel initialized.")
@@ -45,7 +49,7 @@ class HomeViewModel @Inject constructor(
                 )
             }
         }
-       .launchIn(viewModelScope)
+       .launchIn(screenModelScope)
     }
 
     fun toggleExpanded(folderId: Long) {
@@ -57,9 +61,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    override fun onDispose() {
+        Log.d("HomeScreenModel", "ScreenModel disposed.")
+        // super.onDispose()
+    }
+
 }
 
-data class HomeUiState (
+data class HomeScreenState (
     val feeds: List<Feed> = emptyList(),
     val folders: List<Folder> = emptyList(),
     val isLoading: Boolean = false,

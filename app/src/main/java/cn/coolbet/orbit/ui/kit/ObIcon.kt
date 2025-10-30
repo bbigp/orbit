@@ -19,7 +19,7 @@ import cn.coolbet.orbit.ui.theme.Black95
 
 
 @Composable
-fun OrIcon(id: Int, color: Color = Black95) {
+fun ObIcon(id: Int, color: Color = Black95) {
     Box(
         modifier = Modifier.size(28.dp).padding(all = 2.dp)
     ) {
@@ -37,7 +37,7 @@ fun OrIcon(id: Int, color: Color = Black95) {
 @Composable
 fun PreviewOrIcon() {
     Column {
-        OrIcon(R.drawable.lines_3)
+        ObIcon(R.drawable.lines_3)
         Box(modifier = Modifier.size(28.dp).background(Color.Red))
     }
 }
