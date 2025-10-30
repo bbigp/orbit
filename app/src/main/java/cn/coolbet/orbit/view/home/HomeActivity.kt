@@ -9,9 +9,11 @@ import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,11 +40,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.ConsumerLong
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.OrIcon
+import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import cn.coolbet.orbit.ui.theme.OrbitTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -52,9 +56,11 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            SystemBarAppearance()
             OrbitTheme {
-                HomePage()
+                HomeScreen(toProfile = {})
             }
         }
     }
@@ -66,7 +72,10 @@ val LocalListIsScrolling = compositionLocalOf { false }
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun HomePage(viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    viewModel: HomeViewModel = viewModel(),
+    toProfile: () -> Unit
+) {
     val state by viewModel.uiState.collectAsState()
     val lazyListState = rememberLazyListState()
 
@@ -76,7 +85,7 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
 
     Scaffold (
         topBar = {
-            M3CustomTopBar()
+            M3CustomTopBar(toProfile = toProfile)
         }
     ) { paddingValues ->
         CompositionLocalProvider(
@@ -108,50 +117,36 @@ fun HomePage(viewModel: HomeViewModel = viewModel()) {
     }
 }
 
+
 @Preview(showBackground = true)
+@Composable
+fun PreviewM3CustomTopBar(){
+    M3CustomTopBar {  }
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun M3CustomTopBar(
-    // ... 你的点击回调
+    toProfile: () -> Unit
 ) {
-    // 1. 设置 Top Bar 的目标高度 (50.dp)
-    val targetHeight = 50.dp
-
-    // 2. 计算一个与目标高度匹配的 WindowInsets
-    // 目的：告诉 TopAppBar 忽略默认的系统边距，并将其内容限制在目标高度内。
-    val density = LocalDensity.current
-    val customInsets = remember(density, targetHeight) {
-        // 创建一个简单的 WindowInsets，其高度就是我们设置的 50.dp
-        object : androidx.compose.foundation.layout.WindowInsets {
-            override fun getTop(density: Density): Int = with(density) { targetHeight.roundToPx() }
-            override fun getBottom(density: Density): Int = 0
-            override fun getLeft(density: Density, layoutDirection: LayoutDirection): Int = 0
-            override fun getRight(density: Density, layoutDirection: LayoutDirection): Int = 0
-        }
-    }
-
-    TopAppBar( // 在 Material 3 中，TopAppBar 就是 SmallTopAppBar
-        // 🌟 解决高度问题：使用 Modifier.height() 强制 TopAppBar 容器高度
-        modifier = Modifier.height(targetHeight),
+    TopAppBar(
+        // 🌟 关键：使用 heightIn 限制内容区高度，同时允许 TopAppBar 处理状态栏 Insets
+        // 这样最终高度 = (状态栏高度) + 50dp，但图标只在 50dp 区域居中
+        modifier = Modifier.heightIn(max = 50.dp),
 
         // 🌟 解决背景色问题：使用 colors 参数
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White, // 你的白色背景
-            // 确保图标和按钮颜色正确
-            navigationIconContentColor = Color.Black,
-            actionIconContentColor = Color.Black
         ),
 
-        // 🌟 解决内容居中问题：覆盖默认的 WindowInsets
-        // 告诉 TopAppBar 它的内容高度受 50.dp 限制，从而帮助内部的 IconButton 居中。
-        windowInsets = customInsets,
+        // 🌟 关键：让 TopAppBar 自动包含状态栏的高度，这样 Top Bar 就能从屏幕顶部开始画
+        windowInsets = TopAppBarDefaults.windowInsets,
 
         title = { /* 留空 */ },
 
         navigationIcon = {
-            // 内部的 IconButton 负责居中
-            IconButton(onClick = { /* ... */ }) {
-                // 确保 OrIcon 本身是简洁的 Icon/Image (已在你上个回复中修正)
+            IconButton(onClick = toProfile) {
                 OrIcon(R.drawable.lines_3)
             }
         },
