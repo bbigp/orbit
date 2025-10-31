@@ -94,7 +94,10 @@ fun ListTileChevronRight(title: String, icon: Int, iconColor: Color = Black50) {
 }
 
 @Composable
-fun ListTileSwitch(title: String, icon: Int, iconColor: Color = Black50) {
+fun ListTileSwitch(
+    title: String, icon: Int, iconColor: Color = Black50,
+    checked: Boolean = false, onCheckedChange: (Boolean) -> Unit = {},
+) {
     Row (
         modifier = Modifier.fillMaxWidth().height(48.dp)
             .padding(start = 16.dp, end = 12.dp),
@@ -112,10 +115,9 @@ fun ListTileSwitch(title: String, icon: Int, iconColor: Color = Black50) {
 
         Spacer(modifier = Modifier.width(12.dp))
         Spacer(modifier = Modifier.width(44.dp)) //40 + 4
-        Switch(
-            checked = true,
-            modifier = Modifier,
-            onCheckedChange = {}
+        ObSwitch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
         )
         Spacer(modifier = Modifier.width(4.dp))
     }
