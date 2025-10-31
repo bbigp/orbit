@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.core.screen.Screen
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.ui.kit.M3CustomTopBar
 import cn.coolbet.orbit.ui.kit.ObIcon
+import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.PreviewListTileChevronUpDown
 
 object ProfileScreen: Screen {
@@ -22,7 +22,7 @@ object ProfileScreen: Screen {
     override fun Content() {
 
         Scaffold (
-            topBar = { M3CustomTopBar() }
+            topBar = {  }
         ) { paddingValues ->
             Box(
                 modifier = Modifier.padding(paddingValues)

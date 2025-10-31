@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
-import cn.coolbet.orbit.ui.kit.M3CustomTopBar
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
+import cn.coolbet.orbit.ui.kit.ObTopAppbar
 
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
@@ -38,7 +38,7 @@ object HomeScreen: Screen {
         }
 
         Scaffold (
-            topBar = { M3CustomTopBar() }
+            topBar = {  }
         ) { paddingValues ->
             CompositionLocalProvider(
                 LocalOverscrollFactory provides null,

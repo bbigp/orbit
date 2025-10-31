@@ -27,7 +27,7 @@ import cn.coolbet.orbit.view.FeedIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black25
-import cn.coolbet.orbit.ui.theme.ElementSize
+import cn.coolbet.orbit.view.FeedIconSize
 
 
 @Composable
@@ -40,7 +40,7 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
         ){
             if (hasIndicator) LeadingIndicator() else Spacer(modifier = Modifier.width(32.dp).height(32.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            FeedIcon(url = feed.iconURL, alt = feed.title, size = ElementSize.MEDIUM)
+            FeedIcon(url = feed.iconURL, alt = feed.title, size = FeedIconSize.MEDIUM)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = feed.title,

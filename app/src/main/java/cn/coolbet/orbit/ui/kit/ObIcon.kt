@@ -21,7 +21,7 @@ import cn.coolbet.orbit.ui.theme.Black95
 @Composable
 fun ObIcon(id: Int, color: Color = Black95) {
     Box(
-        modifier = Modifier.size(28.dp).padding(all = 2.dp)
+        modifier = Modifier.size(28.dp),
     ) {
         Image(
             modifier = Modifier.size(24.dp),

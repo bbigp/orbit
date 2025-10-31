@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,11 +21,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black50
-import cn.coolbet.orbit.ui.theme.Black95
-import cn.coolbet.orbit.ui.theme.R15
-import cn.coolbet.orbit.ui.theme.R15B50
 
 //headlineContent  title  主标题
 //overlineContent 上标题
@@ -48,10 +45,16 @@ fun ListTileChevronUpDown(title: String, trailing: String, icon: Int, iconColor:
             colorFilter = ColorFilter.tint(iconColor),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = R15, modifier = Modifier.weight(1f))
+        Text(
+            title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = AppTypography.R15,
+            modifier = Modifier.weight(1f)
+        )
 
         Spacer(modifier = Modifier.width(16.dp)) // 12 + 4
-        Text(trailing, maxLines = 1, overflow = TextOverflow.Ellipsis, style = R15B50)
+        Text(trailing, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15B50)
         Spacer(modifier = Modifier.width(8.dp)) //4 + 4
 
         Image(
@@ -80,7 +83,7 @@ fun ListTileChevronRight(title: String, icon: Int, iconColor: Color = Black50) {
             colorFilter = ColorFilter.tint(iconColor),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = R15, modifier = Modifier.weight(1f))
+        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15, modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.width(16.dp)) // 12 + 4
         Image(
@@ -111,7 +114,7 @@ fun ListTileSwitch(
             colorFilter = ColorFilter.tint(iconColor),
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = R15, modifier = Modifier.weight(1f))
+        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15, modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.width(12.dp))
         Spacer(modifier = Modifier.width(44.dp)) //40 + 4

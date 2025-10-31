@@ -34,9 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cn.coolbet.orbit.ui.theme.ElementSize
-import cn.coolbet.orbit.ui.theme.M11White00
-import cn.coolbet.orbit.ui.theme.M15White00
+import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.OrBitTypography
 import cn.coolbet.orbit.view.home.LocalListIsScrolling
 import coil3.ColorImage
 import coil3.annotation.ExperimentalCoilApi
@@ -46,26 +45,24 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 
-
-enum class FeedIconSize (val size: Dp, val radius: Dp, val style: TextStyle) {
-    SMALL( size = 18.dp, radius = 4.dp, style = M11White00),
-    MEDIUM( size = 24.dp, radius = 6.dp, style = M15White00),
-    LARGE( size = 36.dp, radius = 8.dp, style = M15White00);
+data class FeedIconSize (val size: Dp, val radius: Dp, val getStyle: (OrBitTypography) -> TextStyle) {
     companion object {
-        fun get(elementSize: ElementSize): FeedIconSize {
-            return when (elementSize) {
-                ElementSize.SMALL -> SMALL
-                ElementSize.LARGE -> LARGE
-                else -> MEDIUM
-            }
-        }
+        val SMALL = FeedIconSize(size = 18.dp, radius = 4.dp, getStyle = { it.M11White00 })
+        val MEDIUM = FeedIconSize(size = 24.dp, radius = 6.dp, getStyle = { it.M15White00 })
+        val LARGE = FeedIconSize(size = 36.dp, radius = 8.dp, getStyle = { it.M15White00 })
     }
 }
 
+object FeedIconDefaults {
+    val SMALL = FeedIconSize.SMALL
+    val MEDIUM = FeedIconSize.MEDIUM
+    val LARGE = FeedIconSize.LARGE
+}
+
+
 
 @Composable
-fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
-    val iconSize = FeedIconSize.get(size)
+fun FeedIcon(url: String, alt: String, size: FeedIconSize = FeedIconDefaults.MEDIUM) {
     val isScrolling = LocalListIsScrolling.current
     val context = LocalContext.current
     val request = remember(url, isScrolling) {
@@ -83,19 +80,19 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
             .build()
     }
     Box(modifier = Modifier
-        .size(iconSize.size)
-        .clip(RoundedCornerShape(iconSize.radius)),
+        .size(size.size)
+        .clip(RoundedCornerShape(size.radius)),
         contentAlignment = Alignment.Center) {
         SubcomposeAsyncImage(
             model = request,
             contentDescription = alt,
-            modifier = Modifier.size(iconSize.size),
+            modifier = Modifier.size(size.size),
             contentScale = ContentScale.Crop,
             onError = {state ->
                 Log.e("ImageLoadError", "Error: ${state.result.throwable.localizedMessage}")
             },
             loading = {
-                Box(modifier = Modifier.size(iconSize.size).background(Color.LightGray))
+                Box(modifier = Modifier.size(size.size).background(Color.LightGray))
                 //列表滚动停止时，停止时：使用 Shimmer 动画
 //                ShimmerContainer(size = iconSize.size)
             },
@@ -112,7 +109,7 @@ fun FeedIcon(url: String, alt: String, size: ElementSize = ElementSize.MEDIUM) {
                 ) {
                     Text(
                         text = initial,
-                        style = iconSize.style,
+                        style = size.getStyle(AppTypography),
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
                 }

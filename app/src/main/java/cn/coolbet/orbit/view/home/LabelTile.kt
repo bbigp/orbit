@@ -11,8 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cn.coolbet.orbit.ui.theme.M13B25
-import cn.coolbet.orbit.ui.theme.M17
+import cn.coolbet.orbit.ui.theme.AppTypography
 
 
 @Composable
@@ -23,7 +22,7 @@ fun LabelTile(title: String) {
             .padding(start = 18.dp, end = 16.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(title, style = M17, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(title, style = AppTypography.M17, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
