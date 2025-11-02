@@ -52,7 +52,7 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
             Box(modifier = Modifier.width(12.dp))
             CountBadge()
         }
-        SpacerDivider(Modifier.padding(start = 80.dp, end = 16.dp))
+        SpacerDivider(start = 80.dp, end = 16.dp)
     }
 }
 

@@ -18,8 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
+import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.view.profile.ProfileScreen
 
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
@@ -36,9 +41,19 @@ object HomeScreen: Screen {
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
         }
+        val navigator = LocalNavigator.currentOrThrow
 
         Scaffold (
-            topBar = {  }
+            topBar = {
+                ObTopAppbar(
+                    navigationIcon = {
+                        ObIcon(id = R.drawable.lines_3, onClick = { navigator.push(ProfileScreen) })
+                    },
+                    actions = {
+                        ObIcon(id = R.drawable.add)
+                    }
+                )
+            }
         ) { paddingValues ->
             CompositionLocalProvider(
                 LocalOverscrollFactory provides null,

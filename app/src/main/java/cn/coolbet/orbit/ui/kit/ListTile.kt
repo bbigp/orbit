@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.kit
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black50
+import cn.coolbet.orbit.ui.theme.ObTheme
 
 //headlineContent  title  主标题
 //overlineContent 上标题
@@ -31,9 +33,12 @@ import cn.coolbet.orbit.ui.theme.Black50
 //leadingContent leading  左侧
 //trailingContent trailing 右侧
 @Composable
-fun ListTileChevronUpDown(title: String, trailing: String, icon: Int, iconColor: Color = Black50) {
+fun ListTileChevronUpDown(
+    title: String, trailing: String, icon: Int,
+) {
     Row (
         modifier = Modifier.fillMaxWidth().height(48.dp)
+            .background(ObTheme.colors.primaryContainer)
             .padding(start = 16.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -41,8 +46,8 @@ fun ListTileChevronUpDown(title: String, trailing: String, icon: Int, iconColor:
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(iconColor),
+            contentScale = ContentScale.FillBounds,
+            colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
@@ -55,23 +60,24 @@ fun ListTileChevronUpDown(title: String, trailing: String, icon: Int, iconColor:
 
         Spacer(modifier = Modifier.width(16.dp)) // 12 + 4
         Text(trailing, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15B50)
-        Spacer(modifier = Modifier.width(8.dp)) //4 + 4
+        Spacer(modifier = Modifier.width(4.dp)) //4 + 4
 
         Image(
             modifier = Modifier.size(20.dp),
             painter = painterResource(id = R.drawable.chevron_up_down),
             contentDescription = "",
             contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(Black25),
+            colorFilter = ColorFilter.tint(ObTheme.colors.tertiary),
         )
     }
 }
 
 
 @Composable
-fun ListTileChevronRight(title: String, icon: Int, iconColor: Color = Black50) {
+fun ListTileChevronRight(title: String, icon: Int) {
     Row (
         modifier = Modifier.fillMaxWidth().height(48.dp)
+            .background(ObTheme.colors.primaryContainer)
             .padding(start = 16.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -79,8 +85,8 @@ fun ListTileChevronRight(title: String, icon: Int, iconColor: Color = Black50) {
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(iconColor),
+            contentScale = ContentScale.FillBounds,
+            colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15, modifier = Modifier.weight(1f))
@@ -91,18 +97,19 @@ fun ListTileChevronRight(title: String, icon: Int, iconColor: Color = Black50) {
             painter = painterResource(id = R.drawable.chevron_right),
             contentDescription = "",
             contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(Black25),
+            colorFilter = ColorFilter.tint(ObTheme.colors.tertiary),
         )
     }
 }
 
 @Composable
 fun ListTileSwitch(
-    title: String, icon: Int, iconColor: Color = Black50,
+    title: String, icon: Int,
     checked: Boolean = false, onCheckedChange: (Boolean) -> Unit = {},
 ) {
     Row (
         modifier = Modifier.fillMaxWidth().height(48.dp)
+            .background(ObTheme.colors.primaryContainer)
             .padding(start = 16.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -110,8 +117,8 @@ fun ListTileSwitch(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.Inside,
-            colorFilter = ColorFilter.tint(iconColor),
+            contentScale = ContentScale.FillBounds,
+            colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15, modifier = Modifier.weight(1f))
@@ -131,10 +138,10 @@ fun ListTileSwitch(
 fun PreviewListTileChevronUpDown() {
     Column {
         ListTileChevronUpDown(title = "Unread Mark", trailing = "None", icon = R.drawable.book)
-        SpacerDivider(modifier = Modifier.padding(start = 52.dp, end = 16.dp))
+        SpacerDivider(start = 52.dp, end = 16.dp)
         ListTileChevronRight(title = "Swipe Gestures", icon = R.drawable.brush)
-        SpacerDivider(modifier = Modifier.padding(start = 52.dp, end = 16.dp))
+        SpacerDivider(start = 52.dp, end = 16.dp)
         ListTileSwitch(title = "Automatic Reader View", icon = R.drawable.brush)
-        SpacerDivider(modifier = Modifier.padding(start = 52.dp, end = 16.dp))
+        SpacerDivider(start = 52.dp, end = 16.dp)
     }
 }

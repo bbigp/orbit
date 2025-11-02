@@ -1,41 +1,10 @@
 package cn.coolbet.orbit.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-
-val PrimaryColor = Color(0xF2000000)
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = PrimaryColor,
-    background = Color.White,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
+import androidx.compose.runtime.ReadOnlyComposable
 
 @Composable
 fun OrbitTheme(
@@ -48,15 +17,24 @@ fun OrbitTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
+    val obitColors = LightObitColors
+    Log.d("ThemeCheck", if (darkTheme) "Using Dark" else "Using Light")
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
     ) {
         CompositionLocalProvider(
-            LocalAppTypography provides AppTypography
+            LocalAppTypography provides AppTypography,
+            LocalObitColors provides obitColors,
         ) {
             content()
         }
     }
+}
+
+object ObTheme {
+    val colors: ObitColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalObitColors.current
 }

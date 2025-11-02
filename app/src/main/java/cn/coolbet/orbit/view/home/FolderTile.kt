@@ -39,7 +39,7 @@ import cn.coolbet.orbit.ui.theme.Black50
 fun FolderTile(folder: Folder) {
     Column {
         FolderRow(folder)
-        SpacerDivider(Modifier.padding(start = 80.dp, end = 16.dp))
+        SpacerDivider(start = 80.dp, end = 16.dp)
         AnimatedVisibility(
             visible = folder.expanded,
             enter = expandVertically(
