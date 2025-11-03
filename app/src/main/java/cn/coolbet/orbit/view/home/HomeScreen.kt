@@ -53,8 +53,8 @@ object HomeScreen: Screen {
                     },
                     actions = {
                         ObIconGroup(items = listOf(
+                            ObIconItem(iconId = R.drawable.sync),
                             ObIconItem(iconId = R.drawable.add),
-                            ObIconItem(iconId = R.drawable.sync)
                         ))
                     }
                 )

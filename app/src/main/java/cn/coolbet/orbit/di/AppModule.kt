@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.di
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideGson(): Gson {
-        return Gson()
+        return GsonBuilder()
+//            .registerTypeAdapter(
+//                UnreadMark::class.java,
+//                UnreadMarkAdapter(UnreadMark::class.java, UnreadMark.NUMBER)
+//            )
+            .create()
     }
 
 }

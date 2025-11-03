@@ -31,6 +31,7 @@ class UserMapper @Inject constructor(
     @SuppressLint("CheckResult")
     fun userProfile(): User {
         val userJson = sharedPreferences.getString(USER_KEY, "")
+        if (userJson == "") return User.EMPTY
         return gson.fromJson(userJson, User::class.java)
     }
 

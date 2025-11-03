@@ -89,7 +89,10 @@ fun PreviewOrIcon() {
     CompositionLocalProvider {
         Column {
             ObIcon(R.drawable.lines_3)
-            Box(modifier = Modifier.size(28.dp).background(Color.Red))
+            Box(modifier = Modifier.size(28.dp).background(Color.Red)) {
+                ObIcon(R.drawable.add)
+                ObIcon(R.drawable.sync)
+            }
         }
     }
 }
