@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
@@ -29,7 +31,10 @@ object ProfileScreen: Screen {
 
     @Composable
     override fun Content() {
+        val model = getScreenModel<ProfileScreenModel>()
+        val state by model.state.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
+
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
         Scaffold (
             containerColor = ObTheme.colors.secondaryContainer,
@@ -49,7 +54,7 @@ object ProfileScreen: Screen {
                     ObCard {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
-                            trailing = "Number"
+                            trailing = state.user.unreadMark.value
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
@@ -59,12 +64,12 @@ object ProfileScreen: Screen {
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
                             title = "自动已读", icon = R.drawable.check_o,
-                            checked = true
+                            checked = state.user.autoRead
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
                             title = "根文件夹", icon = R.drawable.folder_1,
-                            trailing = "None"
+                            trailing = state.rootFolder.title
                         )
                     }
                 }

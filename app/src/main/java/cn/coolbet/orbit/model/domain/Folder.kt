@@ -15,7 +15,7 @@ data class Folder (
 ): Meta {
 
     companion object {
-        val EMPTY = Folder(id = 0)
+        val EMPTY = Folder(id = 0, title = "None")
     }
 
     override val metaId: String get() = "o$id"
