@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -28,6 +29,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
+import cn.coolbet.orbit.view.profile.ProfileScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -39,6 +41,19 @@ fun PreviewObTopAppbar(){
             Text("标题", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
         }
         TopAppBar(title = {})
+
+        ObTopAppbar(
+            navigationIcon = {
+                ObIcon(id = R.drawable.lines_3)
+            },
+            actions = {
+                ObIconGroup(items = listOf(
+                    ObIconItem(iconId = R.drawable.add),
+                    ObIconItem(iconId = R.drawable.page)
+                ))
+                Box(modifier = Modifier.height(28.dp).width(28.dp).background(Color.Cyan))
+            }
+        )
     }
 }
 

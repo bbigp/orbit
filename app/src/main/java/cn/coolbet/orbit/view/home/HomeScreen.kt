@@ -23,6 +23,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
+import cn.coolbet.orbit.ui.kit.ObIconGroup
+import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.view.profile.ProfileScreen
 
@@ -50,7 +52,10 @@ object HomeScreen: Screen {
                         ObIcon(id = R.drawable.lines_3, onClick = { navigator.push(ProfileScreen) })
                     },
                     actions = {
-                        ObIcon(id = R.drawable.add)
+                        ObIconGroup(items = listOf(
+                            ObIconItem(iconId = R.drawable.add),
+                            ObIconItem(iconId = R.drawable.sync)
+                        ))
                     }
                 )
             }
