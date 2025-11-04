@@ -14,6 +14,9 @@ val Black50 = Color(0x80000000)
 val Black75 = Color(0xBF000000)
 val Black95 = Color(0xF2000000)
 
+val ContentRed = Color(0xFFFF3B30)
+val ContainerRed = Color(0x1AFF3B30)
+
 val DarkColorScheme = darkColorScheme(
     surface = Color.White,
 )
