@@ -46,6 +46,7 @@ import cn.coolbet.orbit.ui.theme.OrbitTheme
 fun PreviewObIconTextButton() {
     Column {
         ObIconTextButton("Add Now", icon = R.drawable.add, sizes = OButtonDefaults.mediumPadded)
+        ObIconTextButton("Add Now", iconOnRight = true, icon = R.drawable.add, sizes = OButtonDefaults.mediumPadded)
     }
 }
 
@@ -61,7 +62,7 @@ fun ObIconTextButton(
     sizes: OButtonSize = OButtonDefaults.buttonSize,
 ) {
     val contentColor = if (disable) colors.disabledContentColor else colors.contentColor
-    val iconAndSpacer = @Composable {
+    val iconContent = @Composable {
         Image(
             modifier = Modifier.size(20.dp),
             painter = painterResource(id = icon),
@@ -69,7 +70,7 @@ fun ObIconTextButton(
             contentScale = ContentScale.FillBounds,
             colorFilter = ColorFilter.tint(contentColor),
         )
-        Spacer(modifier = Modifier.width(8.dp))
+
     }
     val textContent = @Composable {
         Text(
@@ -77,9 +78,12 @@ fun ObIconTextButton(
             style = sizes.fontSize.copy(color = contentColor)
         )
     }
+    val spacerContent = @Composable {
+        Spacer(modifier = Modifier.width(8.dp))
+    }
     val orderedContent = when (iconOnRight) {
-        true -> listOf(textContent, iconAndSpacer)
-        false -> listOf(iconAndSpacer, textContent)
+        true -> listOf(textContent, spacerContent, iconContent)
+        false -> listOf(iconContent, spacerContent, textContent)
     }
     OButton(
         content = {

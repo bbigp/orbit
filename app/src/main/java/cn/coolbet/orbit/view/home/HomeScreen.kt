@@ -26,6 +26,7 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.view.login.LoginScreen
 import cn.coolbet.orbit.view.profile.ProfileScreen
 
 
@@ -54,7 +55,9 @@ object HomeScreen: Screen {
                     actions = {
                         ObIconGroup(items = listOf(
                             ObIconItem(iconId = R.drawable.sync),
-                            ObIconItem(iconId = R.drawable.add),
+                            ObIconItem(iconId = R.drawable.add, onClick = { navigator.push(
+                                LoginScreen
+                            )}),
                         ))
                     }
                 )
