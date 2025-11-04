@@ -1,47 +1,37 @@
 package cn.coolbet.orbit.ui.kit
 
-import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black08
@@ -50,84 +40,91 @@ import cn.coolbet.orbit.ui.theme.Black95
 import cn.coolbet.orbit.ui.theme.ContainerRed
 import cn.coolbet.orbit.ui.theme.ContentRed
 import cn.coolbet.orbit.ui.theme.OrbitTheme
-import kotlinx.coroutines.launch
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewButton() {
-    OrbitTheme {
-        Column {
-            OButton(content = {}, isLoading = false, enabled = true)
-            OButton(content = {}, isLoading = true, enabled = true)
-            OButton(content = {}, isLoading = false, enabled = false)
-
-            Button(onClick = {}) { Text("continue") }
-            TextButton(onClick = {}, content = {
-                Text("continue")
-            })
-            IconButton(onClick = {}) { Text("continue") }
-            OButton(content = {})
-        }
+fun PreviewObIconTextButton() {
+    Column {
+        ObIconTextButton("Add Now", icon = R.drawable.add, sizes = OButtonDefaults.mediumPadded)
     }
+}
+
+
+@Composable
+fun ObIconTextButton(
+    content: String,
+    icon: Int,
+    disable: Boolean = false,
+    onClick: () -> Unit = {},
+    iconOnRight: Boolean = false,
+    colors: OButtonColors = OButtonDefaults.buttonColor,
+    sizes: OButtonSize = OButtonDefaults.buttonSize,
+) {
+    val contentColor = if (disable) colors.disabledContentColor else colors.contentColor
+    val iconAndSpacer = @Composable {
+        Image(
+            modifier = Modifier.size(20.dp),
+            painter = painterResource(id = icon),
+            contentDescription = "",
+            contentScale = ContentScale.FillBounds,
+            colorFilter = ColorFilter.tint(contentColor),
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+    }
+    val textContent = @Composable {
+        Text(
+            content, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            style = sizes.fontSize.copy(color = contentColor)
+        )
+    }
+    val orderedContent = when (iconOnRight) {
+        true -> listOf(textContent, iconAndSpacer)
+        false -> listOf(iconAndSpacer, textContent)
+    }
+    OButton(
+        content = {
+            orderedContent.forEach { composable ->
+                composable()
+            }
+        },
+        onClick = onClick, disable = disable, colors = colors, sizes = sizes,
+    )
 }
 
 @Composable
 fun ObTextButton(
     content: String,
+    disable: Boolean = false,
     onClick: () -> Unit = {},
-    isLoading: Boolean = false,
-    enabled: Boolean = true,
     colors: OButtonColors = OButtonDefaults.buttonColor,
     sizes: OButtonSize = OButtonDefaults.buttonSize,
 ) {
     OButton(
-        content = {},
-        onClick = onClick, isLoading
-    )
-}
-
-@Composable
-fun ObAsyncButton(
-    content: @Composable RowScope.() -> Unit,
-    onClick: suspend () -> Unit = {},
-    enabled: Boolean = true,
-    colors: OButtonColors = OButtonDefaults.buttonColor,
-    sizes: OButtonSize = OButtonDefaults.buttonSize,
-) {
-    var isLoading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val handleClick = {
-        scope.launch {
-            isLoading = true
-            try {
-                onClick()
-            } catch (e: Exception) {
-                Log.e("AsyncOButton", "Async operation failed", e)
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-    OButton(
-        content = content, onClick = handleClick, isLoading = isLoading,
-        enabled = enabled, colors = colors, sizes = sizes,
+        content = {
+            Text(
+                content, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                style = sizes.fontSize.copy(if (disable) colors.disabledContentColor else colors.contentColor))
+        },
+        onClick = onClick, disable = disable, colors = colors, sizes = sizes,
     )
 }
 
 @Composable
 fun OButton(
-    content: @Composable RowScope.() -> Unit,
     onClick: () -> Unit = {},
-    isLoading: Boolean = false,
-    enabled: Boolean = true,
+    disable: Boolean = false,
     colors: OButtonColors = OButtonDefaults.buttonColor,
     sizes: OButtonSize = OButtonDefaults.buttonSize,
+    content: @Composable RowScope.() -> Unit,
 ){
     var modifier = Modifier.height(sizes.height)
         .background(
-            if (enabled && !isLoading) colors.containerColor else colors.disabledContainerColor,
+            if (disable) colors.disabledContainerColor else colors.containerColor,
             shape = RoundedCornerShape(sizes.radius))
         .border(width = 1.dp, color = colors.borderColor, shape = RoundedCornerShape(sizes.radius))
+        .clickable(
+            enabled = !disable, onClick = onClick, role = Role.Button
+        )
     if (sizes.horizontalPadding == 0.dp) {
         modifier = modifier.fillMaxWidth()
     } else{
@@ -137,11 +134,8 @@ fun OButton(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text("icon", maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = sizes.fontSize.copy(color = if (enabled && !isLoading) colors.contentColor else colors.disabledContentColor)
-        )
-    }
+        content = content
+    )
 }
 
 data class OButtonColors(
@@ -217,15 +211,15 @@ fun PreviewObButtonSize() {
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
         ){
-            OButton(content = {}, sizes = OButtonDefaults.small)
+            ObTextButton(content = "continue", sizes = OButtonDefaults.small)
             Spacer(modifier = Modifier.height(10.dp))
-            OButton(content = {}, sizes = OButtonDefaults.medium)
+            ObTextButton(content = "continue", sizes = OButtonDefaults.medium)
             Spacer(modifier = Modifier.height(10.dp))
-            OButton(content = {}, sizes = OButtonDefaults.large)
+            ObTextButton(content = "continue", sizes = OButtonDefaults.large)
             Spacer(modifier = Modifier.height(10.dp))
-            OButton(content = {}, sizes = OButtonDefaults.smallPadded)
+            ObTextButton(content = "continue", sizes = OButtonDefaults.smallPadded)
             Spacer(modifier = Modifier.height(10.dp))
-            OButton(content = {}, sizes = OButtonDefaults.mediumPadded)
+            ObTextButton(content = "continue", sizes = OButtonDefaults.mediumPadded)
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
@@ -241,56 +235,56 @@ fun PreviewObButtonColor() {
         ) {
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.primary)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.primary)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.primary)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.primary)
                 }
             }
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.secondary)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.secondary)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.secondary)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.secondary)
                 }
             }
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.ghost)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.ghost)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.ghost)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.ghost)
                 }
             }
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.stroked)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.stroked)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.stroked)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.stroked)
                 }
             }
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.danger)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.danger)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.danger)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.danger)
                 }
             }
             Row {
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = true, colors = OButtonDefaults.dangerGhost)
+                    ObTextButton(content = "continue", disable = true, colors = OButtonDefaults.dangerGhost)
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                    OButton(content = {}, enabled = false, colors = OButtonDefaults.dangerGhost)
+                    ObTextButton(content = "continue", disable = false, colors = OButtonDefaults.dangerGhost)
                 }
             }
         }
