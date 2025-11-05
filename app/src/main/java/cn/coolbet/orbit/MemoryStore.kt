@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -27,6 +28,8 @@ class MemoryStore @Inject constructor(
     private val folderMapper: FolderMapper,
     private val userMapper: UserMapper,
 ) {
+    val _isReady = MutableStateFlow(false)
+    val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
     private val _user = MutableStateFlow(User.EMPTY)
@@ -66,10 +69,11 @@ class MemoryStore @Inject constructor(
     fun loadInitialData() {
         currentLoadJob?.cancel()
         currentLoadJob = storeScope.launch {
+            _user.value = userMapper.userProfile()
+            _isReady.value = true
             _feeds.value = feedMapper.getFeeds()
             val folders = folderMapper.getFolders()
             _folders.value = associateFeedsWithFolders(_feeds.value, folders)
-            _user.value = userMapper.userProfile()
         }
     }
 
