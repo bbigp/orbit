@@ -47,7 +47,7 @@ fun PreviewButton() {
 fun ObAsyncTextButton(
     content: String,
     isLoading: Boolean = false,
-    onClick: () -> Unit = {},
+    onClick: suspend () -> Unit = {},
     colors: OButtonColors = OButtonDefaults.buttonColor,
     sizes: OButtonSize = OButtonDefaults.buttonSize,
 ) {

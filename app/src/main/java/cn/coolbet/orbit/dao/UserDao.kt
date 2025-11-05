@@ -13,12 +13,14 @@ class UserMapper @Inject constructor(
     @ApplicationContext private val context: Context,
     private val gson: Gson,
 ){
+    companion object {
+        val USER_KEY = "current_user_data"
+        val PREFS_NAME = "user_prefs"
+    }
 
     val sharedPreferences = context.getSharedPreferences(
-        "user_prefs", Context.MODE_PRIVATE,
+        PREFS_NAME, Context.MODE_PRIVATE,
     )
-    private val USER_KEY = "current_user_data"
-
 
     fun saveUser(user: User) {
         val userJson = gson.toJson(user)

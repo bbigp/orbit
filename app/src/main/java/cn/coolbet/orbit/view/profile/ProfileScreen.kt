@@ -20,8 +20,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
+import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObCard
+import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.kit.SystemBarStyleModern
 import cn.coolbet.orbit.ui.theme.ObTheme
@@ -72,6 +74,12 @@ object ProfileScreen: Screen {
                             trailing = state.rootFolder.title
                         )
                     }
+
+                    ObTextButton(
+                        "退出登录",
+                        colors = OButtonDefaults.danger,
+                        onClick = { model.logout() }
+                    )
                 }
             }
         }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,18 +25,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black50
+import cn.coolbet.orbit.ui.theme.Black95
 
 @Composable
 fun ObIconTextField(
@@ -86,25 +92,29 @@ fun ObTextField(
         leading?.invoke()
         if (leading != null) Spacer(modifier = Modifier.width(8.dp))
 
-        if (value == "") {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = hint,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = AppTypography.R15B25,
-            )
-        } else {
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.CenterStart,
+        ) {
             BasicTextField(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 value = value, onValueChange = onValueChange,
                 singleLine = true, readOnly = readOnly,
                 textStyle = AppTypography.R15,
+                cursorBrush = SolidColor(Black95), // 光标
                 keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
             )
+            if (value.isEmpty()) {
+                Text(
+                    text = hint,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = AppTypography.R15B25,
+                )
+            }
         }
 
-        if (value != "" && !readOnly) {
+        if (value.isNotEmpty() && !readOnly) {
             Spacer(modifier = Modifier.width(8.dp))
             Image(
                 modifier = Modifier.size(sizes.iconSize)
@@ -133,7 +143,7 @@ object ObTextFieldDefaults {
         height = 36.dp, padding = 8.dp, radius = 10.dp, iconSize = 20.dp
     )
     val large = ObTextFieldSize(
-        height = 52.dp, padding = 12.dp, radius = 12.dp, iconSize = 28.dp
+        height = 52.dp, padding = 12.dp, radius = 12.dp, iconSize = 24.dp
     )
 
 }

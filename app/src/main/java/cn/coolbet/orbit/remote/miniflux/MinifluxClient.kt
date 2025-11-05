@@ -59,7 +59,7 @@ object MinifluxClient {
             val originalRequest = chain.request()
 
             val newRequest = originalRequest.newBuilder()
-                .header("X-Auth-Token", XAuthToken)
+//                .header("X-Auth-Token", XAuthToken)
                 .header("Content-Type", "application/json")
                 .build()
 
