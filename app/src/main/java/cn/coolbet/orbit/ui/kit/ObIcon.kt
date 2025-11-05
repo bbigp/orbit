@@ -46,7 +46,7 @@ fun ObIcon(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = id),
             contentDescription = "",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(color),
         )
     }

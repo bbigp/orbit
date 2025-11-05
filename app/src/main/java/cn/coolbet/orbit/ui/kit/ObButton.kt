@@ -67,7 +67,7 @@ fun ObIconTextButton(
             modifier = Modifier.size(20.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(contentColor),
         )
 

@@ -69,7 +69,7 @@ fun ObAsyncTextButton(
                 modifier = Modifier.size(24.dp),
                 painter = painterResource(id = R.drawable.loading),
                 contentDescription = "",
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Fit,
                 colorFilter = ColorFilter.tint(colors.contentColor),
             )
             Spacer(modifier = Modifier.size(8.dp))

@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObTextButton
+import cn.coolbet.orbit.ui.kit.ObTextField
+import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.theme.AppTypography
 
 object LoginScreen: Screen {
@@ -59,16 +61,20 @@ fun Login() {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "Enter token and server address",
+                    "Enter Server Address and API Key",
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
                     style = AppTypography.R15B50,
                     modifier = Modifier.padding(horizontal = 6.dp)
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                //服务器地址
+                ObTextField(hint = "Server Address", sizes = ObTextFieldDefaults.large, onValueChange = {
+
+                })
                 Spacer(modifier = Modifier.height(16.dp))
-                //token
-                //16
+                ObTextField(hint = "API Key", sizes = ObTextFieldDefaults.large, onValueChange = {
+
+                })
+                Spacer(modifier = Modifier.height(16.dp))
                 ObTextButton("Continue", sizes = OButtonDefaults.large)
             }
         }

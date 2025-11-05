@@ -46,7 +46,7 @@ fun ListTileChevronUpDown(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -85,7 +85,7 @@ fun ListTileChevronRight(title: String, icon: Int) {
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -117,7 +117,7 @@ fun ListTileSwitch(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
         )
         Spacer(modifier = Modifier.width(12.dp))
