@@ -3,19 +3,15 @@ package cn.coolbet.orbit.view.login
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.dao.UserMapper
-import cn.coolbet.orbit.remote.miniflux.ProfileApi
-import cn.coolbet.orbit.remote.miniflux.to
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class LoginScreenModel @Inject constructor(
-    private val profileApi: ProfileApi,
+//    private val profileApi: ProfileApi,
     private val userMapper: UserMapper,
 ): ScreenModel {
     private val _state = MutableStateFlow(LoginState())
@@ -36,7 +32,7 @@ class LoginScreenModel @Inject constructor(
             val currentState = _state.value
             try {
                 delay(2000)
-                val resp = profileApi.me(currentState.serverAddress + "v1/me", currentState.apiKey)
+//                val resp = profileApi.me(currentState.serverAddress + "v1/me", currentState.apiKey)
 //                userMapper.saveUser(resp.to(currentState.serverAddress, currentState.apiKey))
             } catch (e: Exception) {
 

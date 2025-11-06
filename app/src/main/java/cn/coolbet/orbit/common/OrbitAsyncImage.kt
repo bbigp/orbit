@@ -1,11 +1,7 @@
 package cn.coolbet.orbit.common
 
 import android.util.Base64
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import cn.coolbet.orbit.remote.miniflux.MinifluxClient
-import cn.coolbet.orbit.remote.miniflux.ProfileApi
+import cn.coolbet.orbit.remote.SessionAwareIconApi
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.decode.DataSource
@@ -16,30 +12,27 @@ import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.key.Keyer
 import coil3.map.Mapper
-import coil3.request.CachePolicy
 import coil3.request.Options
-import coil3.util.DebugLogger
-import coil3.util.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Buffer
 import okio.FileSystem
 
-@Composable
-fun rememberMinifluxIconImageLoader(): ImageLoader {
-    val context = LocalContext.current
-    val profileApi: ProfileApi = remember { MinifluxClient.provideProfileApi() }
-    return remember {
-        ImageLoader.Builder(context).components {
-            add(MinifluxIconURLMapper())
-            add(MinifluxIconFetcher.Factory(profileApi))
-            add(MinifluxIconKeyer())
-        }
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .logger(DebugLogger(minLevel = Logger.Level.Debug))
-            .build()
-    }
-}
+//@Composable
+//fun rememberMinifluxIconImageLoader(): ImageLoader {
+//    val context = LocalContext.current
+//    val profileApi: ProfileApi = remember { MinifluxClient.provideProfileApi() }
+//    return remember {
+//        ImageLoader.Builder(context).components {
+//            add(MinifluxIconURLMapper())
+//            add(MinifluxIconFetcher.Factory(profileApi))
+//            add(MinifluxIconKeyer())
+//        }
+//            .diskCachePolicy(CachePolicy.ENABLED)
+//            .logger(DebugLogger(minLevel = Logger.Level.Debug))
+//            .build()
+//    }
+//}
 
 class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
     override fun key(data: MinifluxIconURLModel, options: Options): String {
@@ -49,7 +42,7 @@ class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
 data class MinifluxIconURLModel(val url: String)
 class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
     private val iconURL: MinifluxIconURLModel,
-    private val profileApi: ProfileApi,
+    private val iconApi: SessionAwareIconApi,
     private val diskCache: Lazy<DiskCache?>,
     private val options: Options,
 ) : Fetcher {
@@ -79,7 +72,7 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
             return@withContext null
         }
 
-        val rep = profileApi.icon(iconURL.url)
+        val rep = iconApi.icon(iconURL.url)
         val byteArray = Base64.decode(rep.data.split("base64,")[1], Base64.NO_WRAP)
         val buffer: Buffer = Buffer().write(byteArray)
 
@@ -156,9 +149,9 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
     private val fileSystem: FileSystem
         get() = diskCache.value?.fileSystem ?: options.fileSystem
 
-    class Factory(private val profileApi: ProfileApi) : Fetcher.Factory<MinifluxIconURLModel> {
+    class Factory(private val iconApi: SessionAwareIconApi) : Fetcher.Factory<MinifluxIconURLModel> {
         override fun create(data: MinifluxIconURLModel, options: Options, imageLoader: ImageLoader): Fetcher {
-            return MinifluxIconFetcher(data, profileApi,
+            return MinifluxIconFetcher(data, iconApi,
                 diskCache = lazy { imageLoader.diskCache }, options = options,
             )
         }

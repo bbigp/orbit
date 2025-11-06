@@ -1,5 +1,7 @@
 package cn.coolbet.orbit.remote.miniflux
 
+import cn.coolbet.orbit.di.SessionScope
+import cn.coolbet.orbit.manager.PreferenceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,7 +12,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 const val BASE_URL = "https://feedo.coolbet.cn/"
 const val XAuthToken = "lOEQiLk-6QtDmiIz9_AsoBmZrdeKBarjZyjTLyo4600="
@@ -20,36 +21,37 @@ const val XAuthToken = "lOEQiLk-6QtDmiIz9_AsoBmZrdeKBarjZyjTLyo4600="
 object MinifluxClient {
 
     @Provides
-    @Singleton
+    @SessionScope
     fun provideMiniFeedApi(retrofit: Retrofit): MiniFeedApi { // Hilt 自动注入 Retrofit
         return retrofit.create(MiniFeedApi::class.java)
     }
 
     @Provides
-    @Singleton
+    @SessionScope
     fun provideMiniFolderApi(retrofit: Retrofit): MiniFolderApi {
         return retrofit.create(MiniFolderApi::class.java)
     }
 
     @Provides
-    @Singleton
-    fun provideProfileApi(): ProfileApi {
-        return createRetrofit(this.createOkHttpClient()).create(ProfileApi::class.java)
+    @SessionScope
+    fun provideIconFileApi(retrofit: Retrofit): MinIconFileApi {
+        return retrofit.create(MinIconFileApi::class.java)
     }
 
     @Provides
-    @Singleton
-    fun createRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    @SessionScope
+    fun createRetrofit(okHttpClient: OkHttpClient, preferenceManager: PreferenceManager): Retrofit {
+        val baseUrl = preferenceManager.getBaseUrl()
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create()) // 使用 Gson 转换器
             .build()
     }
 
     @Provides
-    @Singleton
-    fun createOkHttpClient(): OkHttpClient {
+    @SessionScope
+    fun createOkHttpClient(preferenceManager: PreferenceManager): OkHttpClient {
         // 日志拦截器，用于在 Logcat 中查看请求和响应细节
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY // 设置为 BODY 级别查看请求体和响应体
