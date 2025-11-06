@@ -30,21 +30,20 @@ class LoginScreenModel @Inject constructor(
         }
     }
 
-    suspend fun login() {
-        _state.update { it.copy(isLoading = true) }
-        val currentState = _state.value
-        try {
-            delay(2000)
-            val resp = profileApi.me(currentState.serverAddress + "v1/me", currentState.apiKey)
+    fun login() {
+        screenModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val currentState = _state.value
+            try {
+                delay(2000)
+                val resp = profileApi.me(currentState.serverAddress + "v1/me", currentState.apiKey)
 //                userMapper.saveUser(resp.to(currentState.serverAddress, currentState.apiKey))
-        } catch (e: Exception) {
+            } catch (e: Exception) {
 
-        } finally {
-//                _state.update { it.copy(isLoading = false) }
+            } finally {
+                _state.update { it.copy(isLoading = false) }
+            }
         }
-//        screenModelScope.launch {
-//
-//        }
     }
 }
 

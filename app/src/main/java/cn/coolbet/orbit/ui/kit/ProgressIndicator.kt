@@ -8,20 +8,24 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.ui.theme.Black50
 
 @Composable
-fun ProgressIndicator() {
+fun ProgressIndicator(
+    size: Dp = 24.dp,
+    color: Color = Black50,
+) {
 
     // 1. 创建无限动画过渡
     val infiniteTransition = rememberInfiniteTransition(label = "RotationTransition")
@@ -43,9 +47,10 @@ fun ProgressIndicator() {
     Image(
         painter = painterResource(id = R.drawable.loading),
         contentDescription = "Loading",
-        colorFilter = ColorFilter.tint(Color.White),
+        colorFilter = ColorFilter.tint(color),
+        contentScale = ContentScale.Fit,
         modifier = Modifier
-            .size(48.dp)
+            .size(size)
             .rotate(rotation) // 👈 应用旋转角度
     )
 }
