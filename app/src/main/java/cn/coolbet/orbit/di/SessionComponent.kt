@@ -2,6 +2,9 @@ package cn.coolbet.orbit.di
 
 import cn.coolbet.orbit.remote.miniflux.MinIconFileApi
 import dagger.Component
+import dagger.hilt.DefineComponent
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Scope
 
@@ -11,20 +14,21 @@ annotation class SessionScope
 
 
 @SessionScope
-@Component(dependencies = [SingletonComponent::class]) // SessionComponent 依赖于 SingletonComponent
+@DefineComponent(parent = SingletonComponent::class)
 interface SessionComponent {
 
-    // SessionManager (@Singleton 级) 需要通过这个方法获取 @SessionScope 实例
-    fun minIconFileApi(): MinIconFileApi
-
-    @Component.Factory
-    interface Factory {
-        fun create(): SessionComponent
+    @DefineComponent.Builder
+    interface Builder {
+        fun build(): SessionComponent
     }
 
-//    @EntryPoint
-//    @InstallIn(SessionComponent::class)
-//    interface SessionEntryPoint {
-//        fun minIconFileApi(): MinIconFileApi
-//    }
+}
+
+@EntryPoint
+@InstallIn(SessionComponent::class)
+interface SessionEntryPoint {
+
+    // 现在这个方法可以暴露你的 @SessionScope 实例了
+    fun minIconFileApi(): MinIconFileApi
+
 }

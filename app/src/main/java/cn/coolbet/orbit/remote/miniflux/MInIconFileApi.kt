@@ -26,6 +26,6 @@ data class MeResponse(
     val username: String = "",
 )
 
-fun MeResponse.to(baseURL: String, apiKey: String): User {
-    return User(id = id, username = username, baseURL = baseURL, token = apiKey)
+fun MeResponse.to(baseURL: String, authToken: String): User {
+    return User(id = id, username = username, baseURL = baseURL, authToken = authToken)
 }

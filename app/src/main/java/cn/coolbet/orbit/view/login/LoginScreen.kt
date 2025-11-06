@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,12 +23,11 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
-import cn.coolbet.orbit.ui.kit.ObAsyncButton
 import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
-import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.view.home.HomeScreen
 
 object LoginScreen: Screen {
     private fun readResolve(): Any = LoginScreen
@@ -40,6 +37,20 @@ object LoginScreen: Screen {
         val model = getScreenModel<LoginScreenModel>()
         val state by model.state.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(Unit) {
+            model.events.collect { it ->
+                when(it) {
+                    is LoginEvent.NavigateToHome -> {
+                        navigator.replaceAll(HomeScreen)
+                    }
+                    is LoginEvent.ShowError -> {
+                        println(it.message)
+                    }
+                }
+            }
+        }
+
         Scaffold(
             bottomBar = {
                 Column(
@@ -76,23 +87,24 @@ object LoginScreen: Screen {
                     ObTextField(
                         hint = "Server Address",
                         sizes = ObTextFieldDefaults.large,
-                        value = state.serverAddress,
+                        value = state.baseURL,
                         onValueChange = { newValue ->
-                            model.changeState(serverAddress = newValue)
+                            model.changeState(baseURL = newValue)
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     ObTextField(
                         hint = "API Key",
                         sizes = ObTextFieldDefaults.large,
-                        value = state.apiKey,
+                        value = state.authToken,
                         onValueChange = { newValue ->
-                            model.changeState(apiKey = newValue)
+                            model.changeState(authToken = newValue)
                         }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     ObAsyncTextButton(
                         "Continue",
+                        isLoading = state.isLoading,
                         sizes = OButtonDefaults.large,
                         onClick = { model.login() },
                     )

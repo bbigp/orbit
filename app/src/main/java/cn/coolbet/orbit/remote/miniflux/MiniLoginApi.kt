@@ -6,5 +6,5 @@ import retrofit2.http.Url
 
 interface MiniLoginApi {
     @GET
-    suspend fun me(@Url url: String, @Header("X-Auth-Token") apiKey: String): MeResponse
+    suspend fun me(@Url url: String, @Header("X-Auth-Token") authToken: String): MeResponse
 }

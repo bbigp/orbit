@@ -2,26 +2,35 @@ package cn.coolbet.orbit.view.login
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cn.coolbet.orbit.dao.UserMapper
+import cn.coolbet.orbit.di.App
+import cn.coolbet.orbit.manager.SessionManager
+import cn.coolbet.orbit.remote.miniflux.MiniLoginApi
+import cn.coolbet.orbit.remote.miniflux.to
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
 import javax.inject.Inject
 
 class LoginScreenModel @Inject constructor(
-//    private val profileApi: ProfileApi,
-    private val userMapper: UserMapper,
+    @App private val retrofit: Retrofit,
+    private val sessionManager: SessionManager,
 ): ScreenModel {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
+    private val _events = Channel<LoginEvent>()
+    val events = _events.receiveAsFlow()
+    private val loginApi = retrofit.create(MiniLoginApi::class.java)
 
-    fun changeState(serverAddress: String? = null, apiKey: String? = null) {
+    fun changeState(baseURL: String? = null, authToken: String? = null) {
         _state.update { it ->
             it.copy(
-                serverAddress = serverAddress ?: it.serverAddress,
-                apiKey = apiKey ?: it.apiKey,
+                baseURL = baseURL ?: it.baseURL,
+                authToken = authToken ?: it.authToken,
             )
         }
     }
@@ -32,10 +41,15 @@ class LoginScreenModel @Inject constructor(
             val currentState = _state.value
             try {
                 delay(2000)
-//                val resp = profileApi.me(currentState.serverAddress + "v1/me", currentState.apiKey)
-//                userMapper.saveUser(resp.to(currentState.serverAddress, currentState.apiKey))
+                var baseURL = currentState.baseURL
+                baseURL = if (baseURL.endsWith("/")) baseURL else "$baseURL/"
+                val authToken = currentState.authToken
+                val user = loginApi.me(baseURL + "v1/me", authToken)
+                    .to(baseURL, authToken)
+                sessionManager.startSession(user)
+                _events.send(LoginEvent.NavigateToHome)
             } catch (e: Exception) {
-
+                _events.send(LoginEvent.ShowError(message = ""))
             } finally {
                 _state.update { it.copy(isLoading = false) }
             }
@@ -43,8 +57,13 @@ class LoginScreenModel @Inject constructor(
     }
 }
 
+sealed class LoginEvent {
+    data object NavigateToHome: LoginEvent()
+    data class ShowError(val message: String): LoginEvent()
+}
+
 data class LoginState (
-    val serverAddress: String = "https://feedo.coolbet.cn/",
-    val apiKey: String = "lOEQiLk-6QtDmiIz9_AsoBmZrdeKBarjZyjTLyo4600=",
+    val baseURL: String = "https://feedo.coolbet.cn/",
+    val authToken: String = "lOEQiLk-6QtDmiIz9_AsoBmZrdeKBarjZyjTLyo4600=",
     val isLoading: Boolean = false,
 )

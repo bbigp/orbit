@@ -1,8 +1,9 @@
 package cn.coolbet.orbit.manager
 
+import android.annotation.SuppressLint
 import android.content.Context
-import cn.coolbet.orbit.dao.UserMapper.Companion.PREFS_NAME
-import cn.coolbet.orbit.dao.UserMapper.Companion.USER_KEY
+import cn.coolbet.orbit.model.domain.User
+import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,20 +11,53 @@ import javax.inject.Singleton
 @Singleton
 class PreferenceManager @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val gson: Gson,
 ){
 
-    private val sharedPrefs = context.getSharedPreferences(
-        "app_prefs", Context.MODE_PRIVATE,
+    val USER_KEY = "current_user_data"
+
+//    private val sharedPrefs = context.getSharedPreferences(
+//        "app_prefs", Context.MODE_PRIVATE,
+//    )
+
+    val sharedPreferences = context.getSharedPreferences(
+        "user_prefs", Context.MODE_PRIVATE,
     )
 
-
-    fun getBaseUrl(): String {
-        return sharedPrefs.getString("BASE_URL_KEY", "") ?: ""
+    @SuppressLint("CheckResult")
+    fun userProfile(): User {
+        val userJson = sharedPreferences.getString(USER_KEY, "")
+        if (userJson == "") return User.EMPTY
+        return gson.fromJson(userJson, User::class.java)
     }
 
-    fun setBaseUrl(url: String) {
+    fun saveUser(user: User) {
+        val userJson = gson.toJson(user)
+        sharedPreferences.edit().apply {
+            putString(USER_KEY, userJson)
+            commit()
+        }
+    }
+
+    fun userSetting(autoRead: Boolean = false): User {
+        val user = userProfile()
+        val newUser = user.copy(autoRead = autoRead)
+        saveUser(newUser)
+        return newUser
+    }
+
+    fun getBaseURL(): String {
+        return this.userProfile().baseURL
+    }
+
+    fun getAuthToken(): String {
+        return this.userProfile().authToken
     }
 
     fun clearSessionData() {
+        sharedPreferences.edit().apply{
+            remove(USER_KEY)
+            commit()
+        }
     }
 }

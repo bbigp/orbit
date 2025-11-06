@@ -1,8 +1,9 @@
 package cn.coolbet.orbit
 
+import android.util.Log
 import cn.coolbet.orbit.dao.FeedMapper
 import cn.coolbet.orbit.dao.FolderMapper
-import cn.coolbet.orbit.dao.UserMapper
+import cn.coolbet.orbit.manager.PreferenceManager
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.User
@@ -25,7 +26,7 @@ import javax.inject.Singleton
 class MemoryStore @Inject constructor(
     private val feedMapper: FeedMapper,
     private val folderMapper: FolderMapper,
-    private val userMapper: UserMapper,
+    private val preferenceManager: PreferenceManager,
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
@@ -35,7 +36,7 @@ class MemoryStore @Inject constructor(
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     @Volatile private var currentLoadJob: Job? = null
 
-    init { loadInitialData() }
+//    init { loadInitialData() }
 
     fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
     fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()
@@ -66,10 +67,16 @@ class MemoryStore @Inject constructor(
     fun loadInitialData() {
         currentLoadJob?.cancel()
         currentLoadJob = storeScope.launch {
-            _user.value = userMapper.userProfile()
+            val user = preferenceManager.userProfile()
+            if (user.isEmpty) {
+                Log.i("store", "未登录，无法预加载")
+                return@launch
+            }
+            _user.value = user
             _feeds.value = feedMapper.getFeeds()
             val folders = folderMapper.getFolders()
             _folders.value = associateFeedsWithFolders(_feeds.value, folders)
+            Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
         }
     }
 

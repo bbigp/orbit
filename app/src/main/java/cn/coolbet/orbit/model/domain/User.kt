@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class User(
     val id: Long,
     val username: String = "",
-    val token: String,
+    val authToken: String,
     val baseURL: String,
     val autoRead: Boolean = false,
     val unreadMark: UnreadMark = UnreadMark.NUMBER,
@@ -14,8 +14,10 @@ data class User(
     val rootFolder: Long = 0,
 ) {
 
+    val isEmpty: Boolean get() = id == 0L
+    val isNotEmpty: Boolean get() = id != 0L
     companion object {
-        val EMPTY = User(id = 0, token = "", baseURL = "")
+        val EMPTY = User(id = 0, authToken = "", baseURL = "")
     }
 
 }

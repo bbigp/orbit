@@ -1,23 +1,28 @@
 package cn.coolbet.orbit.manager
 
 import android.util.Log
+import cn.coolbet.orbit.MemoryStore
 import cn.coolbet.orbit.di.SessionComponent
+import cn.coolbet.orbit.di.SessionEntryPoint
+import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.remote.SessionAwareIconApi
+import dagger.hilt.EntryPoints
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SessionManager @Inject constructor(
-    private val factory: SessionComponent.Factory,
+    private val sessionComponentBuilder: SessionComponent.Builder,
     private val preferenceManager: PreferenceManager,
     private val awareIconApi: SessionAwareIconApi,
+    private val store: MemoryStore,
 ){
     private var _sessionComponent: SessionComponent? = null
     val sessionComponent: SessionComponent? get() = _sessionComponent
 
     // 💥 检查当前是否处于登录状态（是否有 URL）
     fun isSessionActive(): Boolean {
-        return preferenceManager.getBaseUrl().isNotEmpty() && _sessionComponent != null
+        return preferenceManager.userProfile().isNotEmpty && _sessionComponent != null
     }
 
 
@@ -25,14 +30,17 @@ class SessionManager @Inject constructor(
      * 【App 启动时 / 登录成功后】调用
      * 确保会话组件已创建，使用持久化的 URL。
      */
-    fun startSession(forceUrl: String? = null) {
-        // 如果提供了 URL (登录时)，先持久化
-        forceUrl?.let { preferenceManager.setBaseUrl(it) }
+    fun startSession(user: User? = null) {
+        user?.let { preferenceManager.saveUser(it) }
 
         // 如果持久化的 URL 存在，并且组件尚未创建，则创建它
-        if (preferenceManager.getBaseUrl().isNotEmpty() && _sessionComponent == null) {
-            _sessionComponent = factory.create()
-            awareIconApi.set(this.sessionComponent)
+        if (preferenceManager.userProfile().isNotEmpty && _sessionComponent == null) {
+            _sessionComponent = sessionComponentBuilder.build()
+            awareIconApi.set(EntryPoints.get(
+                sessionComponent!!,
+                SessionEntryPoint::class.java
+            ).minIconFileApi())
+            store.loadInitialData()
             Log.d("SessionManager", "会话启动，Retrofit 使用持久化 URL。")
         }
     }

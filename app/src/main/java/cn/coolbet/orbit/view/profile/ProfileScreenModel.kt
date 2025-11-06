@@ -3,7 +3,7 @@ package cn.coolbet.orbit.view.profile
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.MemoryStore
-import cn.coolbet.orbit.dao.UserMapper
+import cn.coolbet.orbit.manager.SessionManager
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileScreenModel @Inject constructor(
     private val store: MemoryStore,
-    private val userMapper: UserMapper,
+    private val sessionManager: SessionManager,
 ): ScreenModel {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -42,7 +42,7 @@ class ProfileScreenModel @Inject constructor(
     }
 
     fun logout() {
-        userMapper.logout()
+        sessionManager.endSession()
     }
 }
 
