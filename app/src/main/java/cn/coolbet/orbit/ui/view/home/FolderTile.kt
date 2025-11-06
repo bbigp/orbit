@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.home
+package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOut
@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
-import cn.coolbet.orbit.view.CountBadge
+import cn.coolbet.orbit.ui.view.CountBadge
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black50

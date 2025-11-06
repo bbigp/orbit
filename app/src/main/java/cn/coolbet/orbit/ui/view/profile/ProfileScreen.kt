@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.profile
+package cn.coolbet.orbit.ui.view.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

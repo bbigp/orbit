@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.login
+package cn.coolbet.orbit.ui.view.login
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope

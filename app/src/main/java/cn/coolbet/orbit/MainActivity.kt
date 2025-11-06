@@ -9,8 +9,8 @@ import cafe.adriel.voyager.navigator.Navigator
 import cn.coolbet.orbit.manager.PreferenceManager
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import cn.coolbet.orbit.ui.theme.OrbitTheme
-import cn.coolbet.orbit.view.home.HomeScreen
-import cn.coolbet.orbit.view.login.LoginScreen
+import cn.coolbet.orbit.ui.view.home.HomeScreen
+import cn.coolbet.orbit.ui.view.login.LoginScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

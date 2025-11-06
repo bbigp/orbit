@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view
+package cn.coolbet.orbit.ui.view
 
 import android.util.Log
 import androidx.compose.animation.core.InfiniteRepeatableSpec
@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.OrBitTypography
-import cn.coolbet.orbit.view.home.LocalListIsScrolling
+import cn.coolbet.orbit.ui.view.home.LocalListIsScrolling
 import coil3.ColorImage
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.AsyncImagePreviewHandler

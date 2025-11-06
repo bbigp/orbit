@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.home
+package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -22,12 +22,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Feed
-import cn.coolbet.orbit.view.CountBadge
-import cn.coolbet.orbit.view.FeedIcon
+import cn.coolbet.orbit.ui.view.CountBadge
+import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black25
-import cn.coolbet.orbit.view.FeedIconSize
+import cn.coolbet.orbit.ui.view.FeedIconSize
 
 
 @Composable

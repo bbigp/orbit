@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.login
+package cn.coolbet.orbit.ui.view.login
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,7 @@ import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.view.home.HomeScreen
+import cn.coolbet.orbit.ui.view.home.HomeScreen
 
 object LoginScreen: Screen {
     private fun readResolve(): Any = LoginScreen

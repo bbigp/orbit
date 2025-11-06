@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.home
+package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth

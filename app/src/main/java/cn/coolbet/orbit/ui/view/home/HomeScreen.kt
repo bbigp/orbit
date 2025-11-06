@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view.home
+package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,8 +26,8 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
-import cn.coolbet.orbit.view.login.LoginScreen
-import cn.coolbet.orbit.view.profile.ProfileScreen
+import cn.coolbet.orbit.ui.view.login.LoginScreen
+import cn.coolbet.orbit.ui.view.profile.ProfileScreen
 
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }

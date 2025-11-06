@@ -29,7 +29,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
-import cn.coolbet.orbit.view.profile.ProfileScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)

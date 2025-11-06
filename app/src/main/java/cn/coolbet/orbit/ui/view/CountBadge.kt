@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.view
+package cn.coolbet.orbit.ui.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
