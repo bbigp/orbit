@@ -65,13 +65,14 @@ fun ObAsyncTextButton(
             ButtonTextContent()
         },
         onLoadingContent = {
-            Image(
-                modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.loading),
-                contentDescription = "",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(colors.contentColor),
-            )
+//            Image(
+//                modifier = Modifier.size(24.dp),
+//                painter = painterResource(id = R.drawable.loading),
+//                contentDescription = "",
+//                contentScale = ContentScale.Fit,
+//                colorFilter = ColorFilter.tint(colors.contentColor),
+//            )
+            ProgressIndicator()
             Spacer(modifier = Modifier.size(8.dp))
             ButtonTextContent()
         }
