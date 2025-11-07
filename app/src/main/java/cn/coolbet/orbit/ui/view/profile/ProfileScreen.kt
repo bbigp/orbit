@@ -52,8 +52,11 @@ object ProfileScreen: Screen {
                 modifier = Modifier.padding(paddingValues).fillMaxSize()
             ) {
                 Column {
+                    ProfileInfo()
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
-                    ObCard {
+                    ObCard(horizontal = 16.dp) {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
                             trailing = state.user.unreadMark.value
