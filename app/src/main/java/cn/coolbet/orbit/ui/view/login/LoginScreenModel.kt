@@ -2,15 +2,15 @@ package cn.coolbet.orbit.ui.view.login
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.di.App
 import cn.coolbet.orbit.manager.SessionManager
 import cn.coolbet.orbit.remote.miniflux.MiniLoginApi
 import cn.coolbet.orbit.remote.miniflux.to
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -22,8 +22,6 @@ class LoginScreenModel @Inject constructor(
 ): ScreenModel {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
-    private val _events = Channel<LoginEvent>()
-    val events = _events.receiveAsFlow()
     private val loginApi = retrofit.create(MiniLoginApi::class.java)
 
     fun changeState(baseURL: String? = null, authToken: String? = null) {
@@ -47,19 +45,14 @@ class LoginScreenModel @Inject constructor(
                 val user = loginApi.me(baseURL + "v1/me", authToken)
                     .to(baseURL, authToken)
                 sessionManager.startSession(user)
-                _events.send(LoginEvent.NavigateToHome)
+                NavigatorBus.replaceAll(Route.Home)
             } catch (e: Exception) {
-                _events.send(LoginEvent.ShowError(message = ""))
+
             } finally {
                 _state.update { it.copy(isLoading = false) }
             }
         }
     }
-}
-
-sealed class LoginEvent {
-    data object NavigateToHome: LoginEvent()
-    data class ShowError(val message: String): LoginEvent()
 }
 
 data class LoginState (

@@ -55,6 +55,7 @@ class SessionManager @Inject constructor(
 
         // 2. 销毁 Retrofit 实例和所有会话级依赖
         _sessionComponent = null
+        store.clear()
         Log.d("SessionManager", "会话已销毁，旧 URL 已清除。")
     }
 

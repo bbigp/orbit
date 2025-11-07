@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import cn.coolbet.orbit.manager.PreferenceManager
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
@@ -28,7 +29,10 @@ class MainActivity : ComponentActivity() {
             SystemBarAppearance()
             OrbitTheme {
                 val initialScreen: Screen = if (!preferenceManager.userProfile().isEmpty) HomeScreen else LoginScreen
-                Navigator(screen = initialScreen)
+                Navigator(screen = initialScreen) {
+                    OrbitRouter()
+                    CurrentScreen()
+                }
             }
         }
     }

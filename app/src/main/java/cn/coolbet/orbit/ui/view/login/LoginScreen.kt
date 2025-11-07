@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,14 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.view.home.HomeScreen
 
 object LoginScreen: Screen {
     private fun readResolve(): Any = LoginScreen
@@ -36,20 +32,6 @@ object LoginScreen: Screen {
     override fun Content() {
         val model = getScreenModel<LoginScreenModel>()
         val state by model.state.collectAsState()
-        val navigator = LocalNavigator.currentOrThrow
-
-        LaunchedEffect(Unit) {
-            model.events.collect { it ->
-                when(it) {
-                    is LoginEvent.NavigateToHome -> {
-                        navigator.replaceAll(HomeScreen)
-                    }
-                    is LoginEvent.ShowError -> {
-                        println(it.message)
-                    }
-                }
-            }
-        }
 
         Scaffold(
             bottomBar = {

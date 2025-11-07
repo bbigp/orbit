@@ -3,6 +3,8 @@ package cn.coolbet.orbit.ui.view.profile
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.MemoryStore
+import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.manager.SessionManager
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.User
@@ -43,6 +45,7 @@ class ProfileScreenModel @Inject constructor(
 
     fun logout() {
         sessionManager.endSession()
+        NavigatorBus.replaceAll(Route.Login)
     }
 }
 

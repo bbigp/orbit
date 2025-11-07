@@ -36,8 +36,6 @@ class MemoryStore @Inject constructor(
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     @Volatile private var currentLoadJob: Job? = null
 
-//    init { loadInitialData() }
-
     fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
     fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()
     fun currentUser(): Flow<User> = _user.asStateFlow()
@@ -78,6 +76,12 @@ class MemoryStore @Inject constructor(
             _folders.value = associateFeedsWithFolders(_feeds.value, folders)
             Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
         }
+    }
+
+    fun clear() {
+        _feeds.value = emptyList()
+        _folders.value = emptyList()
+        _user.value = User.EMPTY
     }
 
 

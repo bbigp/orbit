@@ -18,17 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
-import cn.coolbet.orbit.ui.view.login.LoginScreen
-import cn.coolbet.orbit.ui.view.profile.ProfileScreen
-
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 val LocalListIsScrolling = compositionLocalOf { false }
@@ -44,20 +41,16 @@ object HomeScreen: Screen {
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
         }
-        val navigator = LocalNavigator.currentOrThrow
-
         Scaffold (
             topBar = {
                 ObTopAppbar(
                     navigationIcon = {
-                        ObIcon(id = R.drawable.lines_3, onClick = { navigator.push(ProfileScreen) })
+                        ObIcon(id = R.drawable.lines_3, onClick = { NavigatorBus.push(Route.Profile) })
                     },
                     actions = {
                         ObIconGroup(items = listOf(
                             ObIconItem(iconId = R.drawable.sync),
-                            ObIconItem(iconId = R.drawable.add, onClick = { navigator.push(
-                                LoginScreen
-                            )}),
+                            ObIconItem(iconId = R.drawable.add, onClick = { }),
                         ))
                     }
                 )
