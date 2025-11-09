@@ -1,65 +1,75 @@
 package cn.coolbet.orbit.remote.miniflux
 
 import cn.coolbet.orbit.di.Miniflux
-import cn.coolbet.orbit.di.SessionComponent
-import cn.coolbet.orbit.di.SessionScope
-import cn.coolbet.orbit.manager.PreferenceManager
+import cn.coolbet.orbit.manager.Session
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-
-const val BASE_URL = "https://feedo.coolbet.cn/"
-const val XAuthToken = "lOEQiLk-6QtDmiIz9_AsoBmZrdeKBarjZyjTLyo4600="
+import javax.inject.Singleton
 
 @Module
-@InstallIn(SessionComponent::class)
+@InstallIn(SingletonComponent::class)
 object MinifluxClient {
 
     @Provides
-    @SessionScope
+    @Singleton
     fun provideMiniFeedApi(@Miniflux retrofit: Retrofit): MiniFeedApi { // Hilt 自动注入 Retrofit
         return retrofit.create(MiniFeedApi::class.java)
     }
 
     @Provides
-    @SessionScope
+    @Singleton
     fun provideMiniFolderApi(@Miniflux retrofit: Retrofit): MiniFolderApi {
         return retrofit.create(MiniFolderApi::class.java)
     }
 
     @Provides
-    @SessionScope
+    @Singleton
     fun provideIconFileApi(@Miniflux retrofit: Retrofit): MinIconFileApi {
         return retrofit.create(MinIconFileApi::class.java)
     }
 
     @Provides
-    @SessionScope
+    @Singleton
+    fun provideEntryApi(@Miniflux retrofit: Retrofit): MiniEntryApi {
+        return retrofit.create(MiniEntryApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     @Miniflux
-    fun createRetrofit(@Miniflux okHttpClient: OkHttpClient, preferenceManager: PreferenceManager): Retrofit {
-        val baseUrl = preferenceManager.getBaseURL()
+    fun createRetrofit(@Miniflux okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl("https://orbit.cn")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create()) // 使用 Gson 转换器
             .build()
     }
 
     @Provides
-    @SessionScope
+    @Singleton
     @Miniflux
-    fun createOkHttpClient(preferenceManager: PreferenceManager, loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun createOkHttpClient(session: Session, loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
         val headerInterceptor = Interceptor { chain ->
             val originalRequest = chain.request()
 
+            val newBaseUrl = session.baseURL.toHttpUrl()
+            val newUrlBuilder = originalRequest.url.newBuilder()
+                .scheme(newBaseUrl.scheme)
+                .host(newBaseUrl.host)
+                .port(newBaseUrl.port)
+                .build()
             val newRequest = originalRequest.newBuilder()
-                .header("X-Auth-Token", preferenceManager.getAuthToken())
+                .url(newUrlBuilder)
+                .header("X-Auth-Token", session.authToken)
                 .header("Content-Type", "application/json")
                 .build()
 

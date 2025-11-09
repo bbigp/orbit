@@ -4,13 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,17 +24,16 @@ fun ObCard(
     background: Color = ObTheme.colors.primaryContainer,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
+    Box(
         modifier = Modifier.padding(horizontal = horizontal, vertical = vertical)
+            .background(background, shape = RoundedCornerShape(radius))
             .clip(RoundedCornerShape(radius)),
-        content = {
-            Column(
-                modifier = Modifier.padding(vertical = contentVertical, horizontal = contentHorizontal),
-                content = content
-            )
-        },
-        colors = CardDefaults.cardColors(contentColor = background)
-    )
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = contentVertical, horizontal = contentHorizontal),
+            content = content
+        )
+    }
 }
 
 @Preview

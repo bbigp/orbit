@@ -16,11 +16,11 @@ fun CategoryResponse.to(): Folder {
 
 data class CategoryResponse(
     val id: Long,
-    val title: String,
-
-    @SerializedName("user_id")
-    val userId: Long,
-
-    @SerializedName("hide_globally")
-    val hideGlobally: Boolean
-)
+    val title: String = "",
+    @SerializedName("user_id") val userId: Long,
+    @SerializedName("hide_globally") val hideGlobally: Boolean = false,
+) {
+    companion object {
+        val EMPTY = CategoryResponse(id = 0, userId = 0)
+    }
+}

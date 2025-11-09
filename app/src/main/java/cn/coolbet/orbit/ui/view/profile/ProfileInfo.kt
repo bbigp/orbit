@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -25,15 +24,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black95
+import java.net.URI
 
 
-@Preview(showBackground = true)
 @Composable
-fun ProfileInfo() {
+fun ProfileInfo(user: User = User.EMPTY) {
     Row(
         modifier = Modifier.padding(horizontal = 4.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -48,12 +48,17 @@ fun ProfileInfo() {
         Column(
             modifier = Modifier.weight(1f),
         ) {
-            Text("username", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.M17)
+            Text(
+                user.username,
+                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                style = AppTypography.M17,
+                modifier = Modifier.padding(start = 3.dp)
+            )
             Spacer(modifier = Modifier.height(4.dp))
             ObCard(
-              radius = 30.dp, contentHorizontal = 8.dp,
+              radius = 30.dp, contentHorizontal = 8.dp, contentVertical = 2.dp,
             ) {
-                Text("Reg. on Nov 12, 2024", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.M13B25)
+                Text(URI(user.baseURL).host, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.M11B25)
             }
 
         }
@@ -70,28 +75,19 @@ fun ProfileInfo() {
                 ) {
                     Image(
                         modifier = Modifier.size(20.dp),
-                        painter = painterResource(id = R.drawable.brush),
+                        painter = painterResource(id = R.drawable.pencil),
                         contentDescription = "",
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.tint(Black95),
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Box(
-                    modifier = Modifier.size(30.dp)
-                        .clip(RoundedCornerShape(99.dp))
-                        .background(Black04),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        modifier = Modifier.size(20.dp),
-                        painter = painterResource(id = R.drawable.brush),
-                        contentDescription = "",
-                        contentScale = ContentScale.Fit,
+                        contentScale = ContentScale.None,
                         colorFilter = ColorFilter.tint(Black95),
                     )
                 }
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewProfileInfo() {
+    ProfileInfo(user = User.EMPTY.copy(username = "Bigp", baseURL = "https://miniflux.com"))
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,12 +52,14 @@ object ProfileScreen: Screen {
             Box(
                 modifier = Modifier.padding(paddingValues).fillMaxSize()
             ) {
-                Column {
-                    ProfileInfo()
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    ProfileInfo(user = state.user)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
-                    ObCard(horizontal = 16.dp) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ObCard {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
                             trailing = state.user.unreadMark.value
@@ -75,6 +78,15 @@ object ProfileScreen: Screen {
                         ListTileChevronUpDown(
                             title = "根文件夹", icon = R.drawable.folder_1,
                             trailing = state.rootFolder.title
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Card(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        ObTextButton(
+                            "清除数据",
+                            onClick = { model.deleteLocalData() }
                         )
                     }
 

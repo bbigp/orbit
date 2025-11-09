@@ -24,6 +24,10 @@ class FeedMapper @Inject constructor(
         dao.getFeeds().map { it.to() }
     }
 
+    suspend fun clearAll() {
+        dao.clearAll()
+    }
+
     suspend fun batchSave(feeds: List<Feed>) = withContext(Dispatchers.IO) {
         val sql = """
             INSERT INTO feeds (id, user_id, feed_url, site_url, title, 
@@ -58,5 +62,9 @@ class FeedMapper @Inject constructor(
 interface RFeedDao {
 
     @Query("select * from feeds")
-    suspend fun getFeeds(): List<FeedEntity>;
+    suspend fun getFeeds(): List<FeedEntity>
+
+    @Query("delete from feeds")
+    suspend fun clearAll()
+
 }

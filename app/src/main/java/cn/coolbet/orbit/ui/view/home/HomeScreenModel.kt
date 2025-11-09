@@ -3,7 +3,7 @@ package cn.coolbet.orbit.ui.view.home
 import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cn.coolbet.orbit.MemoryStore
+import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class HomeScreenModel @Inject constructor(
-    memoryStore: MemoryStore
+    cacheStore: CacheStore
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(HomeScreenState())
@@ -25,8 +25,8 @@ class HomeScreenModel @Inject constructor(
 
     init {
         Log.d("HomeViewModel", "ViewModel initialized.")
-        val feedsFlow = memoryStore.allFeeds()
-        val foldersFlow = memoryStore.allFolders()
+        val feedsFlow = cacheStore.allFeeds()
+        val foldersFlow = cacheStore.allFolders()
 
         combine(feedsFlow, foldersFlow) { feeds, folders ->
             Pair(feeds, folders)

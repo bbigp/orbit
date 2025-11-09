@@ -32,11 +32,18 @@ class FolderMapper @Inject constructor(
             db.openHelper.writableDatabase.execSQL(sql, args)
         }
     }
+
+    suspend fun clearAll() {
+        dao.clearAll()
+    }
 }
 
 @Dao
 interface RFolderDao {
 
     @Query("select * from folders order by id desc")
-    suspend fun getFolders(): List<FolderEntity>;
+    suspend fun getFolders(): List<FolderEntity>
+
+    @Query("delete from folders")
+    suspend fun clearAll()
 }

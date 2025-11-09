@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PreferenceManager @Inject constructor(
+class Preference @Inject constructor(
     @ApplicationContext private val context: Context,
     private val gson: Gson,
 ){
@@ -39,22 +39,16 @@ class PreferenceManager @Inject constructor(
         }
     }
 
-    fun userSetting(autoRead: Boolean = false): User {
+    fun userSetting(lastSyncProgress: Long? = null): User {
         val user = userProfile()
-        val newUser = user.copy(autoRead = autoRead)
+        val newUser = user.copy(
+            lastSyncProgress = lastSyncProgress ?: user.lastSyncProgress,
+        )
         saveUser(newUser)
         return newUser
     }
 
-    fun getBaseURL(): String {
-        return this.userProfile().baseURL
-    }
-
-    fun getAuthToken(): String {
-        return this.userProfile().authToken
-    }
-
-    fun clearSessionData() {
+    fun deleteUser() {
         sharedPreferences.edit().apply{
             remove(USER_KEY)
             commit()

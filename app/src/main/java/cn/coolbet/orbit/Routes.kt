@@ -13,20 +13,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-sealed class NavigationEvent {
-    data class Push(val route: Route): NavigationEvent()
-    data class ReplaceAll(val route: Route): NavigationEvent()
-    data class Replace(val route: Route): NavigationEvent()
-    object Pop: NavigationEvent()
-    data class PopUntil(val targetRoute: Route): NavigationEvent()
-}
-
 data class Route(val screen: Screen) {
     companion object {
         val Login = Route(screen = LoginScreen)
         val Home = Route(screen = HomeScreen)
         val Profile = Route(screen = ProfileScreen)
     }
+}
+
+sealed class NavigationEvent {
+    data class Push(val route: Route): NavigationEvent()
+    data class ReplaceAll(val route: Route): NavigationEvent()
+    data class Replace(val route: Route): NavigationEvent()
+    object Pop: NavigationEvent()
+    data class PopUntil(val targetRoute: Route): NavigationEvent()
 }
 
 @Composable

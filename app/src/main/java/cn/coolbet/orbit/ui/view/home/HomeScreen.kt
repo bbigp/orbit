@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
@@ -26,6 +27,7 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.ui.view.sync.SyncViewModel
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 val LocalListIsScrolling = compositionLocalOf { false }
@@ -37,6 +39,7 @@ object HomeScreen: Screen {
     override fun Content() {
         val viewModel = getScreenModel<HomeScreenModel>()
         val state by viewModel.uiState.collectAsState()
+        val syncViewModel: SyncViewModel = hiltViewModel()
         val lazyListState = rememberLazyListState()
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }

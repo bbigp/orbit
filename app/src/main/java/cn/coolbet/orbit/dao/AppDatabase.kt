@@ -9,6 +9,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.FolderEntity
+import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,13 +20,14 @@ import javax.inject.Singleton
 private const val DATABASE_NAME = "orbit_db"
 
 @Database(
-    entities = [FeedEntity::class, FolderEntity::class],
+    entities = [FeedEntity::class, FolderEntity::class, SyncTaskRecord::class],
     version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun rFeedDao(): RFeedDao
     abstract fun rFolderDao(): RFolderDao
+    abstract fun syncTaskRecordDao(): SyncTaskRecordDao
 }
 
 
@@ -50,6 +52,12 @@ object RoomModule {
     @Singleton
     fun provideRFolderDao(database: AppDatabase): RFolderDao {
         return database.rFolderDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSyncTaskRecordDao(database: AppDatabase): SyncTaskRecordDao {
+        return database.syncTaskRecordDao()
     }
 
     @Provides

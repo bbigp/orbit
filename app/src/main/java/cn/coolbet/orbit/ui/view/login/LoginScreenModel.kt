@@ -5,7 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.di.App
-import cn.coolbet.orbit.manager.SessionManager
+import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.remote.miniflux.MiniLoginApi
 import cn.coolbet.orbit.remote.miniflux.to
 import kotlinx.coroutines.delay
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class LoginScreenModel @Inject constructor(
     @App private val retrofit: Retrofit,
-    private val sessionManager: SessionManager,
+    private val session: Session,
 ): ScreenModel {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
@@ -44,7 +44,7 @@ class LoginScreenModel @Inject constructor(
                 val authToken = currentState.authToken
                 val user = loginApi.me(baseURL + "v1/me", authToken)
                     .to(baseURL, authToken)
-                sessionManager.startSession(user)
+                session.startSession(user)
                 NavigatorBus.replaceAll(Route.Home)
             } catch (e: Exception) {
 

@@ -1,12 +1,10 @@
-package cn.coolbet.orbit
+package cn.coolbet.orbit.manager
 
 import android.util.Log
 import cn.coolbet.orbit.dao.FeedMapper
 import cn.coolbet.orbit.dao.FolderMapper
-import cn.coolbet.orbit.manager.PreferenceManager
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
-import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,14 +21,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MemoryStore @Inject constructor(
+class CacheStore @Inject constructor(
     private val feedMapper: FeedMapper,
     private val folderMapper: FolderMapper,
-    private val preferenceManager: PreferenceManager,
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
-    private val _user = MutableStateFlow(User.EMPTY)
     private val mutex = Mutex()
 
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -38,17 +34,16 @@ class MemoryStore @Inject constructor(
 
     fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
     fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()
-    fun currentUser(): Flow<User> = _user.asStateFlow()
 
     fun feed(id: Long): Flow<Feed> {
         return _feeds.map { feeds ->
-            feeds.find { it.id == id } ?: Feed.EMPTY
+            feeds.find { it.id == id } ?: Feed.Companion.EMPTY
         }
     }
 
     fun folder(id: Long): Flow<Folder> {
         return _folders.map { folders ->
-            folders.find { it.id == id } ?: Folder.EMPTY
+            folders.find { it.id == id } ?: Folder.Companion.EMPTY
         }
     }
 
@@ -62,15 +57,13 @@ class MemoryStore @Inject constructor(
         }
     }
 
-    fun loadInitialData() {
+    fun loadInitialData(userId: Long) {
         currentLoadJob?.cancel()
         currentLoadJob = storeScope.launch {
-            val user = preferenceManager.userProfile()
-            if (user.isEmpty) {
+            if (userId == 0L) {
                 Log.i("store", "未登录，无法预加载")
                 return@launch
             }
-            _user.value = user
             _feeds.value = feedMapper.getFeeds()
             val folders = folderMapper.getFolders()
             _folders.value = associateFeedsWithFolders(_feeds.value, folders)
@@ -78,10 +71,15 @@ class MemoryStore @Inject constructor(
         }
     }
 
-    fun clear() {
+    fun clearCache() {
         _feeds.value = emptyList()
         _folders.value = emptyList()
-        _user.value = User.EMPTY
+    }
+
+    suspend fun deleteLocalData() {
+        feedMapper.clearAll()
+        folderMapper.clearAll()
+        clearCache()
     }
 
 

@@ -2,50 +2,47 @@ package cn.coolbet.orbit.ui.view.profile
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cn.coolbet.orbit.MemoryStore
+import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
-import cn.coolbet.orbit.manager.SessionManager
+import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileScreenModel @Inject constructor(
-    private val store: MemoryStore,
-    private val sessionManager: SessionManager,
+    private val store: CacheStore,
+    private val session: Session,
 ): ScreenModel {
 
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
 
     init {
-        store.currentUser()
-            .flatMapLatest { user ->
-                val rootFolderId = user.rootFolder
-                store.folder(rootFolderId).map { folder -> Pair(user, folder) }
-            }
-            .onStart {
-                _state.update { it.copy(isLoading = true) }
-            }
-            .onEach { (user, folder) ->
-                _state.update { it.copy(isLoading = false, user = user, rootFolder = folder) }
-            }
-            .launchIn(screenModelScope)
+        _state.update { it.copy(isLoading = true) }
+        val rootFolderId = session.user.rootFolder
+        store.folder(rootFolderId).onEach { folder ->
+            _state.update { it.copy(isLoading = false, user = session.user, rootFolder = folder) }
+        }.launchIn(screenModelScope)
     }
 
     fun logout() {
-        sessionManager.endSession()
+        session.endSession()
         NavigatorBus.replaceAll(Route.Login)
+    }
+
+    fun deleteLocalData() {
+        screenModelScope.launch {
+            store.deleteLocalData()
+        }
     }
 }
 

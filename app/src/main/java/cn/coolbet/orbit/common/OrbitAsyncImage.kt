@@ -1,7 +1,7 @@
 package cn.coolbet.orbit.common
 
 import android.util.Base64
-import cn.coolbet.orbit.remote.SessionAwareIconApi
+import cn.coolbet.orbit.remote.miniflux.MinIconFileApi
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.decode.DataSource
@@ -42,7 +42,7 @@ class MinifluxIconKeyer : Keyer<MinifluxIconURLModel> {
 data class MinifluxIconURLModel(val url: String)
 class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
     private val iconURL: MinifluxIconURLModel,
-    private val iconApi: SessionAwareIconApi,
+    private val iconApi: MinIconFileApi,
     private val diskCache: Lazy<DiskCache?>,
     private val options: Options,
 ) : Fetcher {
@@ -117,6 +117,7 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
         try {
             fileSystem.write(editor.metadata) {
                 this.writeUtf8(mimeType)
+                this.writeUtf8("\n")
             }
             fileSystem.write(editor.data) {
                 data.readAll(this)
@@ -149,7 +150,7 @@ class MinifluxIconFetcher @OptIn(ExperimentalCoilApi::class) constructor(
     private val fileSystem: FileSystem
         get() = diskCache.value?.fileSystem ?: options.fileSystem
 
-    class Factory(private val iconApi: SessionAwareIconApi) : Fetcher.Factory<MinifluxIconURLModel> {
+    class Factory(private val iconApi: MinIconFileApi) : Fetcher.Factory<MinifluxIconURLModel> {
         override fun create(data: MinifluxIconURLModel, options: Options, imageLoader: ImageLoader): Fetcher {
             return MinifluxIconFetcher(data, iconApi,
                 diskCache = lazy { imageLoader.diskCache }, options = options,

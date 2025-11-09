@@ -1,0 +1,44 @@
+package cn.coolbet.orbit.model.domain
+
+import java.util.Date
+
+data class Entry(
+    val id: Long,
+    val userId: Long,
+    val feedId: Long = 0,
+    val status: EntryStatus = EntryStatus.UNREAD,
+    val hash: String = "",
+    val title: String = "",
+    val url: String = "",
+    val publishedAt: Long = 0,
+    val content: String = "",
+    val author: String = "",
+    val starred: Boolean = false,
+    val readingTime: Int = 0,
+    val createdAt: Long = 0,
+    val changedAt: Long = 0,
+    val tags: List<String> = emptyList(),
+
+    val summary: String = "",
+    val readableContent: String = "",
+    val leadImageURL: String = "",
+
+    val feed: Feed = Feed.EMPTY,
+    val medias: List<Media> = emptyList(),
+) {
+    companion object {
+        val EMPTY = Entry(id = 0, userId = 0)
+    }
+
+    val isEmpty: Boolean get() = id == 0L
+    val isUnread: Boolean get() = status == EntryStatus.UNREAD
+    val pic: String get() {
+        if (leadImageURL.isNotEmpty()) return leadImageURL
+//        medias
+        return ""
+    }
+    val description: String get() {
+        return summary
+        //content remove html tag
+    }
+}

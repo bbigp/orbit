@@ -21,9 +21,9 @@ data class Folder (
     override val metaId: String get() = "o$id"
     override val siteURL: String get() = ""
     override val url: String = ""
-    val statuses: List<String> = if (onlyShowUnread) listOf(EntryStatus.UNREAD.status) else listOf(
-        EntryStatus.UNREAD.status,
-        EntryStatus.READ.status
+    val statuses: List<String> = if (onlyShowUnread) listOf(EntryStatus.UNREAD.valaue) else listOf(
+        EntryStatus.UNREAD.valaue,
+        EntryStatus.READ.valaue
     )
 }
 

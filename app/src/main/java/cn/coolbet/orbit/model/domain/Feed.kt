@@ -17,6 +17,8 @@ data class Feed(
     override val onlyShowUnread: Boolean = false,
     override val order: String = OrderPublishedAt,
     val iconURL: String = "",
+
+    val folder: Folder = Folder.EMPTY,
 ) : Meta {
 
     // 在 Kotlin 中可以作为 companion object 的常量或 object 实例
@@ -36,9 +38,9 @@ data class Feed(
     // List<String> get statuses => onlyShowUnread ? [EntryStatus.unread.name] : [EntryStatus.unread.name, EntryStatus.read.name];
     val statuses: List<String>
         get() = if (onlyShowUnread) {
-            listOf(EntryStatus.UNREAD.status)
+            listOf(EntryStatus.UNREAD.valaue)
         } else {
-            listOf(EntryStatus.UNREAD.status, EntryStatus.READ.status)
+            listOf(EntryStatus.UNREAD.valaue, EntryStatus.READ.valaue)
         }
 
     /**
