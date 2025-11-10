@@ -54,14 +54,16 @@ class SyncWorker @AssistedInject constructor(
             val lastExecuteTime = dao.getLastExecuteTime(userId)
             val differenceMillis = now - lastExecuteTime
             if (differenceMillis < DateUtils.HOUR_IN_MILLIS * 2) {
-                Log.i("sync", "同步跳过，上次任务执行时间 $lastExecuteTime, now $now")
+                Log.i("sync", "同步跳过，上次任务执行时间 $lastExecuteTime, now $now 时间间隔: ${(now - lastExecuteTime)/1000/60}分钟")
                 return
             }
         }
 
-        val lastSyncProgress =
+//        val lastSyncProgress =
             if (user.lastSyncProgress == 0L) System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 365
             else user.lastSyncProgress
+
+        val lastSyncProgress = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 365
 
         val taskId = dao.insert(SyncTaskRecord(
             executeTime = now, userId = userId, status = SyncTaskRecord.RUNNING
@@ -128,6 +130,7 @@ class SyncWorker @AssistedInject constructor(
                 if (!hasMore || reachedLastProgress) {
                     break
                 }
+                if (page > 10) break
                 page++
             }
         } catch (e: Exception) {

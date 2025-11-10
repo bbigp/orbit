@@ -23,14 +23,17 @@ class Session @Inject constructor(
     fun startSession(user: User? = null) {
         if (user == null) {
             _state.value = preference.userProfile()
+        } else {
+            user.let {
+                preference.saveUser(it)
+                _state.value = it
+            }
+        }
+        if (_state.value.isEmpty) {
             return
         }
-        user.let {
-            preference.saveUser(it)
-            _state.value = it
-        }
         Log.d("SessionManager", "会话启动，Retrofit 使用持久化 URL。")
-        store.loadInitialData(user.id)
+        store.loadInitialData(_state.value.id)
     }
 
     fun endSession() {

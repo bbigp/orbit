@@ -1,6 +1,7 @@
 package cn.coolbet.orbit
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import cn.coolbet.orbit.common.MinifluxIconFetcher
@@ -40,7 +41,10 @@ class OrbitApp : Application(), SingletonImageLoader.Factory, Configuration.Prov
     }
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+        get() {
+            Log.d("WorkConfig", "Using HiltWorkerFactory: $workerFactory")
+            return Configuration.Builder()
+                .setWorkerFactory(workerFactory)
+                .build()
+        }
 }

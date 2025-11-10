@@ -73,12 +73,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     // Hilt 核心依赖
     implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     // Hilt 注解处理器 (需要使用 kapt)
     kapt("com.google.dagger:hilt-compiler:2.51.1")
     // 针对 Compose Navigation 的集成 (您之前使用了 Compose)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // 如果您需要在 Activity/Fragment 中使用 Hilt，可能还需要以下依赖：
-    // kapt("androidx.hilt:hilt-compiler:1.2.0")
+     kapt("androidx.hilt:hilt-compiler:1.2.0")
     // Room 核心库和 KTX (协程支持)
     val roomVersion = "2.8.0" // 稳定版本，兼容 Kotlin 2.0.x
     implementation("androidx.room:room-runtime:${roomVersion}")
@@ -95,7 +96,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
     // 🚀 Hilt 集成，确保 ScreenModel 可以被 Hilt 注入
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
-    implementation("androidx.work:work-runtime-ktx:2.10.5")
+    implementation("androidx.work:work-runtime-ktx:2.11.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
 
     testImplementation(libs.junit)

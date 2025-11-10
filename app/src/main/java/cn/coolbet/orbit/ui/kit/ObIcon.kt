@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,15 +24,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.ui.theme.LightObitColors
-import cn.coolbet.orbit.ui.theme.LocalObitColors
 import cn.coolbet.orbit.ui.theme.ObTheme
-import cn.coolbet.orbit.ui.theme.OrbitTheme
 
 
 @Composable
 fun ObIcon(
     id: Int,
+    contentScale: ContentScale = ContentScale.Fit,
     color: Color = ObTheme.colors.primary,
     background: Color = ObTheme.colors.primaryContainer,
     onClick: () -> Unit = {}
@@ -46,7 +45,7 @@ fun ObIcon(
             modifier = Modifier.size(24.dp),
             painter = painterResource(id = id),
             contentDescription = "",
-            contentScale = ContentScale.Fit,
+            contentScale = contentScale,
             colorFilter = ColorFilter.tint(color),
         )
     }
@@ -61,25 +60,28 @@ data class ObIconItem(
 
 @Composable
 fun ObIconGroup(
-    items: List<ObIconItem>,
+//    items: List<ObIconItem>,
     color: Color = ObTheme.colors.primary,
     background: Color = ObTheme.colors.primaryContainer,
-    spacing: Dp = 16.dp
+    spacing: Dp = 16.dp,
+    content: @Composable RowScope.() -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 4.dp).height(28.dp),
         horizontalArrangement = Arrangement.spacedBy(spacing),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        items.forEach { item ->
-            ObIcon(
-                id = item.iconId,
-                onClick = item.onClick,
-                color = item.color ?: color,
-                background = item.background ?: background
-            )
-        }
-    }
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
+//    {
+//        items.forEach { item ->
+//            ObIcon(
+//                id = item.iconId,
+//                onClick = item.onClick,
+//                color = item.color ?: color,
+//                background = item.background ?: background
+//            )
+//        }
+//    }
 }
 
 
@@ -102,10 +104,10 @@ fun PreviewOrIcon() {
 fun PreviewOrIconGroup() {
     CompositionLocalProvider {
         Column {
-            ObIconGroup(items = listOf(
-                ObIconItem(iconId = R.drawable.add),
-                ObIconItem(iconId = R.drawable.page)
-            ))
+            ObIconGroup {
+                ObIcon(R.drawable.add)
+                ObIcon(R.drawable.page)
+            }
             Box(
                 modifier = Modifier.width((4+4+28+28+16).dp)
                     .height(10.dp).background(Color.Blue)

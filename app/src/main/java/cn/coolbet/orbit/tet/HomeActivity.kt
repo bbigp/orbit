@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import cn.coolbet.orbit.ui.theme.OrbitTheme
+import cn.coolbet.orbit.ui.view.AppLifecycleTracker
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

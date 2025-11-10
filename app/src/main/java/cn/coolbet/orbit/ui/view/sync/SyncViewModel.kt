@@ -1,39 +1,23 @@
 package cn.coolbet.orbit.ui.view.sync
 
-import android.content.Context
-import android.text.format.DateUtils
 import android.util.Log
-import androidx.hilt.work.HiltWorker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import cn.coolbet.orbit.dao.SyncTaskRecordDao
-import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.IGNORE_TIME_KEY
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.manager.SyncWorker
-import cn.coolbet.orbit.model.entity.SyncTaskRecord
-import dagger.Module
-import dagger.Provides
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
-import dagger.hilt.InstallIn
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-import javax.inject.Singleton
 
 private const val SYNC_WORK_TAG = "data_sync_on_home_entry_tag"
 
@@ -77,5 +61,6 @@ class SyncViewModel @Inject constructor(
             ExistingWorkPolicy.KEEP,
             syncRequest
         ).enqueue()
+        Log.i("sync", "同步结束")
     }
 }

@@ -23,6 +23,7 @@ import cn.coolbet.orbit.ui.theme.Black50
 
 @Composable
 fun ProgressIndicator(
+    id: Int = R.drawable.loading,
     size: Dp = 24.dp,
     color: Color = Black50,
 ) {
@@ -45,7 +46,7 @@ fun ProgressIndicator(
     )
 
     Image(
-        painter = painterResource(id = R.drawable.loading),
+        painter = painterResource(id = id),
         contentDescription = "Loading",
         colorFilter = ColorFilter.tint(color),
         contentScale = ContentScale.Fit,

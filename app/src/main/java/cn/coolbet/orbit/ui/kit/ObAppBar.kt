@@ -46,10 +46,10 @@ fun PreviewObTopAppbar(){
                 ObIcon(id = R.drawable.lines_3)
             },
             actions = {
-                ObIconGroup(items = listOf(
-                    ObIconItem(iconId = R.drawable.add),
-                    ObIconItem(iconId = R.drawable.page)
-                ))
+                ObIconGroup {
+                    ObIcon(id = R.drawable.add)
+                    ObIcon(id = R.drawable.page)
+                }
                 Box(modifier = Modifier.height(28.dp).width(28.dp).background(Color.Cyan))
             }
         )

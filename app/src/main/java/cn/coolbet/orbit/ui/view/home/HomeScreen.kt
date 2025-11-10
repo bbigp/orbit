@@ -15,8 +15,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
@@ -25,8 +27,8 @@ import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
-import cn.coolbet.orbit.ui.kit.ObIconItem
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.ui.kit.ProgressIndicator
 import cn.coolbet.orbit.ui.view.sync.SyncViewModel
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
@@ -40,6 +42,7 @@ object HomeScreen: Screen {
         val viewModel = getScreenModel<HomeScreenModel>()
         val state by viewModel.uiState.collectAsState()
         val syncViewModel: SyncViewModel = hiltViewModel()
+        val isSyncing by syncViewModel.isSyncing.collectAsStateWithLifecycle()
         val lazyListState = rememberLazyListState()
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
@@ -51,10 +54,17 @@ object HomeScreen: Screen {
                         ObIcon(id = R.drawable.lines_3, onClick = { NavigatorBus.push(Route.Profile) })
                     },
                     actions = {
-                        ObIconGroup(items = listOf(
-                            ObIconItem(iconId = R.drawable.sync),
-                            ObIconItem(iconId = R.drawable.add, onClick = { }),
-                        ))
+                        ObIconGroup {
+                            if (isSyncing)
+                                ProgressIndicator()
+                            else
+                                ObIcon(
+                                    id = R.drawable.sync,
+                                    contentScale = ContentScale.None,
+                                    onClick = { syncViewModel.syncData(ignoreLastSyncTime = true) }
+                                )
+                            ObIcon(id = R.drawable.add, onClick = { })
+                        }
                     }
                 )
             }
