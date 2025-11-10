@@ -1,31 +1,48 @@
 package cn.coolbet.orbit.manager
 
+import android.content.Context
 import android.text.format.DateUtils
 import android.util.Log
+import androidx.hilt.work.HiltWorker
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import cn.coolbet.orbit.dao.FeedMapper
 import cn.coolbet.orbit.dao.FolderMapper
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
-import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.Media
-import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import cn.coolbet.orbit.remote.EntryApi
-import javax.inject.Inject
-import javax.inject.Singleton
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-@Singleton
-class SyncTaskRecordManager @Inject constructor(
+
+const val IGNORE_TIME_KEY = "ignore_last_sync_time"
+const val FULL_RESYNC_KEY = "full_resync"
+
+@HiltWorker
+class SyncWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
     private val dao: SyncTaskRecordDao,
     private val entryApi: EntryApi,
     private val preference: Preference,
     private val feedMapper: FeedMapper,
     private val folderMapper: FolderMapper,
     private val cacheStore: CacheStore,
-) {
+) : CoroutineWorker(appContext, workerParams) {
 
-    suspend fun startTask(force: Boolean = false) {
+    override suspend fun doWork(): Result {
+        val ignoreLastSyncTime = inputData.getBoolean(IGNORE_TIME_KEY, false)
+        this.startTask(ignoreLastSyncTime)
+        // 如果同步失败，可以选择重试或直接失败
+        // 失败后重试 (Result.retry())
+        // 彻底失败 (Result.failure())
+        return Result.success()
+    }
+
+    suspend fun startTask(ignoreLastSyncTime: Boolean = false, fullResync: Boolean = false) {
         val user = preference.userProfile()
         if (user.isEmpty) {
             Log.i("sync", "未登录，无法同步")
@@ -33,7 +50,7 @@ class SyncTaskRecordManager @Inject constructor(
         }
         val userId = user.id
         val now = System.currentTimeMillis()
-        if (!force) {
+        if (!ignoreLastSyncTime) {
             val lastExecuteTime = dao.getLastExecuteTime(userId)
             val differenceMillis = now - lastExecuteTime
             if (differenceMillis < DateUtils.HOUR_IN_MILLIS * 2) {
@@ -53,8 +70,8 @@ class SyncTaskRecordManager @Inject constructor(
         val size = 25
         var page = 1
 
-        var from = 0L;
-        var to = 0L;
+        var from = 0L
+        var to = 0L
 
         var entryCount = 0
         var mediaCount = 0
@@ -127,7 +144,5 @@ class SyncTaskRecordManager @Inject constructor(
         }
         cacheStore.loadInitialData(userId)
     }
-
-
 
 }

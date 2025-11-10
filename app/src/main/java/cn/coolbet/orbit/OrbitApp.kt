@@ -1,6 +1,8 @@
 package cn.coolbet.orbit
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import cn.coolbet.orbit.common.MinifluxIconFetcher
 import cn.coolbet.orbit.common.MinifluxIconKeyer
 import cn.coolbet.orbit.common.MinifluxIconURLMapper
@@ -16,9 +18,10 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
-class OrbitApp : Application(), SingletonImageLoader.Factory {
+class OrbitApp : Application(), SingletonImageLoader.Factory, Configuration.Provider {
     @Inject lateinit var session: Session
     @Inject lateinit var minIconFileApi: MinIconFileApi
+    @Inject lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
@@ -35,4 +38,9 @@ class OrbitApp : Application(), SingletonImageLoader.Factory {
             .logger(DebugLogger(minLevel = Logger.Level.Debug))
             .build()
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

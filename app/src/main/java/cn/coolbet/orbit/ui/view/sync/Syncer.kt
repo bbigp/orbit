@@ -9,7 +9,7 @@ import androidx.lifecycle.repeatOnLifecycle
 
 
 @Composable
-fun Syncer(syncFun: suspend () -> Unit) {
+fun Syncer(syncFun: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -1,10 +1,13 @@
 package cn.coolbet.orbit.di
 
+import android.content.Context
+import androidx.work.WorkManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -22,6 +25,12 @@ object AppModule {
 //                UnreadMarkAdapter(UnreadMark::class.java, UnreadMark.NUMBER)
 //            )
             .create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
+        return WorkManager.getInstance(context)
     }
 
 }

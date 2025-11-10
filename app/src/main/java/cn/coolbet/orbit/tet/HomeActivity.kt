@@ -1,10 +1,12 @@
 package cn.coolbet.orbit.tet
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
+import cn.coolbet.orbit.ui.theme.OrbitTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,7 +19,13 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            SystemBarAppearance()
+            OrbitTheme {
+                SystemBarAppearance()
+                AppLifecycleTracker(syncAction = {
+                    // ⭐️ App 从后台回到前台时执行的同步操作
+                    Log.d("Lifecycle", "App is back to foreground! Performing sync.")
+                })
+            }
         }
     }
 }

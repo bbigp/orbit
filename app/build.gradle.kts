@@ -95,6 +95,8 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
     // 🚀 Hilt 集成，确保 ScreenModel 可以被 Hilt 注入
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
+    implementation("androidx.work:work-runtime-ktx:2.10.5")
+    implementation("androidx.hilt:hilt-work:1.2.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
