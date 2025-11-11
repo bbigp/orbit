@@ -61,7 +61,7 @@ object HomeScreen: Screen {
                                 ObIcon(
                                     id = R.drawable.sync,
                                     contentScale = ContentScale.None,
-                                    onClick = { syncViewModel.syncData(ignoreLastSyncTime = true) }
+                                    onClick = { syncViewModel.syncData(checkLastExecuteTime = false) }
                                 )
                             ObIcon(id = R.drawable.add, onClick = { })
                         }

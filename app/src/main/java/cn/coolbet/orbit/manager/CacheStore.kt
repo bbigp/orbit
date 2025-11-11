@@ -24,6 +24,8 @@ import javax.inject.Singleton
 class CacheStore @Inject constructor(
     private val feedMapper: FeedMapper,
     private val folderMapper: FolderMapper,
+    eventBus: EventBus,
+    appScope: CoroutineScope,
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
@@ -31,6 +33,12 @@ class CacheStore @Inject constructor(
 
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     @Volatile private var currentLoadJob: Job? = null
+
+    init {
+        eventBus.subscribe<Evt.CacheInvalidated>(appScope) { event ->
+            this.loadInitialData(event.userId)
+        }
+    }
 
     fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
     fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()

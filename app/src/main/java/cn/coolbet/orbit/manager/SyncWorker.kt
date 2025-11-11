@@ -30,19 +30,19 @@ class SyncWorker @AssistedInject constructor(
     private val preference: Preference,
     private val feedMapper: FeedMapper,
     private val folderMapper: FolderMapper,
-    private val cacheStore: CacheStore,
+    private val eventBus: EventBus,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val ignoreLastSyncTime = inputData.getBoolean(IGNORE_TIME_KEY, false)
-        this.startTask(ignoreLastSyncTime)
+//        val ignoreLastSyncTime = inputData.getBoolean(IGNORE_TIME_KEY, false)
+        this.startTask()
         // 如果同步失败，可以选择重试或直接失败
         // 失败后重试 (Result.retry())
         // 彻底失败 (Result.failure())
         return Result.success()
     }
 
-    suspend fun startTask(ignoreLastSyncTime: Boolean = false, fullResync: Boolean = false) {
+    suspend fun startTask(fullResync: Boolean = false) {
         val user = preference.userProfile()
         if (user.isEmpty) {
             Log.i("sync", "未登录，无法同步")
@@ -50,20 +50,11 @@ class SyncWorker @AssistedInject constructor(
         }
         val userId = user.id
         val now = System.currentTimeMillis()
-        if (!ignoreLastSyncTime) {
-            val lastExecuteTime = dao.getLastExecuteTime(userId)
-            val differenceMillis = now - lastExecuteTime
-            if (differenceMillis < DateUtils.HOUR_IN_MILLIS * 2) {
-                Log.i("sync", "同步跳过，上次任务执行时间 $lastExecuteTime, now $now 时间间隔: ${(now - lastExecuteTime)/1000/60}分钟")
-                return
-            }
-        }
+        val record = dao.getLastRecord(userId)
+        var lastSyncProgress =
+            record?.toTime ?: (now - DateUtils.DAY_IN_MILLIS * 365)
 
-//        val lastSyncProgress =
-            if (user.lastSyncProgress == 0L) System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 365
-            else user.lastSyncProgress
-
-        val lastSyncProgress = System.currentTimeMillis() - DateUtils.DAY_IN_MILLIS * 365
+        lastSyncProgress = now - DateUtils.DAY_IN_MILLIS * 365
 
         val taskId = dao.insert(SyncTaskRecord(
             executeTime = now, userId = userId, status = SyncTaskRecord.RUNNING
@@ -142,10 +133,9 @@ class SyncWorker @AssistedInject constructor(
                 fromTime = from, toTime = to, status = status, errorMsg = errorMsg,
                 id = taskId
             )
-            preference.userSetting(lastSyncProgress = to)
             Log.i("sync", "执行完毕: $row $taskId $status $errorMsg")
+            eventBus.post(Evt.CacheInvalidated(userId))
         }
-        cacheStore.loadInitialData(userId)
     }
 
 }

@@ -40,4 +40,9 @@ interface SyncTaskRecordDao {
     @Query("SELECT COALESCE(MAX(execute_time), 0) FROM sync_task_records where user_id = :userId")
     suspend fun getLastExecuteTime(userId: Long): Long
 
+    @Query("select * from sync_task_records " +
+            "where user_id = :userId and status in ('ok') " +
+            "order by id desc limit 1")
+    suspend fun getLastRecord(userId: Long): SyncTaskRecord?
+
 }

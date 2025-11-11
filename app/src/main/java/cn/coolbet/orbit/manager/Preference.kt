@@ -39,10 +39,10 @@ class Preference @Inject constructor(
         }
     }
 
-    fun userSetting(lastSyncProgress: Long? = null): User {
+    fun userSetting(): User {
         val user = userProfile()
         val newUser = user.copy(
-            lastSyncProgress = lastSyncProgress ?: user.lastSyncProgress,
+//            lastSyncProgress = lastSyncProgress ?: user.lastSyncProgress,
         )
         saveUser(newUser)
         return newUser

@@ -20,6 +20,10 @@ class Session @Inject constructor(
     val authToken: String get() = _state.value.authToken
     val baseURL: String get() = _state.value.baseURL
 
+    fun refreshSession(){
+        _state.value = preference.userProfile()
+    }
+
     fun startSession(user: User? = null) {
         if (user == null) {
             _state.value = preference.userProfile()
