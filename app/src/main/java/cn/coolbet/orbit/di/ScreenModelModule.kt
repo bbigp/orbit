@@ -5,6 +5,7 @@ import cafe.adriel.voyager.hilt.ScreenModelKey
 import cn.coolbet.orbit.ui.view.home.HomeScreenModel
 import cn.coolbet.orbit.ui.view.login.LoginScreenModel
 import cn.coolbet.orbit.ui.view.profile.ProfileScreenModel
+import cn.coolbet.orbit.ui.view.sync.SyncScreenModel
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -29,4 +30,10 @@ abstract class ScreenModelModule {
     @IntoMap
     @ScreenModelKey(LoginScreenModel::class)
     abstract fun bindLoginModel(loginScreenModel: LoginScreenModel): ScreenModel
+
+    @Binds
+    @IntoMap
+    @ScreenModelKey(SyncScreenModel::class)
+    abstract fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
+
 }

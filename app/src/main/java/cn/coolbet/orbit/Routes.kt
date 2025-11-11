@@ -8,6 +8,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.profile.ProfileScreen
+import cn.coolbet.orbit.ui.view.sync.SyncScreen
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +19,7 @@ data class Route(val screen: Screen) {
         val Login = Route(screen = LoginScreen)
         val Home = Route(screen = HomeScreen)
         val Profile = Route(screen = ProfileScreen)
+        val Sync = Route(screen = SyncScreen)
     }
 }
 

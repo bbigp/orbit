@@ -18,13 +18,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Dao
-interface SyncTaskRecordDao {
+abstract class SyncTaskRecordDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(record: SyncTaskRecord): Long
+    abstract suspend fun insert(record: SyncTaskRecord): Long
 
     @Query("select * from sync_task_records order by id desc limit :limit offset :offset")
-    suspend fun getList(limit: Int, offset :Int): List<SyncTaskRecord>
+    abstract suspend fun getList(limit: Int, offset :Int): List<SyncTaskRecord>
+
+    suspend fun getPage(page: Int, size: Int): List<SyncTaskRecord> {
+        return getList(size, (page - 1) * size)
+    }
 
     @Query("""
         update sync_task_records
@@ -33,16 +37,16 @@ interface SyncTaskRecordDao {
             status = :status, changed_at = unixepoch('now') * 1000
         where id = :id
     """)
-    suspend fun updateFinish(entry: Int, media: Int, feed: Int, folder: Int, errorMsg: String = "",
+    abstract suspend fun updateFinish(entry: Int, media: Int, feed: Int, folder: Int, errorMsg: String = "",
                              fromTime: Long, toTime: Long, status: String, id: Long): Int
 
 
     @Query("SELECT COALESCE(MAX(execute_time), 0) FROM sync_task_records where user_id = :userId")
-    suspend fun getLastExecuteTime(userId: Long): Long
+    abstract suspend fun getLastExecuteTime(userId: Long): Long
 
     @Query("select * from sync_task_records " +
             "where user_id = :userId and status in ('ok') " +
             "order by id desc limit 1")
-    suspend fun getLastRecord(userId: Long): SyncTaskRecord?
+    abstract suspend fun getLastRecord(userId: Long): SyncTaskRecord?
 
 }

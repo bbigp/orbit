@@ -13,8 +13,8 @@ import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import cn.coolbet.orbit.ui.theme.OrbitTheme
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
-import cn.coolbet.orbit.ui.view.sync.SyncViewModel
-import cn.coolbet.orbit.ui.view.sync.Syncer
+import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
+import cn.coolbet.orbit.ui.view.syncer.Syncer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

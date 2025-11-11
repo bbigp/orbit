@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.sync
+package cn.coolbet.orbit.ui.view.syncer
 
 import android.text.format.DateUtils
 import android.util.Log
@@ -9,9 +9,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
-import cn.coolbet.orbit.manager.IGNORE_TIME_KEY
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.manager.SyncWorker
 import dagger.hilt.android.lifecycle.HiltViewModel

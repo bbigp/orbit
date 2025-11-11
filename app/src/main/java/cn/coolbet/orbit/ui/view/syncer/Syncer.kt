@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.sync
+package cn.coolbet.orbit.ui.view.syncer
 
 import android.util.Log
 import androidx.compose.runtime.Composable

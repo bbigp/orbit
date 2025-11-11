@@ -25,6 +25,7 @@ val MonoFontFamily = FontFamily(
 
 @Immutable
 data class OrBitTypography(
+    val R11B25: TextStyle,
     val M11B25: TextStyle,
     val M11White00: TextStyle,
 
@@ -42,6 +43,7 @@ data class OrBitTypography(
 )
 
 val AppTypography = OrBitTypography(
+    R11B25 = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.W400, lineHeight = 13.sp, color = Black25, fontFamily = SansFontFamily),
     M11B25 = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.W500, lineHeight = 13.sp, color = Black25, fontFamily = SansFontFamily),
     M11White00 = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.W500, lineHeight = 13.sp, color = Color.White, fontFamily = SansFontFamily),
 

@@ -29,7 +29,7 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.ProgressIndicator
-import cn.coolbet.orbit.ui.view.sync.SyncViewModel
+import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 val LocalListIsScrolling = compositionLocalOf { false }
