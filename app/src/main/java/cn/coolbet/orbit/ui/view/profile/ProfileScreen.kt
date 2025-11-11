@@ -83,6 +83,12 @@ object ProfileScreen: Screen {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    ObCard {
+                        SyncSubscriptions("01:01")
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
                     Card(modifier = Modifier.padding(horizontal = 16.dp)) {
                         ObTextButton(
                             "清除数据",

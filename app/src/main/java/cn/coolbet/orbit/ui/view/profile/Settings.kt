@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black75
@@ -21,16 +23,18 @@ import cn.coolbet.orbit.ui.theme.Black75
 @Composable
 fun SyncSubscriptions(time: String) {
     Row(
-        modifier = Modifier.padding(horizontal = 12.dp).height(57.dp),
+        modifier = Modifier.padding(horizontal = 12.dp).height(49.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier = Modifier.weight(1f)
         ) {
             Text("Sync Subscriptions", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15)
-            Text("Last Synced $time", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R13B25)
+            Text("Last Synced $time", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R11B50)
         }
-        ObIcon(id = R.drawable.check_o, color = Black75, onClick = {})
+        ObIcon(id = R.drawable.check_o, color = Black75, onClick = {
+            NavigatorBus.push(Route.Sync)
+        })
     }
 }
 

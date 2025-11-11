@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.sync
 
+import android.util.Log
 import cn.coolbet.orbit.common.BasePagingScreenModel
 import cn.coolbet.orbit.common.PageState
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
@@ -11,8 +12,10 @@ class SyncScreenModel @Inject constructor(
 ): BasePagingScreenModel<SyncTaskRecord, Unit>(
     initialState = PageState(extra = Unit)
 ) {
+    init { loadInitialData() }
 
     override suspend fun fetchData(page: Int, size: Int): List<SyncTaskRecord> {
+        Log.i("syncRecord", "$page")
         return syncTaskRecordDao.getPage(page, size)
     }
 
