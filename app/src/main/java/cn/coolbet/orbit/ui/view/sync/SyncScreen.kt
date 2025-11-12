@@ -68,14 +68,26 @@ object SyncScreen: Screen {
     override fun Content() {
         val model = getScreenModel<SyncScreenModel>()
         val state by model.state.collectAsState()
+
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
+
         LaunchedEffect(listState) {
-            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
-                .distinctUntilChanged()
-                .filter { !state.isLoadingMore }
-                .collect {
-                    model.nextPage()
+            snapshotFlow { listState.layoutInfo }
+                .collect { layoutInfo ->
+                    if (!state.hasMore || state.isLoadingMore || state.isRefreshing || state.items.isEmpty()) return@collect
+
+                    val totalItemsCount = layoutInfo.totalItemsCount
+                    if (totalItemsCount == 0) return@collect
+
+                    // 获取最后一个完全可见/部分可见的项目索引
+                    val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                    if (lastVisibleItemIndex == null) return@collect
+
+                    val itemsRemaining = totalItemsCount - (lastVisibleItemIndex + 1) // 计算距离底部的剩余项目数
+                    if (itemsRemaining <= 5) {
+                        model.nextPage()
+                    }
                 }
         }
 
@@ -103,7 +115,7 @@ object SyncScreen: Screen {
                         animateFloatAsState(targetValue = thresholdPx, label = "refreshHeight").value
                     } else {
                         // 未刷新，高度跟随下拉距离
-                        pullState.distanceFraction
+                        pullState.distanceFraction * thresholdPx
                     }
 
                     // 只有当高度大于 0 时才渲染
@@ -157,7 +169,6 @@ fun RefreshIndicatorItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            // 关键：将高度设置为外部传入的动态高度
             .height(with(density) { itemHeightPx.toDp() }),
         contentAlignment = Alignment.Center
     ) {
