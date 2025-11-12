@@ -6,12 +6,12 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import cn.coolbet.orbit.dao.FeedMapper
-import cn.coolbet.orbit.dao.FolderMapper
+import cn.coolbet.orbit.dao.EntryDao
+import cn.coolbet.orbit.dao.FeedDao
+import cn.coolbet.orbit.dao.FolderDao
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
-import cn.coolbet.orbit.model.domain.Media
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import cn.coolbet.orbit.remote.EntryApi
 import dagger.assisted.Assisted
@@ -28,8 +28,9 @@ class SyncWorker @AssistedInject constructor(
     private val dao: SyncTaskRecordDao,
     private val entryApi: EntryApi,
     private val preference: Preference,
-    private val feedMapper: FeedMapper,
-    private val folderMapper: FolderMapper,
+    private val feedDao: FeedDao,
+    private val folderDao: FolderDao,
+    private val entryDao: EntryDao,
     private val eventBus: EventBus,
 ) : CoroutineWorker(appContext, workerParams) {
 
@@ -85,7 +86,6 @@ class SyncWorker @AssistedInject constructor(
                     to = listInfo.firstOrNull()?.changedAt ?: 0
                 }
 
-                val medias = mutableListOf<Media>()
                 val feeds = mutableListOf<Feed>()
                 val folders = mutableListOf<Folder>()
 
@@ -98,19 +98,16 @@ class SyncWorker @AssistedInject constructor(
                         folders.add(e.feed.folder)
                         seenFolderIds.add(e.feed.folderId)
                     }
-                    medias.addAll(e.medias)
+                    mediaCount += e.medias.size
                 }
-                //entry save
-                //media save
-                feedMapper.batchSave(feeds)
-                folderMapper.batchSave(folders)
+                entryDao.batchSave(listInfo)
+                feedDao.batchSave(feeds)
+                folderDao.batchSave(folders)
 
                 entryCount += listInfo.size
-                mediaCount += medias.size
                 feedCount += feeds.size
                 folderCount += folders.size
 
-                medias.clear()
                 feeds.clear()
                 folders.clear()
 

@@ -2,30 +2,17 @@ package cn.coolbet.orbit.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.RawQuery
-import androidx.room.Transaction
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.to
-import cn.coolbet.orbit.model.entity.toEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FeedMapper @Inject constructor(
-    private val dao: RFeedDao,
-    private val db: AppDatabase,
-) {
+@Dao
+abstract class FeedDao(private val db: AppDatabase) {
+
     suspend fun getFeeds(): List<Feed> = withContext(Dispatchers.IO) {
-        dao.getFeeds().map { it.to() }
-    }
-
-    suspend fun clearAll() {
-        dao.clearAll()
+        getFeedsImpl().map { it.to() }
     }
 
     suspend fun batchSave(feeds: List<Feed>) = withContext(Dispatchers.IO) {
@@ -56,15 +43,12 @@ class FeedMapper @Inject constructor(
             db.openHelper.writableDatabase.execSQL(sql, args)
         }
     }
-}
-
-@Dao
-interface RFeedDao {
-
-    @Query("select * from feeds")
-    suspend fun getFeeds(): List<FeedEntity>
 
     @Query("delete from feeds")
-    suspend fun clearAll()
+    abstract suspend fun clearAll()
+
+
+    @Query("select * from feeds")
+    internal abstract suspend fun getFeedsImpl(): List<FeedEntity>
 
 }

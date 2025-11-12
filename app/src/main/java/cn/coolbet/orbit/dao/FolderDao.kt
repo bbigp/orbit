@@ -7,18 +7,12 @@ import cn.coolbet.orbit.model.entity.FolderEntity
 import cn.coolbet.orbit.model.entity.to
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-
-@Singleton
-class FolderMapper @Inject constructor(
-    private val dao: RFolderDao,
-    private val db: AppDatabase,
-) {
+@Dao
+abstract class FolderDao(private val db: AppDatabase) {
 
     suspend fun getFolders(): List<Folder> = withContext(Dispatchers.IO) {
-        dao.getFolders().map { it.to() }
+        getFoldersImpl().map { it.to() }
     }
 
     suspend fun batchSave(items: List<Folder>) = withContext(Dispatchers.IO) {
@@ -33,17 +27,11 @@ class FolderMapper @Inject constructor(
         }
     }
 
-    suspend fun clearAll() {
-        dao.clearAll()
-    }
-}
+    @Query("delete from folders")
+    abstract suspend fun clearAll()
 
-@Dao
-interface RFolderDao {
+
 
     @Query("select * from folders order by id desc")
-    suspend fun getFolders(): List<FolderEntity>
-
-    @Query("delete from folders")
-    suspend fun clearAll()
+    internal abstract suspend fun getFoldersImpl(): List<FolderEntity>
 }

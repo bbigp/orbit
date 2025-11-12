@@ -1,8 +1,8 @@
 package cn.coolbet.orbit.manager
 
 import android.util.Log
-import cn.coolbet.orbit.dao.FeedMapper
-import cn.coolbet.orbit.dao.FolderMapper
+import cn.coolbet.orbit.dao.FeedDao
+import cn.coolbet.orbit.dao.FolderDao
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import kotlinx.coroutines.CoroutineScope
@@ -22,8 +22,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CacheStore @Inject constructor(
-    private val feedMapper: FeedMapper,
-    private val folderMapper: FolderMapper,
+    private val feedDao: FeedDao,
+    private val folderDao: FolderDao,
     eventBus: EventBus,
     appScope: CoroutineScope,
 ) {
@@ -72,8 +72,8 @@ class CacheStore @Inject constructor(
                 Log.i("store", "未登录，无法预加载")
                 return@launch
             }
-            _feeds.value = feedMapper.getFeeds()
-            val folders = folderMapper.getFolders()
+            _feeds.value = feedDao.getFeeds()
+            val folders = folderDao.getFolders()
             _folders.value = associateFeedsWithFolders(_feeds.value, folders)
             Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
         }
@@ -85,8 +85,8 @@ class CacheStore @Inject constructor(
     }
 
     suspend fun deleteLocalData() {
-        feedMapper.clearAll()
-        folderMapper.clearAll()
+        feedDao.clearAll()
+        folderDao.clearAll()
         clearCache()
     }
 

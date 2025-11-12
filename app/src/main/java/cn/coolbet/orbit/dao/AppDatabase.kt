@@ -25,8 +25,8 @@ private const val DATABASE_NAME = "orbit_db"
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun rFeedDao(): RFeedDao
-    abstract fun rFolderDao(): RFolderDao
+    abstract fun feedDao(): FeedDao
+    abstract fun folderDao(): FolderDao
     abstract fun syncTaskRecordDao(): SyncTaskRecordDao
 }
 
@@ -44,14 +44,14 @@ object RoomModule {
 
     @Provides
     @Singleton
-    fun provideRFeedDao(database: AppDatabase): RFeedDao {
-        return database.rFeedDao()
+    fun provideRFeedDao(database: AppDatabase): FeedDao {
+        return database.feedDao()
     }
 
     @Provides
     @Singleton
-    fun provideRFolderDao(database: AppDatabase): RFolderDao {
-        return database.rFolderDao()
+    fun provideRFolderDao(database: AppDatabase): FolderDao {
+        return database.folderDao()
     }
 
     @Provides
