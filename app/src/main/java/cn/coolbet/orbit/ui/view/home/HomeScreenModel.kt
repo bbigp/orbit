@@ -25,8 +25,8 @@ class HomeScreenModel @Inject constructor(
 
     init {
         Log.d("HomeViewModel", "ViewModel initialized.")
-        val feedsFlow = cacheStore.allFeeds()
-        val foldersFlow = cacheStore.allFolders()
+        val feedsFlow = cacheStore.flowAllFeeds()
+        val foldersFlow = cacheStore.flowAllFolders()
 
         combine(feedsFlow, foldersFlow) { feeds, folders ->
             Pair(feeds, folders)

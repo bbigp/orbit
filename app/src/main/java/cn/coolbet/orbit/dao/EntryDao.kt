@@ -5,17 +5,24 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
+import androidx.room.Query
 import androidx.room.Transaction
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.Media
+import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
+import cn.coolbet.orbit.model.entity.to
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Date
 
 @Dao
 abstract class EntryDao(private val db: AppDatabase) {
+
+    suspend fun getEntries(page: Int, size: Int): List<Entry> {
+        return getEntriesImpl().map { it.to() }
+    }
 
     @Transaction
     suspend fun batchSave(items: List<Entry>) = withContext(Dispatchers.IO) {
@@ -54,5 +61,10 @@ abstract class EntryDao(private val db: AppDatabase) {
         }
 
     }
+
+    @Query("delete from entries")
+    abstract suspend fun clearAll()
+
+    internal abstract suspend fun getEntriesImpl(): List<EntryEntity>
 
 }

@@ -29,7 +29,7 @@ class ProfileScreenModel @Inject constructor(
     init {
         _state.update { it.copy(isLoading = true) }
         val rootFolderId = session.user.rootFolder
-        store.folder(rootFolderId).onEach { folder ->
+        store.flowFolder(rootFolderId).onEach { folder ->
             _state.update { it.copy(isLoading = false, user = session.user, rootFolder = folder) }
         }.launchIn(screenModelScope)
     }

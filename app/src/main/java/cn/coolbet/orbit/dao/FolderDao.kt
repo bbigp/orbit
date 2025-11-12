@@ -11,8 +11,8 @@ import kotlinx.coroutines.withContext
 @Dao
 abstract class FolderDao(private val db: AppDatabase) {
 
-    suspend fun getFolders(): List<Folder> = withContext(Dispatchers.IO) {
-        getFoldersImpl().map { it.to() }
+    suspend fun getFolders(): List<Folder> {
+        return getFoldersImpl().map { it.to() }
     }
 
     suspend fun batchSave(items: List<Folder>) = withContext(Dispatchers.IO) {

@@ -11,8 +11,8 @@ import kotlinx.coroutines.withContext
 @Dao
 abstract class FeedDao(private val db: AppDatabase) {
 
-    suspend fun getFeeds(): List<Feed> = withContext(Dispatchers.IO) {
-        getFeedsImpl().map { it.to() }
+    suspend fun getFeeds(): List<Feed> {
+        return getFeedsImpl().map { it.to() }
     }
 
     suspend fun batchSave(feeds: List<Feed>) = withContext(Dispatchers.IO) {

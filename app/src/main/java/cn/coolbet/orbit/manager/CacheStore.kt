@@ -1,8 +1,10 @@
 package cn.coolbet.orbit.manager
 
 import android.util.Log
+import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.FeedDao
 import cn.coolbet.orbit.dao.FolderDao
+import cn.coolbet.orbit.dao.MediaDao
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +26,8 @@ import javax.inject.Singleton
 class CacheStore @Inject constructor(
     private val feedDao: FeedDao,
     private val folderDao: FolderDao,
+    private val entryDao: EntryDao,
+    private val mediaDao: MediaDao,
     eventBus: EventBus,
     appScope: CoroutineScope,
 ) {
@@ -40,18 +44,22 @@ class CacheStore @Inject constructor(
         }
     }
 
-    fun allFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
-    fun allFolders(): Flow<List<Folder>> = _folders.asStateFlow()
+    fun flowAllFeeds(): Flow<List<Feed>> = _feeds.asStateFlow()
+    fun flowAllFolders(): Flow<List<Folder>> = _folders.asStateFlow()
 
-    fun feed(id: Long): Flow<Feed> {
+    fun flowFeed(id: Long): Flow<Feed> {
         return _feeds.map { feeds ->
-            feeds.find { it.id == id } ?: Feed.Companion.EMPTY
+            feeds.find { it.id == id } ?: Feed.EMPTY
         }
     }
 
-    fun folder(id: Long): Flow<Folder> {
+    fun feed(id: Long): Feed {
+        return _feeds.value.find { it.id == id } ?: Feed.EMPTY
+    }
+
+    fun flowFolder(id: Long): Flow<Folder> {
         return _folders.map { folders ->
-            folders.find { it.id == id } ?: Folder.Companion.EMPTY
+            folders.find { it.id == id } ?: Folder.EMPTY
         }
     }
 
@@ -72,9 +80,11 @@ class CacheStore @Inject constructor(
                 Log.i("store", "未登录，无法预加载")
                 return@launch
             }
-            _feeds.value = feedDao.getFeeds()
+            val feeds = feedDao.getFeeds()
             val folders = folderDao.getFolders()
-            _folders.value = associateFeedsWithFolders(_feeds.value, folders)
+
+            _feeds.value = feeds
+            _folders.value = associateFeedsWithFolders(feeds, folders)
             Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
         }
     }
@@ -87,6 +97,8 @@ class CacheStore @Inject constructor(
     suspend fun deleteLocalData() {
         feedDao.clearAll()
         folderDao.clearAll()
+        entryDao.clearAll()
+        mediaDao.clearAll()
         clearCache()
     }
 
