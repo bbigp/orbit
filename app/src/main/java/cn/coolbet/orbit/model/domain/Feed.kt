@@ -38,9 +38,9 @@ data class Feed(
     // List<String> get statuses => onlyShowUnread ? [EntryStatus.unread.name] : [EntryStatus.unread.name, EntryStatus.read.name];
     val statuses: List<String>
         get() = if (onlyShowUnread) {
-            listOf(EntryStatus.UNREAD.valaue)
+            listOf(EntryStatus.UNREAD.value)
         } else {
-            listOf(EntryStatus.UNREAD.valaue, EntryStatus.READ.valaue)
+            listOf(EntryStatus.UNREAD.value, EntryStatus.READ.value)
         }
 
     /**
