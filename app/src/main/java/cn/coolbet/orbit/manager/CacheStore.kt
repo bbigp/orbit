@@ -33,6 +33,7 @@ class CacheStore @Inject constructor(
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
+    private val _unreadCountMap = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val mutex = Mutex()
 
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -82,9 +83,19 @@ class CacheStore @Inject constructor(
             }
             val feeds = feedDao.getFeeds()
             val folders = folderDao.getFolders()
-
             _feeds.value = feeds
             _folders.value = associateFeedsWithFolders(feeds, folders)
+
+
+            val feedUnreadCount = entryDao.countFeedUnread()
+            val unreadMap = feedUnreadCount.associate { unreadCount -> "e${unreadCount.feedId}" to unreadCount.count }.toMutableMap()
+            for (feed in feeds) {
+                val key = "o${feed.folderId}"
+                val oUnread = unreadMap.getOrElse(key, { 0 })
+                val eUnread = unreadMap.getOrElse("e${feed.id}", { 0 })
+                unreadMap[key] = oUnread + eUnread
+            }
+            _unreadCountMap.value = unreadMap
             Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
         }
     }

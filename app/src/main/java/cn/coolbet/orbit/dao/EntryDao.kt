@@ -10,6 +10,7 @@ import androidx.room.Transaction
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.Media
+import cn.coolbet.orbit.model.domain.UnreadCount
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import cn.coolbet.orbit.model.entity.to
@@ -64,6 +65,13 @@ abstract class EntryDao(private val db: AppDatabase) {
 
     @Query("delete from entries")
     abstract suspend fun clearAll()
+
+    @Query("""
+        select feed_id, count(*) filter (where status = 'unread') as unread 
+        from entries
+        group by feed_id
+    """)
+    abstract suspend fun countFeedUnread(): List<UnreadCount>
 
     internal abstract suspend fun getEntriesImpl(): List<EntryEntity>
 
