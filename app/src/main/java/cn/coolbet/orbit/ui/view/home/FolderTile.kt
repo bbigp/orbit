@@ -104,7 +104,7 @@ fun FolderRow(folder: Folder) {
             style = AppTypography.R15,
         )
         Box(modifier = Modifier.width(12.dp))
-        CountBadge()
+        CountBadge(folder.metaId)
     }
 }
 

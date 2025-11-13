@@ -50,7 +50,7 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
                 style = AppTypography.R15,
             )
             Box(modifier = Modifier.width(12.dp))
-            CountBadge()
+            CountBadge(feed.metaId)
         }
         SpacerDivider(start = 80.dp, end = 16.dp)
     }

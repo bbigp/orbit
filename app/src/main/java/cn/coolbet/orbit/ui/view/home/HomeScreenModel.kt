@@ -4,8 +4,10 @@ import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
+import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
+import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,26 +19,27 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 class HomeScreenModel @Inject constructor(
-    cacheStore: CacheStore
+    cacheStore: CacheStore,
+    session: Session,
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(HomeScreenState())
     val uiState: StateFlow<HomeScreenState> = _uiState.asStateFlow()
 
+    val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
+    val userState: StateFlow<User> = session.state
+
     init {
         Log.d("HomeViewModel", "ViewModel initialized.")
-        val feedsFlow = cacheStore.flowAllFeeds()
-        val foldersFlow = cacheStore.flowAllFolders()
-
-        combine(feedsFlow, foldersFlow) { feeds, folders ->
-            Pair(feeds, folders)
+        combine(cacheStore.feedsState, cacheStore.foldersState, userState) { feeds, folders, user ->
+            CacheData(feeds, folders, user)  //Pair Triple
         }
         .onStart {
             _uiState.update { it.copy(isLoading = true) }
         }
-        .onEach { (feeds, folders) ->
-            val rootFolder  = 1L;
-            _uiState.update {
+        .onEach { (feeds, folders, user) ->
+            val rootFolder = user.rootFolder
+            _uiState.update { it ->
                 it.copy(isLoading = false,
                     feeds = feeds.asSequence().filter { it.folderId == rootFolder }.toList(),
                     folders = folders.asSequence().filter { it.id != rootFolder }.toList()
@@ -61,6 +64,12 @@ class HomeScreenModel @Inject constructor(
     }
 
 }
+
+data class CacheData(
+    val feeds: List<Feed>,
+    val folders: List<Folder>,
+    val user: User
+)
 
 data class HomeScreenState (
     val feeds: List<Feed> = emptyList(),

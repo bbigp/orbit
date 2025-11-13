@@ -11,7 +11,7 @@ data class User(
     val autoRead: Boolean = false,
     val unreadMark: UnreadMark = UnreadMark.NUMBER,
     val openContent: OpenContentWith = OpenContentWith.READER_VIEW,
-    val rootFolder: Long = 0,
+    val rootFolder: Long = 1,
 ) {
 
     val isEmpty: Boolean get() = id == 0L

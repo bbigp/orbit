@@ -17,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -24,6 +26,8 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
+import cn.coolbet.orbit.model.domain.UnreadMark
+import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
@@ -33,16 +37,22 @@ import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 val LocalListIsScrolling = compositionLocalOf { false }
+val LocalUnreadState = compositionLocalOf<State<Map<String, Int>>> { mutableStateOf(emptyMap()) }
+val LocalUserState = compositionLocalOf<State<User>> { mutableStateOf(User.EMPTY) }
 
 object HomeScreen: Screen {
     private fun readResolve(): Any = HomeScreen
 
     @Composable
     override fun Content() {
-        val viewModel = getScreenModel<HomeScreenModel>()
-        val state by viewModel.uiState.collectAsState()
+        val model = getScreenModel<HomeScreenModel>()
+        val state by model.uiState.collectAsState()
+        val unreadState = model.unreadMapState.collectAsState()
+        val userState = model.userState.collectAsState()
+
         val syncViewModel: SyncViewModel = hiltViewModel()
         val isSyncing by syncViewModel.isSyncing.collectAsStateWithLifecycle()
+
         val lazyListState = rememberLazyListState()
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
@@ -71,6 +81,8 @@ object HomeScreen: Screen {
         ) { paddingValues ->
             CompositionLocalProvider(
                 LocalOverscrollFactory provides null,
+                LocalUnreadState provides unreadState,
+                LocalUserState provides userState,
 //                LocalListIsScrolling provides isScrolling
             ) {
                 LazyColumn(
@@ -80,7 +92,7 @@ object HomeScreen: Screen {
                     item { LabelTile("订阅源") }
                     items(state.folders, key = { it.metaId }) { item ->
                         CompositionLocalProvider(
-                            LocalExpandFolder provides viewModel::toggleExpanded,
+                            LocalExpandFolder provides model::toggleExpanded,
                         ) {
                             FolderTile(item)
                         }

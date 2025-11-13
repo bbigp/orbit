@@ -3,6 +3,7 @@ package cn.coolbet.orbit.manager
 import android.util.Log
 import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,7 +15,7 @@ class Session @Inject constructor(
 ) {
 
     private val _state = MutableStateFlow(User.EMPTY)
-    val state = _state.asStateFlow()
+    val state: StateFlow<User> = _state.asStateFlow()
 
     val user: User get() = _state.value
     val authToken: String get() = _state.value.authToken
