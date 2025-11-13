@@ -30,7 +30,7 @@ fun SyncSubscriptions(time: String) {
             modifier = Modifier.weight(1f)
         ) {
             Text("Sync Subscriptions", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15)
-            Text("Last Synced $time", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R11B50)
+            Text("Last Synced $time", modifier = Modifier.padding(start = 1.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R11B50)
         }
         ObIcon(id = R.drawable.check_o, color = Black75, onClick = {
             NavigatorBus.push(Route.Sync)

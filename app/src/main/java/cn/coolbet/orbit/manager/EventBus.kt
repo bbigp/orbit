@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class EventBus @Inject constructor() {
 
-    private val _events = MutableSharedFlow<Evt>(replay = 0, extraBufferCapacity = 0)
+    private val _events = MutableSharedFlow<Evt>(replay = 1, extraBufferCapacity = 0)
     val events: SharedFlow<Evt> = _events.asSharedFlow()
 
     suspend fun emitEvent(event: Evt) {

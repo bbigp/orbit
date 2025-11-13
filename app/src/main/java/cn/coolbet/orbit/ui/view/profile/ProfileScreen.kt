@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -49,16 +50,36 @@ object ProfileScreen: Screen {
                 )
             }
         ) { paddingValues ->
-            Box(
-                modifier = Modifier.padding(paddingValues).fillMaxSize()
+            LazyColumn(
+                contentPadding = paddingValues,
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    ProfileInfo(user = state.user)
-                    Spacer(modifier = Modifier.height(16.dp))
+                item { ProfileInfo(user = state.user) }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                item {
+                    ObCard {
+                        SyncSubscriptions("01:01")
+                    }
+                }
+                item {  Spacer(modifier = Modifier.height(24.dp)) }
+                item {
+                    ObCard {
+                        SyncSubscriptions("01:01")
+                    }
+                }
+                item {  Spacer(modifier = Modifier.height(24.dp)) }
+                item {
+                    ObCard {
+                        SyncSubscriptions("01:01")
+                    }
+                }
+                item {  Spacer(modifier = Modifier.height(24.dp)) }
+
+
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+                item {
                     ObCard {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
@@ -80,25 +101,27 @@ object ProfileScreen: Screen {
                             trailing = state.rootFolder.title
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
+                }
+                item {  Spacer(modifier = Modifier.height(24.dp)) }
+                item {
                     ObCard {
                         SyncSubscriptions("01:01")
                     }
+                }
+                item {  Spacer(modifier = Modifier.height(24.dp)) }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
+                item {
                     Card(modifier = Modifier.padding(horizontal = 16.dp)) {
                         ObTextButton(
                             "清除数据",
                             onClick = { model.deleteLocalData() }
                         )
                     }
-
+                }
+                item {
                     ObTextButton(
                         "退出登录",
-                        colors = OButtonDefaults.danger,
+                        colors = OButtonDefaults.dangerGhost,
                         onClick = { model.logout() }
                     )
                 }

@@ -52,6 +52,7 @@ class CacheStore @Inject constructor(
 
     init {
         eventBus.subscribe<Evt.CacheInvalidated>(appScope) { event ->
+            Log.i("eventbus", "刷新缓存")
             this.loadInitialData(event.userId)
         }
     }

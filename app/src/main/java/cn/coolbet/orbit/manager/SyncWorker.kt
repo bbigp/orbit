@@ -131,7 +131,8 @@ class SyncWorker @AssistedInject constructor(
                 id = taskId
             )
             Log.i("sync", "执行完毕: $row $taskId $status $errorMsg")
-            eventBus.post(Evt.CacheInvalidated(userId))
+            val result = eventBus.post(Evt.CacheInvalidated(userId))
+            Log.i("eventbus", "缓存失效事件发送 $result")
         }
     }
 
