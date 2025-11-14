@@ -25,6 +25,7 @@ import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObCard
+import cn.coolbet.orbit.ui.kit.ObDropdownMenuItem
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.kit.SystemBarStyleModern
@@ -38,6 +39,12 @@ object ProfileScreen: Screen {
         val model = getScreenModel<ProfileScreenModel>()
         val state by model.state.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
+
+        val unreadMarkMenus: @Composable () -> Unit = {
+            ObDropdownMenuItem(text = "None", trailingIcon = R.drawable.ban)
+            ObDropdownMenuItem(text = "Dot", trailingIcon = R.drawable.dot_m)
+            ObDropdownMenuItem(text = "Number", trailingIcon = R.drawable.notification_num)
+        }
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
         Scaffold (
@@ -83,7 +90,8 @@ object ProfileScreen: Screen {
                     ObCard {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
-                            trailing = state.user.unreadMark.value
+                            trailing = state.user.unreadMark.value,
+                            menuContent = unreadMarkMenus
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
@@ -129,6 +137,8 @@ object ProfileScreen: Screen {
         }
 
     }
+
+
 }
 
 

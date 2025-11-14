@@ -3,6 +3,7 @@ package cn.coolbet.orbit.ui.kit
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,23 +55,18 @@ import cn.coolbet.orbit.ui.theme.ObTheme
 //trailingContent trailing 右侧
 
 // 定义菜单的最大宽度，防止菜单过宽超出屏幕
-const val MAX_MENU_WIDTH_DP = 280
+const val MAX_MENU_WIDTH_DP = 240
+
+// 2. 测量菜单内容的 Composable 块
+val menuContent: @Composable () -> Unit = {
+    // 使用实际的菜单内容来测量宽度
+    DropdownMenuItem(text = { Text("选项一") }, onClick = {})
+    DropdownMenuItem(text = { Text("选项二很长很长") }, onClick = {})
+}
+
 @Composable
-fun ListTileChevronUpDown(
-    title: String, trailing: String, icon: Int,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var anchorSize by remember { mutableStateOf(IntSize.Zero) }
-    // 1. 存储测量到的菜单内容宽度 (像素值)
-    var menuContentWidth by remember { mutableStateOf(0) }
-
-    // 2. 测量菜单内容的 Composable 块
-    val menuContent: @Composable () -> Unit = {
-        // 使用实际的菜单内容来测量宽度
-        DropdownMenuItem(text = { Text("选项一") }, onClick = {})
-        DropdownMenuItem(text = { Text("选项二很长很长") }, onClick = {})
-    }
-
+fun MeasureView() {
+    var menuContentWidth by remember { mutableIntStateOf(0) } // 1. 存储测量到的菜单内容宽度 (像素值)
     // --- 测量菜单宽度的 SubcomposeLayout ---
     SubcomposeLayout(
         modifier = Modifier.wrapContentSize(Alignment.TopEnd) // 保持右侧对齐
@@ -88,36 +85,66 @@ fun ListTileChevronUpDown(
         // 由于 SubcomposeLayout 在这里只用于测量，我们返回一个空的布局
         layout(0, 0) {}
     }
+}
 
-    val ddd = LocalDensity.current
+@Composable
+fun ListTileChevronUpDown(
+    title: String, trailing: String, icon: Int,
+    menuContent: @Composable () -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var anchorSize by remember { mutableStateOf(IntSize.Zero) }
+    var menuContentWidth by remember { mutableIntStateOf(240) }
+    val interactionSource = remember { MutableInteractionSource() }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(ObTheme.colors.primaryContainer)
-            .padding(start = 16.dp, end = 12.dp)
-            .clickable(onClick = { expanded = true }),
+            .clickable(
+                indication = null,
+                interactionSource = interactionSource,
+                onClick = { expanded = !expanded }
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // ... (左侧内容) ...
-        Text(title, style = AppTypography.R15, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(16.dp))
+        Image(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = icon),
+            contentDescription = "",
+            contentScale = ContentScale.Fit,
+            colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = AppTypography.R15,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(16.dp)) // 12 + 4
 
         // --- 关键区域：局部 Box 锚点 ---
         Box(
             // 关键：在这里测量 Box 的尺寸
             modifier = Modifier
+                .fillMaxHeight()
                 .wrapContentSize(Alignment.TopEnd)
                 .onSizeChanged { anchorSize = it } // 记录锚点 Box 的实际尺寸
         ) {
             // 1. 锚点内容（右侧的 Text 和 Image）
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(trailing, style = AppTypography.R15B50)
-                Spacer(modifier = Modifier.width(4.dp))
+            Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
+                Text(trailing, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15B50)
+                Spacer(modifier = Modifier.width(4.dp)) //4 + 4
                 Image(
                     modifier = Modifier.size(20.dp),
                     painter = painterResource(id = R.drawable.chevron_up_down),
                     contentDescription = "",
+                    contentScale = ContentScale.Inside,
+                    colorFilter = ColorFilter.tint(ObTheme.colors.tertiary),
                 )
             }
 
@@ -125,8 +152,7 @@ fun ListTileChevronUpDown(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                // 响应式偏移计算
-                modifier = Modifier.offset {
+                modifier = Modifier.offset { // 响应式偏移计算
                     // X_offset = 锚点 Box 宽度 - 菜单实际宽度 (测量值)
                     // 这个计算确保菜单的右边缘对齐到锚点 Box 的右边缘
                     val horizontalOffset = anchorSize.width - menuContentWidth
@@ -136,45 +162,8 @@ fun ListTileChevronUpDown(
                 menuContent()
             }
         }
+        Spacer(modifier = Modifier.width(12.dp))
     }
-//    Row (
-//        modifier = Modifier.fillMaxWidth().height(48.dp)
-//            .background(ObTheme.colors.primaryContainer)
-//            .padding(start = 16.dp, end = 12.dp).clickable(onClick = {
-//                expanded = true
-//            }),
-//        verticalAlignment = Alignment.CenterVertically,
-//    ) {
-//        Image(
-//            modifier = Modifier.size(24.dp),
-//            painter = painterResource(id = icon),
-//            contentDescription = "",
-//            contentScale = ContentScale.Fit,
-//            colorFilter = ColorFilter.tint(ObTheme.colors.secondary),
-//        )
-//        Spacer(modifier = Modifier.width(12.dp))
-//        Text(
-//            title,
-//            maxLines = 1,
-//            overflow = TextOverflow.Ellipsis,
-//            style = AppTypography.R15,
-//            modifier = Modifier.weight(1f)
-//        )
-//
-//        Spacer(modifier = Modifier.width(16.dp)) // 12 + 4
-//        Text(trailing, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15B50,
-//
-//            )
-//        Spacer(modifier = Modifier.width(4.dp)) //4 + 4
-//
-//        Image(
-//            modifier = Modifier.size(20.dp),
-//            painter = painterResource(id = R.drawable.chevron_up_down),
-//            contentDescription = "",
-//            contentScale = ContentScale.Inside,
-//            colorFilter = ColorFilter.tint(ObTheme.colors.tertiary),
-//        )
-//    }
 }
 
 
