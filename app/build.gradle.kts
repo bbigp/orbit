@@ -73,6 +73,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     // Hilt 核心依赖
     implementation("com.google.dagger:hilt-android:2.51.1")
+    implementation(libs.androidx.compose.ui.unit)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     // Hilt 注解处理器 (需要使用 kapt)
     kapt("com.google.dagger:hilt-compiler:2.51.1")

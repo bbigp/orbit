@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
@@ -43,7 +44,7 @@ object ProfileScreen: Screen {
         val unreadMarkMenus: @Composable () -> Unit = {
             ObDropdownMenuItem(text = "None", trailingIcon = R.drawable.ban)
             ObDropdownMenuItem(text = "Dot", trailingIcon = R.drawable.dot_m)
-            ObDropdownMenuItem(text = "Number", trailingIcon = R.drawable.notification_num)
+            ObDropdownMenuItem(text = "Number", trailingIcon = R.drawable.notification_num, leadingIcon = R.drawable.check)
         }
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
@@ -64,7 +65,30 @@ object ProfileScreen: Screen {
                 item { ProfileInfo(user = state.user) }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
-
+                item {
+                    ObCard {
+                        ListTileChevronUpDown(
+                            title = "未读标记", icon = R.drawable.unread_dashed,
+                            trailing = state.user.unreadMark.value,
+                            menuContent = unreadMarkMenus
+                        )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileChevronUpDown(
+                            title = "默认打开方式", icon = R.drawable.page,
+                            trailing = "内置阅读器"
+                        )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileSwitch(
+                            title = "自动已读", icon = R.drawable.check_o,
+                            checked = state.user.autoRead
+                        )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileChevronUpDown(
+                            title = "根文件夹", icon = R.drawable.folder_1,
+                            trailing = state.rootFolder.title
+                        )
+                    }
+                }
                 item {
                     ObCard {
                         SyncSubscriptions("01:01")
