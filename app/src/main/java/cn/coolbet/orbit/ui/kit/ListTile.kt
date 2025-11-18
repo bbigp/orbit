@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.kit
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,12 +26,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,6 +58,7 @@ import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black50
 import cn.coolbet.orbit.ui.theme.ObTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 //headlineContent  title  主标题
@@ -96,6 +100,7 @@ fun MeasureView() {
     }
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun ListTileChevronUpDown(
     title: String, trailing: String, icon: Int,
@@ -106,30 +111,38 @@ fun ListTileChevronUpDown(
     var menuContentWidth by remember { mutableIntStateOf(240) }
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
+    var isClickDisabled by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        // 监听 showPopup 状态流
+        snapshotFlow { expanded }
+            // 过滤：我们只关心状态从 true 变为 false (即弹窗被关闭) 的情况
+            .filter { !it }
+            .collect {
+                // 当 showPopup 刚刚变为 false 时：
+
+                // 1. 立即禁用 Row 的点击
+                isClickDisabled = true
+
+                // 2. 引入一个短暂延迟，以确保 Row 的 clickable 在状态改变后立即执行时被忽略
+                delay(100)
+
+                // 3. 延迟结束后，解除点击禁用
+                isClickDisabled = false
+            }
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(ObTheme.colors.primaryContainer)
-            .clickable{
-                scope.launch {
-                    if (!expanded) {
-                        expanded = true
-                    } else {
-                        expanded = false
-                        delay(50)
-                    }
-                    val targetState = !expanded
-                    expanded = targetState
-
-                    if (!targetState) {
-                        // 如果我们正在关闭，等待一个极小的时间，让事件穿透和处理完成。
-                        // 这样可以避免在 onDismissRequest 将其关闭后，Row 的 clickable
-                        // 紧接着将其打开。
-                        delay(10) // 只需要一个极小的延迟
-                    }
-                }
+            .clickable(
+                enabled = !isClickDisabled,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ){
+                expanded = !expanded
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
