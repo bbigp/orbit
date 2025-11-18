@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.kit
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -40,19 +40,18 @@ import kotlinx.coroutines.flow.filter
 @Composable
 fun ListTileChevronUpDown(
     title: String, trailing: String, icon: Int,
-    menuContent: @Composable () -> Unit = {}
+    menuContent: @Composable (onClose: () -> Unit) -> Unit = {}
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val expandedState = remember { MutableTransitionState(false) }
+    val closeMenu = { expandedState.targetState = false }
     var isClickDisabled by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        snapshotFlow { expanded }
-            .filter { !it }
-            .collect {
-                isClickDisabled = true
-                delay(100) // 2. 引入一个短暂延迟，以确保 Row 的 clickable 在状态改变后立即执行时被忽略
-                isClickDisabled = false
-            }
+    LaunchedEffect(expandedState.targetState) {
+        if (!expandedState.targetState) {
+            isClickDisabled = true
+            delay(100) // 2. 引入一个短暂延迟，以确保 Row 的 clickable 在状态改变后立即执行时被忽略
+            isClickDisabled = false
+        }
     }
 
     Row(
@@ -65,7 +64,7 @@ fun ListTileChevronUpDown(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ){
-                expanded = !expanded
+                expandedState.targetState = !expandedState.targetState
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -109,11 +108,11 @@ fun ListTileChevronUpDown(
             }
 
             ObDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+                expandedState = expandedState,
+                onDismissRequest = closeMenu,
             ) {
                 Column {
-                    menuContent()
+                    menuContent(closeMenu)
                 }
             }
         }

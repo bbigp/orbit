@@ -52,7 +52,7 @@ fun CountBadge(metaId: String) {
                 modifier = Modifier.size(5.dp),
                 painter = painterResource(id = R.drawable.badge_dot),
                 contentDescription = "",
-                contentScale = ContentScale.None,
+                contentScale = ContentScale.Fit,
             )
         }
     }

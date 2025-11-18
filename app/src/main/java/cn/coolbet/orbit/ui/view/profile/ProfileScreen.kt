@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,9 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.model.domain.OpenContentWith
+import cn.coolbet.orbit.model.domain.UnreadMark
+import cn.coolbet.orbit.ui.kit.DropdownMenuDivider
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
@@ -41,10 +45,36 @@ object ProfileScreen: Screen {
         val state by model.state.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
-        val unreadMarkMenus: @Composable () -> Unit = {
-            ObDropdownMenuItem(text = "None", trailingIcon = R.drawable.ban)
-            ObDropdownMenuItem(text = "Dot", trailingIcon = R.drawable.dot_m)
-            ObDropdownMenuItem(text = "Number", trailingIcon = R.drawable.notification_num, leadingIcon = R.drawable.check)
+        val unreadMarkMenus: @Composable (onClose: () -> Unit) -> Unit = { onClose ->
+            UnreadMark.entries.forEachIndexed { index, mark ->
+                ObDropdownMenuItem(
+                    text = mark.value, trailingIcon = mark.trailingIconRes,
+                    leadingIcon = if (state.user.unreadMark == mark) R.drawable.check else null,
+                    onClick = {
+                        model.changeUser(unreadMark = mark)
+                        onClose()
+                    }
+                )
+                if (index < UnreadMark.entries.lastIndex) {
+                    DropdownMenuDivider()
+                }
+            }
+        }
+
+        val openContentMenus: @Composable (onClose: () -> Unit) -> Unit = { onClose ->
+            OpenContentWith.entries.forEachIndexed { index, with ->
+                ObDropdownMenuItem(
+                    text = with.value,
+                    leadingIcon = if (state.user.openContent == with) R.drawable.check else null,
+                    onClick = {
+                        model.changeUser(openContent = with)
+                        onClose()
+                    }
+                )
+                if (index < OpenContentWith.entries.lastIndex) {
+                    DropdownMenuDivider()
+                }
+            }
         }
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
@@ -75,12 +105,16 @@ object ProfileScreen: Screen {
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
                             title = "默认打开方式", icon = R.drawable.page,
-                            trailing = "内置阅读器"
+                            trailing = state.user.openContent.value,
+                            menuContent = openContentMenus
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
                             title = "自动已读", icon = R.drawable.check_o,
-                            checked = state.user.autoRead
+                            checked = state.user.autoRead,
+                            onCheckedChange = { v->
+                                model.changeUser(autoRead = v)
+                            }
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
@@ -89,52 +123,7 @@ object ProfileScreen: Screen {
                         )
                     }
                 }
-                item {
-                    ObCard {
-                        SyncSubscriptions("01:01")
-                    }
-                }
-                item {  Spacer(modifier = Modifier.height(24.dp)) }
-                item {
-                    ObCard {
-                        SyncSubscriptions("01:01")
-                    }
-                }
-                item {  Spacer(modifier = Modifier.height(24.dp)) }
-                item {
-                    ObCard {
-                        SyncSubscriptions("01:01")
-                    }
-                }
-                item {  Spacer(modifier = Modifier.height(24.dp)) }
-
-
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-                item {
-                    ObCard {
-                        ListTileChevronUpDown(
-                            title = "未读标记", icon = R.drawable.unread_dashed,
-                            trailing = state.user.unreadMark.value,
-                            menuContent = unreadMarkMenus
-                        )
-                        SpacerDivider(start = 52.dp, end = 12.dp)
-                        ListTileChevronUpDown(
-                            title = "默认打开方式", icon = R.drawable.page,
-                            trailing = "内置阅读器"
-                        )
-                        SpacerDivider(start = 52.dp, end = 12.dp)
-                        ListTileSwitch(
-                            title = "自动已读", icon = R.drawable.check_o,
-                            checked = state.user.autoRead
-                        )
-                        SpacerDivider(start = 52.dp, end = 12.dp)
-                        ListTileChevronUpDown(
-                            title = "根文件夹", icon = R.drawable.folder_1,
-                            trailing = state.rootFolder.title
-                        )
-                    }
-                }
-                item {  Spacer(modifier = Modifier.height(24.dp)) }
+                item {  Spacer(modifier = Modifier.height(16.dp)) }
                 item {
                     ObCard {
                         SyncSubscriptions("01:01")

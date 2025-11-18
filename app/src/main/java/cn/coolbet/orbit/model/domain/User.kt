@@ -1,5 +1,7 @@
 package cn.coolbet.orbit.model.domain
 
+import androidx.annotation.DrawableRes
+import cn.coolbet.orbit.R
 import com.google.gson.annotations.SerializedName
 
 
@@ -23,10 +25,11 @@ data class User(
 }
 
 
-enum class UnreadMark(val value: String) {
-    @SerializedName("Number") NUMBER("Number"),
-    @SerializedName("Dot") DOT("Dot"),
-    @SerializedName("None") NONE("None");
+enum class UnreadMark(val value: String, @DrawableRes val trailingIconRes: Int) {
+    @SerializedName("None") NONE("None", R.drawable.ban),
+    @SerializedName("Dot") DOT("Dot", R.drawable.dot_m),
+    @SerializedName("Number") NUMBER("Number", R.drawable.notification_num),
+    ;
     companion object {
         fun fromValue(value: String?): UnreadMark =
             UnreadMark.entries.find { it.value == value } ?: NUMBER

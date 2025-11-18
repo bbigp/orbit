@@ -13,14 +13,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
 
-internal val MenuVerticalMargin = 48.dp
-private val MenuListItemContainerHeight = 48.dp
-private val DropdownMenuItemHorizontalPadding = 12.dp
-internal val DropdownMenuVerticalPadding = 8.dp
-private val DropdownMenuItemDefaultMinWidth = 112.dp
-private val DropdownMenuItemDefaultMaxWidth = 280.dp
-
-
 @Stable
 internal object MenuPosition {
     /**
@@ -171,7 +163,7 @@ internal object MenuPosition {
 internal data class ObDropdownPositionProvider(
     val contentOffset: DpOffset,
     val density: Density,
-    val verticalMargin: Int = with(density) { MenuVerticalMargin.roundToPx() },
+    val verticalMargin: Int = with(density) { 48.dp.roundToPx() },
     val onPositionCalculated: (anchorBounds: IntRect, menuBounds: IntRect) -> Unit = { _, _ -> }
 ) : PopupPositionProvider {
     // Horizontal position

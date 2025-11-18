@@ -2,6 +2,8 @@ package cn.coolbet.orbit.manager
 
 import android.annotation.SuppressLint
 import android.content.Context
+import cn.coolbet.orbit.model.domain.OpenContentWith
+import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.model.domain.User
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,10 +41,14 @@ class Preference @Inject constructor(
         }
     }
 
-    fun userSetting(): User {
+    fun userSetting(unreadMark: UnreadMark? = null, autoRead: Boolean? = null,
+        openContent: OpenContentWith? = null
+    ): User {
         val user = userProfile()
         val newUser = user.copy(
-//            lastSyncProgress = lastSyncProgress ?: user.lastSyncProgress,
+            unreadMark = unreadMark ?: user.unreadMark,
+            autoRead = autoRead ?: user.autoRead,
+            openContent = openContent ?: user.openContent,
         )
         saveUser(newUser)
         return newUser
