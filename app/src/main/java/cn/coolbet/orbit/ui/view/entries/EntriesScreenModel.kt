@@ -13,6 +13,10 @@ class EntriesScreenModel @Inject constructor(
     private val entryManager: EntryManager,
 ): BasePagingScreenModel<Entry, Unit>(initialState = PageState(extra = Unit)) {
 
+    init {
+        loadInitialData()
+    }
+
     override suspend fun fetchData(page: Int, size: Int): List<Entry> {
         return entryManager.getPage(page = page, size = size)
     }

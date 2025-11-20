@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.ui.view.entries.EntriesScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.profile.ProfileScreen
@@ -20,6 +21,7 @@ data class Route(val screen: Screen) {
         val Home = Route(screen = HomeScreen)
         val Profile = Route(screen = ProfileScreen)
         val Sync = Route(screen = SyncScreen)
+        val Entries = Route(screen = EntriesScreen)
     }
 }
 

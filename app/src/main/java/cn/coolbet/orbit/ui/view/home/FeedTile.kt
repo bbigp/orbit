@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.view.CountBadge
 import cn.coolbet.orbit.ui.view.FeedIcon
@@ -32,7 +35,12 @@ import cn.coolbet.orbit.ui.view.FeedIconSize
 
 @Composable
 fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
-    Column (modifier = Modifier.fillMaxWidth()){
+    Column (
+        modifier = Modifier.fillMaxWidth()
+            .clickable(
+                onClick = { NavigatorBus.push(Route.Entries) }
+            )
+    ){
         Row (
             modifier = Modifier.height(52.dp).fillMaxWidth()
                 .padding(start = 8.dp, end = 16.dp),

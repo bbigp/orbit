@@ -23,7 +23,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 
 
 @Composable
-fun EntriesTopTile(meta: Meta) {
+fun EntryTopTile(meta: Meta) {
     val unreadState = LocalUnreadState.current
     val unreadMap by unreadState
     val count = unreadMap[meta.metaId] ?: 0
@@ -63,8 +63,8 @@ fun PreviewEntriesTopTile() {
         LocalUnreadState provides mutableStateOf(unreadMap)
     ) {
         Column {
-            EntriesTopTile(meta)
-            EntriesTopTile(meta.copy(id = 1))
+            EntryTopTile(meta)
+            EntryTopTile(meta.copy(id = 1))
         }
     }
 }

@@ -49,7 +49,7 @@ import coil3.compose.SubcomposeAsyncImageContent
 fun EntryTile(entry: Entry) {
     Column {
         Spacer(modifier = Modifier.height(16.dp))
-        EntryTileTop(entry)
+        EntryTileTopRow(entry)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -136,7 +136,7 @@ fun Modifier.pulsatingShimmer(isLoading: Boolean): Modifier = composed {
 }
 
 @Composable
-fun EntryTileTop(entry: Entry){
+fun EntryTileTopRow(entry: Entry){
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
         FeedIcon(entry.feed.iconURL, entry.feed.title, size = FeedIconDefaults.SMALL)
@@ -168,7 +168,7 @@ fun PreviewEntryTile() {
         summary = "少数派的近期动态少数派11月主题征稿进行中：平台独占KillerApp、聊聊卫星通讯。投稿有奖励GAMEBABYforiPhone17系列现已上市。进一步了解《蓝皮书》系列新版上架，一起探索全新iOS ..."
     )
     Column {
-        EntryTileTop(entry)
+        EntryTileTopRow(entry)
         SpacerDivider()
         EntryTile(entry.copy(summary = "", leadImageURL = ""))
         SpacerDivider()
