@@ -34,13 +34,13 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filter
 
 @SuppressLint("RememberReturnType")
 @Composable
 fun ListTileChevronUpDown(
     title: String, trailing: String, icon: Int,
-    menuContent: @Composable (onClose: () -> Unit) -> Unit = {}
+    menuContent: @Composable (onClose: () -> Unit) -> Unit = {},
+    onClick: (() -> Unit)? = null
 ) {
     val expandedState = remember { MutableTransitionState(false) }
     val closeMenu = { expandedState.targetState = false }
@@ -53,6 +53,9 @@ fun ListTileChevronUpDown(
             isClickDisabled = false
         }
     }
+    val finalOnClick: (() -> Unit) = onClick ?: {
+        expandedState.targetState = !expandedState.targetState
+    }
 
     Row(
         modifier = Modifier
@@ -63,9 +66,8 @@ fun ListTileChevronUpDown(
                 enabled = !isClickDisabled,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-            ){
-                expandedState.targetState = !expandedState.targetState
-            },
+                onClick = finalOnClick
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(16.dp))

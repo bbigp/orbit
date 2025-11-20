@@ -36,6 +36,8 @@ class ProfileScreenModel @Inject constructor(
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
 
+    val folders = store.foldersState
+
     init {
         _state.update { it.copy(isLoading = true) }
         session.state
@@ -57,9 +59,11 @@ class ProfileScreenModel @Inject constructor(
         NavigatorBus.replaceAll(Route.Login)
     }
 
-    fun changeUser(unreadMark: UnreadMark? = null, autoRead: Boolean? = null, openContent: OpenContentWith? = null) {
+    fun changeUser(unreadMark: UnreadMark? = null, autoRead: Boolean? = null,
+            openContent: OpenContentWith? = null, rootFolderId: Long? = null,
+    ) {
         val newUser = preference.userSetting(unreadMark = unreadMark, autoRead = autoRead,
-            openContent = openContent,
+            openContent = openContent, rootFolderId = rootFolderId,
         )
         session.startSession(newUser)
     }
