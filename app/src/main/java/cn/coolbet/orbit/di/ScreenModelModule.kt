@@ -2,6 +2,7 @@ package cn.coolbet.orbit.di
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.hilt.ScreenModelKey
+import cn.coolbet.orbit.ui.view.entries.EntriesScreenModel
 import cn.coolbet.orbit.ui.view.home.HomeScreenModel
 import cn.coolbet.orbit.ui.view.login.LoginScreenModel
 import cn.coolbet.orbit.ui.view.profile.ProfileScreenModel
@@ -36,4 +37,8 @@ abstract class ScreenModelModule {
     @ScreenModelKey(SyncScreenModel::class)
     abstract fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
 
+    @Binds
+    @IntoMap
+    @ScreenModelKey(EntriesScreenModel::class)
+    abstract fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
 }

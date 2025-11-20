@@ -32,11 +32,13 @@ data class OrBitTypography(
 
     val R13B50: TextStyle,
     val R13B25: TextStyle,
+    val M13: TextStyle,
     val M13B25: TextStyle,
 
     val R15: TextStyle,
     val R15B50: TextStyle,
     val R15B25: TextStyle,
+    val M15: TextStyle,
     val M15White00: TextStyle,
 
     val M17: TextStyle,
@@ -52,11 +54,13 @@ val AppTypography = OrBitTypography(
 
     R13B50 = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.W400, lineHeight = 18.sp, color = Black50, fontFamily = SansFontFamily),
     R13B25 = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.W400, lineHeight = 18.sp, color = Black25, fontFamily = SansFontFamily),
+    M13 = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.W500, lineHeight = 18.sp, color = Black95, fontFamily = SansFontFamily),
     M13B25 = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.W500, lineHeight = 18.sp, color = Black25, fontFamily = SansFontFamily),
 
     R15 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W400, lineHeight = 20.sp, color = Black95, fontFamily = SansFontFamily),
     R15B50 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W400, lineHeight = 20.sp, color = Black50, fontFamily = SansFontFamily),
     R15B25 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W400, lineHeight = 20.sp, color = Black25, fontFamily = SansFontFamily),
+    M15 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W500, lineHeight = 20.sp, color = Black95, fontFamily = SansFontFamily),
     M15White00 = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.W500, lineHeight = 20.sp, color = Color.White, fontFamily = SansFontFamily),
 
     M17 = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.W500, lineHeight = 22.sp, color = Black95, fontFamily = SansFontFamily),
