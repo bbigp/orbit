@@ -18,7 +18,7 @@ data class Folder (
         val EMPTY = Folder(id = 0, title = "None")
     }
 
-    override val metaId: String get() = "o$id"
+    override val metaId: MetaId get() = MetaId("o", id)
     override val siteURL: String get() = ""
     override val url: String = ""
     val statuses: List<String> = if (onlyShowUnread) listOf(EntryStatus.UNREAD.value) else listOf(

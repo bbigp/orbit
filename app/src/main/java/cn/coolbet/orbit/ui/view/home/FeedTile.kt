@@ -38,7 +38,7 @@ fun FeedTile(feed: Feed, hasIndicator: Boolean = true) {
     Column (
         modifier = Modifier.fillMaxWidth()
             .clickable(
-                onClick = { NavigatorBus.push(Route.Entries) }
+                onClick = { NavigatorBus.push(Route.Entries(feed.metaId)) }
             )
     ){
         Row (

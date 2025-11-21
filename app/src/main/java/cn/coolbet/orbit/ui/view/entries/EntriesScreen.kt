@@ -1,7 +1,6 @@
 package cn.coolbet.orbit.ui.view.entries
 
 import androidx.compose.foundation.LocalOverscrollFactory
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,43 +14,65 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.hilt.getNavigatorScreenModel
 import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.ui.kit.CupertinoActivityIndicator
+import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
+import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 
-object EntriesScreen: Screen {
-    private fun readResolve(): Any = EntriesScreen
+data class EntriesScreen(
+    val metaId: MetaId,
+): Screen {
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<EntriesScreenModel>()
+        val navigator = LocalNavigator.currentOrThrow
+        val model = navigator.getNavigatorScreenModel<EntriesScreenModel, EntriesScreenModel.Factory> { factory ->
+            factory.create(metaId)
+        }
         val state by model.state.collectAsState()
-
         val listState = rememberLazyListState()
+
+        InfiniteScrollHandler(
+            listState = listState,
+            state = state,
+            onLoadMore = {
+                model.nextPage()
+            }
+        )
 
         Scaffold(
 
         ) { paddingValues ->
-            Box(
-                modifier = Modifier.padding(paddingValues)
-                    .fillMaxSize()
-            ) {
-                if (state.isRefreshing) {
-                    //todo: 骨架屏
-                } else {
-                    CompositionLocalProvider(
-                        LocalOverscrollFactory provides null,
+            if (state.isRefreshing) {
+                //todo: 骨架屏
+            } else {
+                CompositionLocalProvider(
+                    LocalOverscrollFactory provides null,
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.padding(paddingValues)
+                            .fillMaxSize(),
                     ) {
-                        LazyColumn(
-                            state = listState,
-                        ) {
-                            item {
-                                EntryTopTile(Feed.EMPTY)
-                            }
-
-                            items(state.items, key = { it.id }) { item ->
-                                EntryTile(item)
-                                SpacerDivider(start = 16.dp, end = 16.dp)
+                        item(key = "entry-top-tile") {
+                            EntryTopTile(Feed.EMPTY)
+                        }
+                        items(state.items, key = { it.id }) { item ->
+                            EntryTile(item)
+                            SpacerDivider(start = 16.dp, end = 16.dp)
+                        }
+                        item(key = "indicator") {
+                            if (state.hasMore) {
+                                CupertinoActivityIndicator()
+                            } else {
+                                NoMoreIndicator()
                             }
                         }
                     }

@@ -90,14 +90,14 @@ object HomeScreen: Screen {
                     state = lazyListState,
                 ) {
                     item { LabelTile("订阅源") }
-                    items(state.folders, key = { it.metaId }) { item ->
+                    items(state.folders, key = { it.metaId.toString() }) { item ->
                         CompositionLocalProvider(
                             LocalExpandFolder provides model::toggleExpanded,
                         ) {
                             FolderTile(item)
                         }
                     }
-                    items(state.feeds, key = { it.metaId }) { item ->
+                    items(state.feeds, key = { it.metaId.toString() }) { item ->
                         FeedTile(item)
                     }
                     if (!state.hasMore) {

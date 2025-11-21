@@ -10,16 +10,14 @@ abstract class BasePagingScreenModel<T, E>(
     initialState: PageState<T, E>
 ): StateScreenModel<PageState<T, E>>(initialState) {
 
-    private val stateValue: PageState<T, E> get() = mutableState.value
-
     abstract suspend fun fetchData(page: Int, size: Int): List<T>
 
-    fun loadInitialData() {
+    open fun loadInitialData() {
         screenModelScope.launch {
-            if (stateValue.isRefreshing) return@launch
+            if (state.value.isRefreshing) return@launch
             mutableState.update { it.copy(isRefreshing = true) }
             try {
-                val newData = fetchData(page = 1, size = stateValue.size)
+                val newData = fetchData(page = 1, size = state.value.size)
                 mutableState.update { it.addItems(newData, reset = true) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
@@ -30,11 +28,11 @@ abstract class BasePagingScreenModel<T, E>(
 
     fun nextPage() {
         screenModelScope.launch {
-            if (!stateValue.hasMore) return@launch
-            if (stateValue.isLoadingMore) return@launch
+            if (!state.value.hasMore) return@launch
+            if (state.value.isLoadingMore) return@launch
             mutableState.update { it.copy(isLoadingMore = true) }
             try {
-                val newData = fetchData(page = stateValue.page + 1, size = stateValue.size)
+                val newData = fetchData(page = state.value.page + 1, size = state.value.size)
                 mutableState.update { it.addItems(newData) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isLoadingMore = false) }

@@ -3,6 +3,7 @@ package cn.coolbet.orbit.manager
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.MediaDao
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.Meta
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,8 +14,8 @@ class EntryManager @Inject constructor(
     private val cacheStore: CacheStore,
 ) {
 
-    suspend fun getPage(page: Int = 1, size: Int = 20): List<Entry> {
-        val entries = entryDao.getEntries(page, size)
+    suspend fun getPage(mate: Meta, page: Int = 1, size: Int = 20): List<Entry> {
+        val entries = entryDao.getEntries(page, size, mate)
         if (entries.isEmpty()) return emptyList()
 
         val mediaMap = mediaDao.getMap(entryIds = entries.map { it.id }.toList())

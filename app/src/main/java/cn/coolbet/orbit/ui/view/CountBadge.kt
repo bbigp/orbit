@@ -24,6 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.ui.theme.AppTypography
@@ -32,7 +34,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUserState
 
 
 @Composable
-fun CountBadge(metaId: String) {
+fun CountBadge(metaId: MetaId) {
     val userState = LocalUserState.current
     val user by userState
     if (user.unreadMark == UnreadMark.NONE) {
@@ -41,7 +43,7 @@ fun CountBadge(metaId: String) {
 
     val unreadState = LocalUnreadState.current
     val unreadMap by unreadState
-    val count = unreadMap[metaId] ?: 0
+    val count = unreadMap[metaId.toString()] ?: 0
     if (count == 0) return
 
     if (user.unreadMark == UnreadMark.DOT) {
@@ -83,21 +85,21 @@ fun PreviewCountBadge(){
         CompositionLocalProvider(
             LocalUnreadState provides sampleUnreadState
         ) {
-            CountBadge(metaId = "1")
+            CountBadge(metaId = MetaId("", 1))
         }
         Spacer(modifier = Modifier.height(10.dp).width(20.dp).background(Color.Red))
         CompositionLocalProvider(
             LocalUnreadState provides sampleUnreadState,
                 LocalUserState provides dotUserState,
         ) {
-            CountBadge(metaId = "1")
+            CountBadge(metaId = MetaId("", 1))
         }
         Spacer(modifier = Modifier.height(10.dp).width(20.dp).background(Color.Red))
         CompositionLocalProvider(
             LocalUnreadState provides sampleUnreadState,
             LocalUserState provides noneUserState,
         ) {
-            CountBadge(metaId = "1")
+            CountBadge(metaId = MetaId("", 1))
         }
     }
 }

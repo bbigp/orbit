@@ -2,11 +2,15 @@ package cn.coolbet.orbit.common
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 // 定义常用的时间格式化器
 @RequiresApi(Build.VERSION_CODES.O)
@@ -82,4 +86,63 @@ fun Long.toRelativeTime(
     // --- 阶段 3: 跨年 (显示完整日期) ---
     // 其他情况：显示年-月-日 时:分 (yyyy-MM-dd HH:mm)
     return targetDateTime.format(DEFAULT_FORMATTER)
+}
+
+// 定义时间常量（毫秒）
+val ONE_MINUTE = TimeUnit.MINUTES.toMillis(1)
+val ONE_HOUR = TimeUnit.HOURS.toMillis(1)
+val ONE_DAY = TimeUnit.DAYS.toMillis(1)
+val ONE_WEEK = TimeUnit.DAYS.toMillis(7)
+
+/**
+ * 将 Long 毫秒时间戳格式化为相对时间字符串。
+ * 规则：几分钟前 -> 几小时前 -> 几天前 -> 月日 -> 年月日
+ * @return 格式化后的字符串
+ */
+fun Long.showTime(): String {
+    if (this == 0L) {
+        return ""
+    }
+    if (this < MIN_VALID_TIMESTAMP_MS) {
+        return ""
+    }
+
+    val now = System.currentTimeMillis()
+    val diff = now - this // 计算时间差 (毫秒)
+
+    // 如果时间戳在未来或时间差为负，返回绝对时间
+    if (diff < 0) {
+        return ""
+    }
+
+    return when {
+        diff < ONE_MINUTE -> "刚刚"
+        diff < ONE_HOUR -> {
+            val minutes = TimeUnit.MILLISECONDS.toMinutes(diff)
+            "${minutes}分钟前"
+        }
+        diff < ONE_DAY -> {
+            val hours = TimeUnit.MILLISECONDS.toHours(diff)
+            "${hours}小时前"
+        }
+        diff < ONE_WEEK -> {
+            val days = TimeUnit.MILLISECONDS.toDays(diff)
+            "${days}天前"
+        }
+        else -> {
+            val targetDate = Date(this)
+
+            val targetCalendar = Calendar.getInstance().apply { time = targetDate }
+            val currentCalendar = Calendar.getInstance().apply { time = Date(now) }
+
+            val targetYear = targetCalendar.get(Calendar.YEAR)
+            val currentYear = currentCalendar.get(Calendar.YEAR)
+
+            return if (targetYear == currentYear) {
+                SimpleDateFormat("MM-dd", Locale.getDefault()).format(targetDate)
+            } else {
+                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(targetDate)
+            }
+        }
+    }
 }

@@ -37,8 +37,8 @@ abstract class ScreenModelModule {
     @ScreenModelKey(SyncScreenModel::class)
     abstract fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
 
-    @Binds
-    @IntoMap
-    @ScreenModelKey(EntriesScreenModel::class)
-    abstract fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
+//    @Binds
+//    @IntoMap
+//    @ScreenModelKey(EntriesScreenModel::class)
+//    abstract fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.common.showTime
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.SpacerDivider
@@ -149,7 +150,7 @@ fun EntryTileTopRow(entry: Entry){
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            entry.publishedAt.toString(),
+            entry.publishedAt.showTime(),
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             style = AppTypography.M13B25,
             modifier = Modifier.wrapContentWidth()

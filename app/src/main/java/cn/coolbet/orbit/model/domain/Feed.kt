@@ -27,9 +27,7 @@ data class Feed(
     }
 
 
-    // @override String get metaId => "e$id";
-    override val metaId: String
-        get() = "e$id"
+    override val metaId: MetaId get() = MetaId("e", id)
 
     // @override String get url => feedUrl;
     override val url: String

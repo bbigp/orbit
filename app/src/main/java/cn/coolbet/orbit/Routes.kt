@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.view.entries.EntriesScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
@@ -15,13 +16,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
+@Suppress("FunctionName")
 data class Route(val screen: Screen) {
     companion object {
         val Login = Route(screen = LoginScreen)
         val Home = Route(screen = HomeScreen)
         val Profile = Route(screen = ProfileScreen)
         val Sync = Route(screen = SyncScreen)
-        val Entries = Route(screen = EntriesScreen)
+        fun Entries(metaId: MetaId) = Route(
+            screen = EntriesScreen(metaId)
+        )
     }
 }
 
