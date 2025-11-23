@@ -10,35 +10,47 @@ import cn.coolbet.orbit.ui.view.sync.SyncScreenModel
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoMap
 
 @Module
-@InstallIn(ActivityRetainedComponent::class)
-abstract class ScreenModelModule {
+@InstallIn(SingletonComponent::class)
+interface ScreenModelModule {
 
     @Binds
     @IntoMap
     @ScreenModelKey(HomeScreenModel::class)
-    abstract fun bindHomeModel(homeScreenModel: HomeScreenModel): ScreenModel
+    fun bindHomeModel(homeScreenModel: HomeScreenModel): ScreenModel
 
     @Binds
     @IntoMap
     @ScreenModelKey(ProfileScreenModel::class)
-    abstract fun bindProfileModel(profileScreenModel: ProfileScreenModel): ScreenModel
+    fun bindProfileModel(profileScreenModel: ProfileScreenModel): ScreenModel
 
     @Binds
     @IntoMap
     @ScreenModelKey(LoginScreenModel::class)
-    abstract fun bindLoginModel(loginScreenModel: LoginScreenModel): ScreenModel
+    fun bindLoginModel(loginScreenModel: LoginScreenModel): ScreenModel
 
     @Binds
     @IntoMap
     @ScreenModelKey(SyncScreenModel::class)
-    abstract fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
+    fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
 
-//    @Binds
-//    @IntoMap
-//    @ScreenModelKey(EntriesScreenModel::class)
-//    abstract fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
+    @Binds
+    @IntoMap
+    @ScreenModelKey(EntriesScreenModel::class)
+    fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
+
+//    companion object {
+//        @Provides
+//        @IntoMap
+//        @ScreenModelFactoryKey(EntriesScreenModel.Factory::class)
+//        fun provideEntriesScreenModelFactory(
+//            factory: EntriesScreenModel.Factory
+//        ): ScreenModelFactory = factory
+//    }
+//    val model = navigator.getNavigatorScreenModel<EntriesScreenModel, EntriesScreenModel.Factory> { factory ->
+//        factory.create(metaId)
+//    }
 }

@@ -17,7 +17,7 @@ import cn.coolbet.orbit.R
 
 
 @Composable
-fun NoMoreIndicator(height: Dp = 60.dp) {
+fun NoMoreIndicator(height: Dp = 30.dp) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

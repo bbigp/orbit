@@ -25,7 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
@@ -104,8 +106,8 @@ fun ObBackTopAppBar(
     title: String = "",
     actions: @Composable RowScope.() -> Unit = {},
     background: Color = ObTheme.colors.primaryContainer,
-    navigator: Navigator? = null
 ) {
+    val navigator = LocalNavigator.current
     ObTopAppbar(
         title = title,
         actions = actions,

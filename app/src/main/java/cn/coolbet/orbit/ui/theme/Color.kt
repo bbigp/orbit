@@ -19,6 +19,8 @@ val ContainerRed = Color(0x1AFF3B30)
 
 val ContainerSecondary = Color(0xD9FFFFFF)//85白
 
+val Skeleton = Color(0xFFEAE8E8)
+
 val DarkColorScheme = darkColorScheme(
     surface = Color.White,
 )

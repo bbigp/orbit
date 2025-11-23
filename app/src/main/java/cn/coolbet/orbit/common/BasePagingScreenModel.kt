@@ -3,6 +3,7 @@ package cn.coolbet.orbit.common
 import android.util.Log
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,7 @@ abstract class BasePagingScreenModel<T, E>(
             mutableState.update { it.copy(isLoadingMore = true) }
             try {
                 val newData = fetchData(page = state.value.page + 1, size = state.value.size)
+                delay(200)
                 mutableState.update { it.addItems(newData) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isLoadingMore = false) }

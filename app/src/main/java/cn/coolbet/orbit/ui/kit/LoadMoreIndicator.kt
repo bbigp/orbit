@@ -8,11 +8,14 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -23,6 +26,19 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
+
+@Composable
+fun LoadMoreIndicator(height: Dp = 30.dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(height),
+        contentAlignment = Alignment.Center
+    ) {
+        CupertinoActivityIndicator()
+    }
+}
+
 
 /**
  * 模仿 iOS 风格的 Activity Indicator (Cupertino Spinner).
@@ -42,9 +58,9 @@ fun CupertinoActivityIndicator(
     color: Color = Color(0xFFE3E0E0),
     size: Dp = 20.dp,
     segmentCount: Int = 8,
-    segmentLength: Dp = 6.67.dp,
+    segmentLength: Dp = 5.dp,
     segmentThickness: Dp = 2.22.dp,
-    segmentGap: Dp = 10.dp // 条目与中心点之间的距离
+    segmentGap: Dp = 15.dp // 条目与中心点之间的距离
 ) {
     // 1. 无限旋转动画
     val infiniteTransition = rememberInfiniteTransition(label = "SpinnerTransition")
@@ -101,10 +117,11 @@ fun CupertinoActivityIndicator(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewIOSIndicator() {
-    // 在预览中测试指示器
-    Box(modifier = Modifier.padding(20.dp)) {
-        CupertinoActivityIndicator(
-            size = 48.dp
-        )
+    Column {
+        Box(modifier = Modifier.padding(20.dp)) {
+            CupertinoActivityIndicator(
+            )
+        }
+        LoadMoreIndicator()
     }
 }

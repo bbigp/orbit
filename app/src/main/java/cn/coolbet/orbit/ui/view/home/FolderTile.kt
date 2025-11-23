@@ -27,7 +27,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.ui.view.CountBadge
@@ -37,7 +39,12 @@ import cn.coolbet.orbit.ui.theme.Black50
 
 @Composable
 fun FolderTile(folder: Folder) {
-    Column {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .clickable(
+                onClick = { NavigatorBus.push(Route.Entries(folder.metaId)) }
+            )
+    ) {
         FolderRow(folder)
         SpacerDivider(start = 80.dp, end = 16.dp)
         AnimatedVisibility(

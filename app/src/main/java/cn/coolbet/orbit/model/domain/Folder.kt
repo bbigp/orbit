@@ -3,7 +3,7 @@ package cn.coolbet.orbit.model.domain
 import cn.coolbet.orbit.model.OrderPublishedAt
 
 data class Folder (
-    val id: Long,
+    override val id: Long,
     val userId: Long = 0,
     override val title: String = "",
     override val hideGlobally: Boolean = false,
@@ -19,12 +19,9 @@ data class Folder (
     }
 
     override val metaId: MetaId get() = MetaId("o", id)
+    override val feedIds: List<Long> get() = feeds.map { it.id }.toList()
     override val siteURL: String get() = ""
     override val url: String = ""
-    val statuses: List<String> = if (onlyShowUnread) listOf(EntryStatus.UNREAD.value) else listOf(
-        EntryStatus.UNREAD.value,
-        EntryStatus.READ.value
-    )
 }
 
 

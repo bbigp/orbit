@@ -3,7 +3,7 @@ package cn.coolbet.orbit.model.domain
 import cn.coolbet.orbit.model.OrderPublishedAt
 
 data class Feed(
-    val id: Long,
+    override val id: Long,
     val userId: Long = 0,
     val feedURL: String = "",
     override val siteURL: String = "",
@@ -26,20 +26,9 @@ data class Feed(
         val EMPTY = Feed(id = 0L)
     }
 
-
+    override val feedIds: List<Long> get() = listOf(id)
     override val metaId: MetaId get() = MetaId("e", id)
-
-    // @override String get url => feedUrl;
-    override val url: String
-        get() = feedURL
-
-    // List<String> get statuses => onlyShowUnread ? [EntryStatus.unread.name] : [EntryStatus.unread.name, EntryStatus.read.name];
-    val statuses: List<String>
-        get() = if (onlyShowUnread) {
-            listOf(EntryStatus.UNREAD.value)
-        } else {
-            listOf(EntryStatus.UNREAD.value, EntryStatus.READ.value)
-        }
+    override val url: String get() = feedURL
 
     /**
      * 对应 Dart 中的 contextMenus 方法，返回一个 List<ContextMenuEntry>

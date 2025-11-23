@@ -3,21 +3,24 @@ package cn.coolbet.orbit.ui.kit
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Modifier
 import cn.coolbet.orbit.common.PageState
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun <T, E> InfiniteScrollHandler(
     listState: LazyListState,
-    state: PageState<T, E>,
+    stateFlow: StateFlow<PageState<T, E>>,
     onLoadMore: () -> Unit,
-    buffer: Int = 5 // 距离列表底部多少项时触发加载
+    buffer: Int = 4 // 距离列表底部多少项时触发加载
 ) {
     // 使用 rememberUpdatedState 确保 LaunchedEffect 总是使用最新的 onLoadMore 引用，
     // 即使外部函数引用发生变化，也不会重启 LaunchedEffect。
     val onLoadMoreAction = rememberUpdatedState(onLoadMore)
+    val state by stateFlow.collectAsState()
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }

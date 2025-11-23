@@ -26,7 +26,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 fun EntryTopTile(meta: Meta) {
     val unreadState = LocalUnreadState.current
     val unreadMap by unreadState
-    val count = unreadMap[meta.metaId] ?: 0
+    val count = unreadMap[meta.metaId.toString()] ?: 0
     Column(
         modifier = Modifier.padding(horizontal = 14.dp)
             .fillMaxWidth()

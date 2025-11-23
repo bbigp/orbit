@@ -75,7 +75,6 @@ object ProfileScreen: Screen {
         val model = getScreenModel<ProfileScreenModel>()
         val state by model.state.collectAsState()
         val folders by model.folders.collectAsState()
-        val navigator = LocalNavigator.currentOrThrow
 
         var showFolderPicker by remember { mutableStateOf(false) }
         FolderPickerSheet (
@@ -129,7 +128,6 @@ object ProfileScreen: Screen {
                 ObBackTopAppBar(
                     background = ObTheme.colors.secondaryContainer,
                     title = "设置",
-                    navigator = navigator
                 )
             }
         ) { paddingValues ->

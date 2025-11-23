@@ -1,12 +1,17 @@
 package cn.coolbet.orbit.dao
 
+import android.util.Log
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+import cn.coolbet.orbit.model.OrderCreatedAt
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Folder
@@ -24,46 +29,32 @@ import java.util.Date
 abstract class EntryDao(protected val db: AppDatabase) {
 
     suspend fun getEntries(page: Int, size: Int, meta: Meta): List<Entry> {
-
         val whereClause = buildQuery(
-            feedIds = feedIds,
-            statuses = statuses,
-            publishedTime = publishedTime,
-            addTime = addTime,
-            search = search,
+            feedIds = meta.feedIds,
+            statuses = meta.statuses,
+            recentPubTime = meta.recentPubTime,
+            recentAddTime = meta.recentAddTime,
+//            search = search,
         ).joinToString(separator = " and ")
-        val orderByColumn = when (order) {
-            "createdAt" -> "created_at"
-            else -> "published_at" // 默认按 published_at 排序
+        val orderByColumn = when (meta.order) {
+            OrderCreatedAt -> "created_at"
+            else -> "published_at"
         }
+        val direction = "desc"
         val ordering = when (direction.lowercase()) {
-            "asc" -> OrderingMode.ASC.name
-            else -> OrderingMode.DESC.name // 默认降序
+            "asc" -> "asc"
+            else -> "desc"
         }
-        val offset = (finalPage - 1) * finalSize
+        val offset = (page - 1) * size
         val query = """
             select * from entries where $whereClause
             order by $orderByColumn $ordering
-            limit $finalSize offset $offset
+            limit $size offset $offset
         """.trimIndent()
-        println(query)
-        val result = db.customSelect(query)
-        return result.map { r -> mapToEntry(r) }.toList()
-        return getEntriesImpl().map { it.to() }
-    }
-
-    private fun mapToEntry(data: Map<String, Any?>): Entry {
-        // 实际应用中需要安全地转换和处理 null
-        return Entry(
-            id = data["id"] as Long,
-            feedId = data["feed_id"] as Long,
-            publishedAt = data["published_at"] as Long,
-            createdAt = data["created_at"] as Long,
-            status = data["status"] as String,
-            title = data["title"] as String,
-            content = data["content"] as String?,
-            summary = data["summary"] as String?,
-        )
+        Log.i("SQL", query)
+        val sqliteQuery = SimpleSQLiteQuery(query)
+        return this.getEntriesRaw(sqliteQuery).map { it.to() }
+//        return getEntriesImpl().map { it.to() }
     }
 
     suspend fun batchSave(items: List<Entry>) = withContext(Dispatchers.IO) {
@@ -122,10 +113,13 @@ abstract class EntryDao(protected val db: AppDatabase) {
     @Query("select * from entries limit 10")
     internal abstract suspend fun getEntriesImpl(): List<EntryEntity>
 
+    @RawQuery
+    internal abstract suspend fun getEntriesRaw(query: SupportSQLiteQuery): List<EntryEntity>
+
     internal fun buildQuery(
         feedIds: List<Long> = emptyList(),
-        publishedTime: Long = 0,
-        addTime: Long = 0,
+        recentPubTime: Int = 0,
+        recentAddTime: Int = 0,
         statuses: List<EntryStatus> = emptyList(),
         search: String = "",
     ): List<String> {
@@ -137,13 +131,13 @@ abstract class EntryDao(protected val db: AppDatabase) {
             cond.add("feed_id in ($ids)")
         }
 
-        if (publishedTime > 0) {
-            val time = nowSeconds - (publishedTime * 60)
+        if (recentPubTime > 0) {
+            val time = nowSeconds - (recentPubTime * 60)
             cond.add("published_at >= $time")
         }
 
-        if (addTime > 0) {
-            val time = nowSeconds - (addTime * 60)
+        if (recentAddTime > 0) {
+            val time = nowSeconds - (recentAddTime * 60)
             cond.add("created_at >= $time")
         }
 
