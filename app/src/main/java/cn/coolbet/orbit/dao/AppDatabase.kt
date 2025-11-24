@@ -1,17 +1,16 @@
 package cn.coolbet.orbit.dao
 
 import android.content.Context
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.FolderEntity
 import cn.coolbet.orbit.model.entity.MediaEntity
+import cn.coolbet.orbit.model.entity.SearchRecord
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import dagger.Module
 import dagger.Provides
@@ -23,7 +22,8 @@ import javax.inject.Singleton
 private const val DATABASE_NAME = "orbit_db"
 
 @Database(
-    entities = [FeedEntity::class, FolderEntity::class, SyncTaskRecord::class, EntryEntity::class, MediaEntity::class],
+    entities = [FeedEntity::class, FolderEntity::class, SyncTaskRecord::class, EntryEntity::class,
+        MediaEntity::class, SearchRecord::class],
     version = 1,
     exportSchema = false
 )
@@ -33,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun syncTaskRecordDao(): SyncTaskRecordDao
     abstract fun entryDao(): EntryDao
     abstract fun mediaDao(): MediaDao
+    abstract fun searchDao(): SearchDao
 }
 
 
@@ -75,6 +76,12 @@ object RoomModule {
     @Singleton
     fun provideMediaDao(database: AppDatabase): MediaDao {
         return database.mediaDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchDao(database: AppDatabase): SearchDao {
+        return database.searchDao()
     }
 
     @Provides
