@@ -41,12 +41,20 @@ interface ScreenModelModule {
     @ScreenModelKey(SyncScreenModel::class)
     fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
 
-    @Binds
-    @IntoMap
-    @ScreenModelKey(EntriesScreenModel::class)
-    fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
+//    @Binds
+//    @IntoMap
+//    @ScreenModelKey(EntriesScreenModel::class)
+//    fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
 
     companion object {
+
+        @Provides
+        @IntoMap
+        @ScreenModelFactoryKey(EntriesScreenModel.Factory::class)
+        fun provideEntriesModelFactory(
+            factory: EntriesScreenModel.Factory
+        ): ScreenModelFactory = factory
+
         @Provides
         @IntoMap
         @ScreenModelFactoryKey(SearchEntriesScreenModel.Factory::class)

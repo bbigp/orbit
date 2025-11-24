@@ -3,6 +3,7 @@ package cn.coolbet.orbit.ui.view.entries
 import android.util.Log
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
@@ -10,34 +11,36 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class EntriesScreenModel @Inject constructor(
+class EntriesScreenModel @AssistedInject constructor(
+    @Assisted private val metaId: MetaId,
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
 ): StateScreenModel<EntriesState>(initialState = EntriesState()) {
 
+    @AssistedFactory
+    interface Factory: ScreenModelFactory {
+        fun create(metaId: MetaId): EntriesScreenModel
+    }
+
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
-    init {
-        mutableState.update { it.copy(isRefreshing = true) }
-    }
+    init { loadInitialData() }
 
-    fun refresh(){
-        val id = state.value.meta.metaId
-        this.clearState()
-        loadInitialData(id)
-    }
 
-    fun loadInitialData(metaId: MetaId) {
+    fun loadInitialData() {
         val value = state.value
-        if (value.isRefreshing && value.meta.isNotEmpty) return
+        if (value.isRefreshing) return
+        mutableState.update { it.copy(isRefreshing = true) }
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -75,10 +78,6 @@ class EntriesScreenModel @Inject constructor(
                 Log.e("BasePagingScreenModel", "加载数据出错.", e)
             }
         }
-    }
-
-    fun clearState() {
-        mutableState.update { EntriesState(isRefreshing = true) }
     }
 
 }

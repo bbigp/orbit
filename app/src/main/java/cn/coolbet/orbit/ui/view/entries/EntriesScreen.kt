@@ -13,17 +13,13 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
-import cafe.adriel.voyager.hilt.getNavigatorScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
@@ -46,16 +42,13 @@ data class EntriesScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val model = navigator.getNavigatorScreenModel<EntriesScreenModel>()
+        val model = getScreenModel<EntriesScreenModel, EntriesScreenModel.Factory> { factory ->
+            factory.create(metaId)
+        }
         val state by model.state.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
-
-        LaunchedEffect(Unit) {
-            model.loadInitialData(metaId)
-        }
 
         InfiniteScrollHandler(
             listState = listState,
@@ -64,12 +57,6 @@ data class EntriesScreen(
                 model.nextPage()
             }
         )
-
-        DisposableEffect(Unit) {
-            onDispose {
-                model.clearState()
-            }
-        }
 
         Scaffold(
             topBar = {
@@ -95,7 +82,7 @@ data class EntriesScreen(
                             state = pullState,
                             isRefreshing = state.isRefreshing,
                             onRefresh = {
-                                model.refresh()
+                                model.loadInitialData()
                             }
                         ),
                 ) {

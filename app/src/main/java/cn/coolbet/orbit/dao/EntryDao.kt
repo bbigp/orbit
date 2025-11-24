@@ -28,13 +28,13 @@ import java.util.Date
 @Dao
 abstract class EntryDao(protected val db: AppDatabase) {
 
-    suspend fun getEntries(page: Int, size: Int, meta: Meta): List<Entry> {
+    suspend fun getEntries(page: Int, size: Int, meta: Meta, search: String = ""): List<Entry> {
         val whereClause = buildQuery(
             feedIds = meta.feedIds,
             statuses = meta.statuses,
             recentPubTime = meta.recentPubTime,
             recentAddTime = meta.recentAddTime,
-//            search = search,
+            search = search,
         ).joinToString(separator = " and ")
         val orderByColumn = when (meta.order) {
             OrderCreatedAt -> "created_at"
