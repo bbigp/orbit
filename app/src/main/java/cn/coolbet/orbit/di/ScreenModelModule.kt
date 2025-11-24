@@ -5,6 +5,7 @@ import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cafe.adriel.voyager.hilt.ScreenModelFactoryKey
 import cafe.adriel.voyager.hilt.ScreenModelKey
 import cn.coolbet.orbit.ui.view.entries.EntriesScreenModel
+import cn.coolbet.orbit.ui.view.entry.EntryScreenModel
 import cn.coolbet.orbit.ui.view.home.HomeScreenModel
 import cn.coolbet.orbit.ui.view.login.LoginScreenModel
 import cn.coolbet.orbit.ui.view.profile.ProfileScreenModel
@@ -41,11 +42,6 @@ interface ScreenModelModule {
     @ScreenModelKey(SyncScreenModel::class)
     fun bindSyncModel(syncScreenModel: SyncScreenModel): ScreenModel
 
-//    @Binds
-//    @IntoMap
-//    @ScreenModelKey(EntriesScreenModel::class)
-//    fun bindEntriesModel(entriesScreenModel: EntriesScreenModel): ScreenModel
-
     companion object {
 
         @Provides
@@ -60,6 +56,13 @@ interface ScreenModelModule {
         @ScreenModelFactoryKey(SearchEntriesScreenModel.Factory::class)
         fun provideSearchEntriesModelFactory(
             factory: SearchEntriesScreenModel.Factory
+        ): ScreenModelFactory = factory
+
+        @Provides
+        @IntoMap
+        @ScreenModelFactoryKey(EntryScreenModel.Factory::class)
+        fun provideEntryModelFactory(
+            factory: EntryScreenModel.Factory
         ): ScreenModelFactory = factory
     }
 }

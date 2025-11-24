@@ -5,9 +5,11 @@ import androidx.compose.runtime.LaunchedEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.view.entries.EntriesScreen
+import cn.coolbet.orbit.ui.view.entry.EntryScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.profile.ProfileScreen
@@ -30,6 +32,9 @@ data class Route(val screen: Screen) {
         )
         fun SearchEntries(meta: Meta) = Route(
             screen = SearchEntriesScreen(meta)
+        )
+        fun Entry(entry: Entry) = Route(
+            screen = EntryScreen(entry)
         )
     }
 }
