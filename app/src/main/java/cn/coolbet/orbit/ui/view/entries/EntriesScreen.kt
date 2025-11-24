@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -28,6 +31,7 @@ import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
+import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 
 data class EntriesScreen(
     val metaId: MetaId,
@@ -35,13 +39,15 @@ data class EntriesScreen(
 
     override val key: ScreenKey = metaId.toString()
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val model = navigator.getNavigatorScreenModel<EntriesScreenModel>()
-        val unreadState = model.unreadMapState.collectAsState()
         val state by model.state.collectAsState()
+        val unreadState = model.unreadMapState.collectAsState()
         val listState = rememberLazyListState()
+        val pullState = rememberPullToRefreshState()
 
         LaunchedEffect(Unit) {
             model.loadInitialData(metaId)
@@ -66,18 +72,37 @@ data class EntriesScreen(
                 ObBackTopAppBar()
             }
         ) { paddingValues ->
-            if (state.isRefreshing) {
-                Box(modifier = Modifier.padding(paddingValues)) { EntriesSkeleton() }
-            } else {
-                CompositionLocalProvider(
-                    LocalOverscrollFactory provides null,
-                    LocalUnreadState provides unreadState,
+            CompositionLocalProvider(
+                LocalOverscrollFactory provides null,
+                LocalUnreadState provides unreadState,
+            ) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.padding(paddingValues)
+                        .fillMaxSize()
+                        .pullToRefresh(
+                            state = pullState,
+                            isRefreshing = state.isRefreshing,
+                            onRefresh = {
+                                model.refresh()
+                            }
+                        ),
                 ) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.padding(paddingValues)
-                            .fillMaxSize(),
-                    ) {
+                    item(key = "refresh-indicator") {
+                        RefreshIndicatorItem(
+                            state = pullState,
+                            isRefreshing = state.isRefreshing,
+                        )
+                    }
+                    if (state.isRefreshing) {
+                        item {
+                            EntryTopTileSkeleton()
+                        }
+                        items(20) {
+                            EntryTileSkeleton()
+                            Box(modifier = Modifier.padding(horizontal = 16.dp)) { SpacerDivider() }
+                        }
+                    } else {
                         item(key = "entry-top-tile") {
                             EntryTopTile(state.extra)
                         }

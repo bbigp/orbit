@@ -1,8 +1,10 @@
 package cn.coolbet.orbit.ui.view.sync
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -34,14 +37,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -51,9 +58,11 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.toRelativeTime
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
+import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.Black95
 import cn.coolbet.orbit.ui.theme.ContentRed
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -123,7 +132,7 @@ object SyncScreen: Screen {
                         RefreshIndicatorItem(
                             state = pullState,
                             isRefreshing = state.isRefreshing,
-                            itemHeightPx = itemHeightPx
+//                            itemHeightPx = itemHeightPx
                         )
                     }
                 }
@@ -140,68 +149,119 @@ object SyncScreen: Screen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RefreshIndicatorItem(
-    state: PullToRefreshState,
-    isRefreshing: Boolean,
-    itemHeightPx: Float, // 这个高度将由 LazyColumn 动态控制
-    circleSize: Dp = 40.dp
+    state: PullToRefreshState,     // 🌟 由 Modifier.pullToRefresh 提供的状态，包含下拉距离信息。
+    isRefreshing: Boolean,         // 🌟 是否处于刷新状态 (数据正在加载)。
 ) {
-    val density = LocalDensity.current
-    val maxRelativeOffsetDp = 15.dp
-    val maxRelativeOffsetPx = with(density) { maxRelativeOffsetDp.toPx() }
+    // 追踪是否已经触发过震动（防止一次下拉多次震动）
+    val vibratedPastThreshold = remember { mutableStateOf(true) }
+    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(state.distanceFraction) {
+        if (state.isAnimating) {
+            return@LaunchedEffect
+        }
+//        Log.i("RefreshIndicatorItem", "22 ${state.distanceFraction} ${vibratedPastThreshold.value}")
+        // 如果达到或超过阈值 (1.0f)，且本轮尚未震动
+        if (state.distanceFraction >= 1.0f && !vibratedPastThreshold.value) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            vibratedPastThreshold.value = true
+        }
 
-    // ------------------- 相对偏移计算（与上个回答相同） --------------------
-    val offsetThreshold = 0.5f
+        // 如果距离小于阈值，重置震动状态
+        if (state.distanceFraction < 1.0f && vibratedPastThreshold.value) {
+            vibratedPastThreshold.value = false
+        }
+    }
+    val density = LocalDensity.current
+    val thresholdDp = 40.dp
+    val itemHeight = if (isRefreshing) {
+        // 🌟 刷新触发时：页面回弹，平滑收缩到 0.dp (250ms 动画)
+        animateDpAsState(
+            targetValue = 0.dp,
+            animationSpec = tween(durationMillis = 80),
+            label = "ShrinkHeight"
+        ).value
+    } else {
+        // 🌟 主动下拉时：直接使用原始高度，确保 1:1 跟手
+        thresholdDp * state.distanceFraction
+    }
+//    Log.i("RefreshIndicatorItem", "distanceFraction ${state.distanceFraction} $itemHeight")
+
+    // --- 动画偏移量计算 ---
+
+    // 偏移量的起始触发阈值。当 distanceFraction 达到 0.2f 后，动画才开始启动。
+    val offsetThreshold = 0.2f
+
+    // state.distanceFraction 范围通常是 0.0f 到 1.0f
+    // 0.0f 的含义: 表示用户没有下拉，或者下拉距离在阈值以下
+    // 1.0f 的含义: 表示用户已经下拉到了触发刷新操作的阈值（即，如果此时释放，就会触发 onRefresh）。
+    // 将[0.2f, 1f] 转换成 [0f, 1f] 动画参数需要 0到1
     val offsetFraction = ((state.distanceFraction - offsetThreshold) / (1f - offsetThreshold)).coerceIn(0f, 1f)
 
-    val targetOffsetFraction = if (isRefreshing) 1f else offsetFraction
+    // --- 动画定义 ---
 
+    // 上层圆移动的距离
+    val maxRelativeOffsetDp = 15.dp
+    // 上层圆移动的距离 (15.dp) 转换为像素值，用于动画
+    val maxRelativeOffsetPx = with(density) { maxRelativeOffsetDp.toPx() }
+
+    // 上层圆的 X 轴相对偏移量动画。
+    // 当 offsetFraction 从 0f 增加到 1f 时，X 轴偏移量从 0 动画到 -maxRelativeOffsetPx。
     val animatedRelativeOffsetX by animateFloatAsState(
-        targetValue = -targetOffsetFraction * maxRelativeOffsetPx,
+        targetValue = -offsetFraction * maxRelativeOffsetPx,
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing), label = "RelativeXOffset"
     )
+    // 上层圆的 Y 轴相对偏移量动画。
+    // 当 offsetFraction 从 0f 增加到 1f 时，Y 轴偏移量从 0 动画到 +maxRelativeOffsetPx。
     val animatedRelativeOffsetY by animateFloatAsState(
-        targetValue = targetOffsetFraction * maxRelativeOffsetPx,
+        targetValue = offsetFraction * maxRelativeOffsetPx,
         animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing), label = "RelativeYOffset"
     )
-    // ----------------------------------------------------------------------
 
-    // 根容器高度由外部控制，这里确保指示器在 Item 区域的中央
+    val contentAlpha = if (isRefreshing) {
+        0f
+    } else {
+        // 使用 distanceFraction 本身作为 alpha 值，但放大以确保在距离很小时也能完全显示
+        (state.distanceFraction * 5f).coerceIn(0f, 1f)
+    }
+
+    // --- 布局容器 ---
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(with(density) { itemHeightPx.toDp() }),
+            .height(itemHeight),
         contentAlignment = Alignment.Center
     ) {
-        // --- 1. 下层圆 (不动) ---
-        CircleIndicator(
-            color = Color.Gray.copy(alpha = 0.5f),
-            size = circleSize,
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        // --- 2. 上层圆 (移动和动画) ---
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                // 应用相对偏移
-                .offset {
-                    IntOffset(x = animatedRelativeOffsetX.toInt(), y = animatedRelativeOffsetY.toInt())
-                }
-                .size(circleSize),
-            contentAlignment = Alignment.Center
-        ) {
-            CircleIndicator(
-                color = MaterialTheme.colorScheme.primary,
-                size = circleSize,
-            )
-
-            // 刷新时显示加载动画
-            if (isRefreshing) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(circleSize * 0.7f)
+        if (contentAlpha > 0f) {
+            Box(
+                modifier = Modifier.fillMaxSize().graphicsLayer(alpha = contentAlpha),
+                contentAlignment = Alignment.Center
+            ) {
+                // --- 1. 下层圆 (不动)
+                CircleIndicator(
+                    color = Black95,
+                    size = 24.dp,
+                    modifier = Modifier.align(Alignment.Center)
                 )
+
+                // --- 2. 上层圆 (移动和动画) ---
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        // 🌟 应用相对偏移：将动画后的像素值转换为 IntOffset
+                        .offset {
+                            IntOffset(
+                                x = animatedRelativeOffsetX.toInt(),
+                                y = animatedRelativeOffsetY.toInt()
+                            )
+                        }
+                        .size(14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircleIndicator(
+                        color = Black95,
+                        size = 14.dp
+                    )
+                }
             }
         }
     }

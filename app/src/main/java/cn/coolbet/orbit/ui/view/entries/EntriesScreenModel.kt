@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.entries
 
+import android.util.Log
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.common.BasePagingScreenModel
 import cn.coolbet.orbit.common.PageState
@@ -29,6 +30,12 @@ class EntriesScreenModel @Inject constructor(
         mutableState.update { it.copy(isRefreshing = true) }
     }
 
+    fun refresh(){
+        val id = state.value.extra.metaId
+        this.clearState()
+        loadInitialData(id)
+    }
+
     fun loadInitialData(metaId: MetaId) {
         val value = state.value
         if (value.isRefreshing && value.extra.isNotEmpty) return
@@ -40,19 +47,19 @@ class EntriesScreenModel @Inject constructor(
             }
         }
         screenModelScope.launch {
-            delay(100)
+            delay(200)
             try {
-                mutableState.update { it.copy(extra = metaDataFlow.first()) }
-                val newData = fetchData(page = 1, size = value.size)
-                mutableState.update { it.addItems(newData, reset = true) }
+                val extra = metaDataFlow.first()
+                val newData = fetchData(page = 1, size = value.size, extra)
+                mutableState.update { it.addItems(newData, reset = true, extra) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
             }
         }
     }
 
-    override suspend fun fetchData(page: Int, size: Int): List<Entry> {
-        return entryManager.getPage(state.value.extra, page = page, size = size)
+    override suspend fun fetchData(page: Int, size: Int, extra: Meta): List<Entry> {
+        return entryManager.getPage(extra, page = page, size = size)
     }
 
     fun clearState() {

@@ -14,7 +14,7 @@ class SyncScreenModel @Inject constructor(
 ) {
     init { loadInitialData() }
 
-    override suspend fun fetchData(page: Int, size: Int): List<SyncTaskRecord> {
+    override suspend fun fetchData(page: Int, size: Int, extra: Unit): List<SyncTaskRecord> {
         Log.i("syncRecord", "$page")
         return syncTaskRecordDao.getPage(page, size)
     }

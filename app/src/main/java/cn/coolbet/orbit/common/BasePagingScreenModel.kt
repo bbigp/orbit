@@ -11,14 +11,14 @@ abstract class BasePagingScreenModel<T, E>(
     initialState: PageState<T, E>
 ): StateScreenModel<PageState<T, E>>(initialState) {
 
-    abstract suspend fun fetchData(page: Int, size: Int): List<T>
+    abstract suspend fun fetchData(page: Int, size: Int, extra: E): List<T>
 
     open fun loadInitialData() {
         screenModelScope.launch {
             if (state.value.isRefreshing) return@launch
             mutableState.update { it.copy(isRefreshing = true) }
             try {
-                val newData = fetchData(page = 1, size = state.value.size)
+                val newData = fetchData(page = 1, size = state.value.size, state.value.extra)
                 mutableState.update { it.addItems(newData, reset = true) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
@@ -33,7 +33,7 @@ abstract class BasePagingScreenModel<T, E>(
             if (state.value.isLoadingMore) return@launch
             mutableState.update { it.copy(isLoadingMore = true) }
             try {
-                val newData = fetchData(page = state.value.page + 1, size = state.value.size)
+                val newData = fetchData(page = state.value.page + 1, size = state.value.size, state.value.extra)
                 delay(200)
                 mutableState.update { it.addItems(newData) }
             } catch (e: Exception) {
@@ -54,7 +54,7 @@ data class PageState<T, E>(
     val extra: E,
 )
 
-fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false): PageState<T, E> {
+fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false, extra: E? = null): PageState<T, E> {
     val newHasMore = data.size >= this.size
     return if (reset) {
         this.copy(
@@ -62,13 +62,15 @@ fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false): Page
             page = 1,
             hasMore = newHasMore,
             isRefreshing = false,
+            extra = extra ?: this.extra
         )
     } else {
         this.copy(
             items = this.items + data,
             page = this.page + 1,
             hasMore = newHasMore,
-            isLoadingMore = false
+            isLoadingMore = false,
+            extra = extra ?: this.extra
         )
     }
 }

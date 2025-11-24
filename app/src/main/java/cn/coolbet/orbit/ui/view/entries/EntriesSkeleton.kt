@@ -75,6 +75,24 @@ fun EntriesSkeleton() {
 }
 
 @Composable
+fun EntryTopTileSkeleton() {
+    Column(modifier = Modifier.padding(horizontal = 14.dp)) {
+        Spacer(modifier = Modifier.height(8.dp).fillMaxWidth())
+        Text("All", style = AppTypography.M28.copy(color = Skeleton))
+        Spacer(modifier = Modifier.height(4.dp).fillMaxWidth())
+        Spacer(modifier = Modifier
+            .padding(top = 2.dp)
+            .width(100.dp)
+            .height(13.dp)
+            .clip(RoundedCornerShape(3.dp))
+            .shimmer()
+        )
+        Spacer(modifier = Modifier.height(16.dp).fillMaxWidth())
+        DashedDivider(indent = 2.dp)
+    }
+}
+
+@Composable
 fun EntryTileSkeleton() {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
