@@ -24,11 +24,15 @@ import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.hilt.getNavigatorScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
+import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
@@ -69,7 +73,14 @@ data class EntriesScreen(
 
         Scaffold(
             topBar = {
-                ObBackTopAppBar()
+                ObBackTopAppBar(
+                    actions = {
+                        ObIcon(
+                            R.drawable.search,
+                            onClick = { NavigatorBus.push(Route.SearchEntries(state.meta)) }
+                        )
+                    }
+                )
             }
         ) { paddingValues ->
             CompositionLocalProvider(
@@ -104,7 +115,7 @@ data class EntriesScreen(
                         }
                     } else {
                         item(key = "entry-top-tile") {
-                            EntryTopTile(state.extra)
+                            EntryTopTile(state.meta)
                         }
                         items(state.items, key = { it.id }) { item ->
                             EntryTile(item)

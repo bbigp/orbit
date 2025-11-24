@@ -7,13 +7,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
-import cn.coolbet.orbit.common.PageState
+import cn.coolbet.orbit.common.ILoadingState
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun <T, E> InfiniteScrollHandler(
+fun InfiniteScrollHandler(
     listState: LazyListState,
-    stateFlow: StateFlow<PageState<T, E>>,
+    stateFlow: StateFlow<ILoadingState>,
     onLoadMore: () -> Unit,
     buffer: Int = 4 // 距离列表底部多少项时触发加载
 ) {
@@ -25,7 +25,7 @@ fun <T, E> InfiniteScrollHandler(
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }
             .collect { layoutInfo ->
-                if (!state.hasMore || state.isLoadingMore || state.isRefreshing || state.items.isEmpty()) {
+                if (!state.hasMore || state.isLoadingMore || state.isRefreshing) {
                     return@collect
                 }
 

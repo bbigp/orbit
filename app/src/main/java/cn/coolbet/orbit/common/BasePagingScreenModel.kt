@@ -7,18 +7,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-abstract class BasePagingScreenModel<T, E>(
-    initialState: PageState<T, E>
-): StateScreenModel<PageState<T, E>>(initialState) {
+abstract class IPagingScreenModel<T>(
+    initialState: PageState<T>
+): StateScreenModel<PageState<T>>(initialState) {
 
-    abstract suspend fun fetchData(page: Int, size: Int, extra: E): List<T>
+    abstract suspend fun fetchData(page: Int, size: Int): List<T>
 
     open fun loadInitialData() {
         screenModelScope.launch {
             if (state.value.isRefreshing) return@launch
             mutableState.update { it.copy(isRefreshing = true) }
             try {
-                val newData = fetchData(page = 1, size = state.value.size, state.value.extra)
+                val newData = fetchData(page = 1, size = state.value.size)
                 mutableState.update { it.addItems(newData, reset = true) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
@@ -33,7 +33,7 @@ abstract class BasePagingScreenModel<T, E>(
             if (state.value.isLoadingMore) return@launch
             mutableState.update { it.copy(isLoadingMore = true) }
             try {
-                val newData = fetchData(page = state.value.page + 1, size = state.value.size, state.value.extra)
+                val newData = fetchData(page = state.value.page + 1, size = state.value.size)
                 delay(200)
                 mutableState.update { it.addItems(newData) }
             } catch (e: Exception) {
@@ -44,17 +44,22 @@ abstract class BasePagingScreenModel<T, E>(
     }
 }
 
-data class PageState<T, E>(
+interface ILoadingState {
+    val hasMore: Boolean
+    val isRefreshing: Boolean
+    val isLoadingMore: Boolean
+}
+
+data class PageState<T>(
     val items: List<T> = emptyList(),
     val page: Int = 1,
     val size: Int = 20,
-    val hasMore: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val isLoadingMore: Boolean = false,
-    val extra: E,
-)
+    override val hasMore: Boolean = false,
+    override val isRefreshing: Boolean = false,
+    override val isLoadingMore: Boolean = false,
+): ILoadingState
 
-fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false, extra: E? = null): PageState<T, E> {
+fun <T> PageState<T>.addItems(data: List<T>, reset: Boolean = false): PageState<T> {
     val newHasMore = data.size >= this.size
     return if (reset) {
         this.copy(
@@ -62,7 +67,6 @@ fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false, extra
             page = 1,
             hasMore = newHasMore,
             isRefreshing = false,
-            extra = extra ?: this.extra
         )
     } else {
         this.copy(
@@ -70,7 +74,6 @@ fun <T, E> PageState<T, E>.addItems(data: List<T>, reset: Boolean = false, extra
             page = this.page + 1,
             hasMore = newHasMore,
             isLoadingMore = false,
-            extra = extra ?: this.extra
         )
     }
 }

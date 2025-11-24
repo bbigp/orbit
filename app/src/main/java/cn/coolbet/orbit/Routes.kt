@@ -5,11 +5,13 @@ import androidx.compose.runtime.LaunchedEffect
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.view.entries.EntriesScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.profile.ProfileScreen
+import cn.coolbet.orbit.ui.view.search_entries.SearchEntriesScreen
 import cn.coolbet.orbit.ui.view.sync.SyncScreen
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,9 @@ data class Route(val screen: Screen) {
         val Sync = Route(screen = SyncScreen)
         fun Entries(metaId: MetaId) = Route(
             screen = EntriesScreen(metaId)
+        )
+        fun SearchEntries(meta: Meta) = Route(
+            screen = SearchEntriesScreen(meta)
         )
     }
 }

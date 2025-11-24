@@ -1,10 +1,9 @@
 package cn.coolbet.orbit.ui.view.entries
 
 import android.util.Log
+import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cn.coolbet.orbit.common.BasePagingScreenModel
-import cn.coolbet.orbit.common.PageState
-import cn.coolbet.orbit.common.addItems
+import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.model.domain.Entry
@@ -22,7 +21,7 @@ import javax.inject.Inject
 class EntriesScreenModel @Inject constructor(
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
-): BasePagingScreenModel<Entry, Meta>(initialState = PageState(extra = Feed.EMPTY)) {
+): StateScreenModel<EntriesState>(initialState = EntriesState()) {
 
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
@@ -31,14 +30,14 @@ class EntriesScreenModel @Inject constructor(
     }
 
     fun refresh(){
-        val id = state.value.extra.metaId
+        val id = state.value.meta.metaId
         this.clearState()
         loadInitialData(id)
     }
 
     fun loadInitialData(metaId: MetaId) {
         val value = state.value
-        if (value.isRefreshing && value.extra.isNotEmpty) return
+        if (value.isRefreshing && value.meta.isNotEmpty) return
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -49,21 +48,68 @@ class EntriesScreenModel @Inject constructor(
         screenModelScope.launch {
             delay(200)
             try {
-                val extra = metaDataFlow.first()
-                val newData = fetchData(page = 1, size = value.size, extra)
-                mutableState.update { it.addItems(newData, reset = true, extra) }
+                val meta = metaDataFlow.first()
+                val newData = entryManager.getPage(meta, page = 1, size = value.size)
+                mutableState.update { it.addItems(newData, reset = true, meta) }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
             }
         }
     }
 
-    override suspend fun fetchData(page: Int, size: Int, extra: Meta): List<Entry> {
-        return entryManager.getPage(extra, page = page, size = size)
+    fun nextPage() {
+        screenModelScope.launch {
+            if (!state.value.hasMore) return@launch
+            if (state.value.isLoadingMore) return@launch
+            mutableState.update { it.copy(isLoadingMore = true) }
+            try {
+                val newData = entryManager.getPage(
+                    state.value.meta,
+                    page = state.value.page + 1,
+                    size = state.value.size
+                )
+                delay(200)
+                mutableState.update { it.addItems(newData) }
+            } catch (e: Exception) {
+                mutableState.update { it.copy(isLoadingMore = false) }
+                Log.e("BasePagingScreenModel", "加载数据出错.", e)
+            }
+        }
     }
 
     fun clearState() {
-        mutableState.update { PageState(extra = Feed.EMPTY, isRefreshing = true) }
+        mutableState.update { EntriesState(isRefreshing = true) }
     }
 
+}
+
+data class EntriesState(
+    val meta: Meta = Feed.EMPTY,
+    val items: List<Entry> = emptyList(),
+    val page: Int = 1,
+    val size: Int = 20,
+    override val hasMore: Boolean = false,
+    override val isRefreshing: Boolean = false,
+    override val isLoadingMore: Boolean = false,
+): ILoadingState
+
+fun EntriesState.addItems(data: List<Entry>, reset: Boolean = false, meta: Meta? = null): EntriesState {
+    val newHasMore = data.size >= this.size
+    return if (reset) {
+        this.copy(
+            items = data,
+            page = 1,
+            hasMore = newHasMore,
+            isRefreshing = false,
+            meta = meta ?: this.meta
+        )
+    } else {
+        this.copy(
+            items = this.items + data,
+            page = this.page + 1,
+            hasMore = newHasMore,
+            isLoadingMore = false,
+            meta = meta ?: this.meta
+        )
+    }
 }
