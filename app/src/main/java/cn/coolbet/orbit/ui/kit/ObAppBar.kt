@@ -55,6 +55,14 @@ fun PreviewObTopAppbar(){
                 Box(modifier = Modifier.height(28.dp).width(28.dp).background(Color.Cyan))
             }
         )
+
+        ObTextFieldAppbar(icon = R.drawable.search, button = {
+            ObTextButton(
+                "取消",
+                colors = OButtonDefaults.ghost,
+                sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 0.1.dp),
+            )
+        })
     }
 }
 
@@ -116,4 +124,37 @@ fun ObBackTopAppBar(
         },
         background = background,
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ObTextFieldAppbar(
+    icon: Int,
+    button: @Composable RowScope.() -> Unit = {},
+    background: Color = ObTheme.colors.primaryContainer,
+){
+    Box(
+        // 让 Box 自身处理 Insets，将内容向下推
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(TopAppBarDefaults.windowInsets) // 处理状态栏 Insets
+            .height(52.dp) // 最终高度 = 状态栏 Insets + 50.dp
+            .background(background), // 设置背景色
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp)
+                .height(36.dp)
+                .fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                ObIconTextField(
+                    icon = icon,
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            button()
+        }
+    }
 }
