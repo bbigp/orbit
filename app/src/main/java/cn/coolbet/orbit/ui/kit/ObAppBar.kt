@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -19,6 +20,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
@@ -62,7 +64,8 @@ fun PreviewObTopAppbar(){
                 colors = OButtonDefaults.ghost,
                 sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 0.1.dp),
             )
-        })
+        }, keyboardActions = KeyboardActions {  })
+        ObTextFieldAppbar(icon = R.drawable.search, keyboardActions = KeyboardActions {  })
     }
 }
 
@@ -130,8 +133,12 @@ fun ObBackTopAppBar(
 @Composable
 fun ObTextFieldAppbar(
     icon: Int,
-    button: @Composable RowScope.() -> Unit = {},
+    keyboardActions: KeyboardActions,
+    button: (@Composable RowScope.() -> Unit)? = null,
     background: Color = ObTheme.colors.primaryContainer,
+    value: String = "",
+    onValueChange: (String) -> Unit = {},
+    focusRequester: FocusRequester? = null,
 ){
     Box(
         // 让 Box 自身处理 Insets，将内容向下推
@@ -150,11 +157,17 @@ fun ObTextFieldAppbar(
                 modifier = Modifier.weight(1f)
             ) {
                 ObIconTextField(
+                    value = value,
                     icon = icon,
+                    onValueChange = onValueChange,
+                    focusRequester = focusRequester,
+                    keyboardActions = keyboardActions
                 )
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            button()
+            if (button != null) {
+                Spacer(modifier = Modifier.width(16.dp))
+                button()
+            }
         }
     }
 }

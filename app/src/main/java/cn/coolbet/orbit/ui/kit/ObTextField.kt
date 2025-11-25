@@ -23,6 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
@@ -53,10 +56,13 @@ fun ObIconTextField(
         imeAction = ImeAction.Done,
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onValueChange: (String) -> Unit = {},
+    focusRequester: FocusRequester? = null,
 ) {
     ObTextField(
         hint = hint, value = value, background = background, readOnly = readOnly,
         keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
+        onValueChange = onValueChange, focusRequester = focusRequester,
         leading = {
             Image(
                 modifier = Modifier.size(sizes.iconSize),
@@ -71,6 +77,7 @@ fun ObIconTextField(
 
 @Composable
 fun ObTextField(
+    modifier: Modifier = Modifier,
     hint: String = "Search", value: String = "",
     readOnly: Boolean = false,
     onValueChange: (String) -> Unit = {},
@@ -81,6 +88,7 @@ fun ObTextField(
         imeAction = ImeAction.Done,
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester? = null,
 ) {
     Row(
         modifier = Modifier.height(sizes.height).fillMaxWidth()
@@ -97,12 +105,16 @@ fun ObTextField(
             contentAlignment = Alignment.CenterStart,
         ) {
             BasicTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = modifier.fillMaxWidth()
+                    .then(
+                        if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
+                    ),
                 value = value, onValueChange = onValueChange,
                 singleLine = true, readOnly = readOnly,
                 textStyle = AppTypography.R15,
                 cursorBrush = SolidColor(Black95), // 光标
-                keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
             )
             if (value.isEmpty()) {
                 Text(

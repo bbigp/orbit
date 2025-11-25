@@ -11,7 +11,7 @@ import cn.coolbet.orbit.model.entity.SearchRecord
 interface SearchDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(history: SearchRecord): Long
+    suspend fun insert(record: SearchRecord): Long
 
     @Query("select distinct word from search_records where meta_id = :metaId order by id desc limit 15")
     suspend fun getList(metaId: String): List<String>
