@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.update
 class EntryScreenModel @AssistedInject constructor(
     @Assisted private val entry: Entry,
 ): ScreenModel {
-    private val mutableState = MutableStateFlow(EntryState())
+    private val mutableState = MutableStateFlow(EntryState(entry = entry))
     val state: StateFlow<EntryState> = mutableState.asStateFlow()
 
     init {
-        mutableState.update { it.copy(entry) }
+//        mutableState.update { it.copy(entry) }
     }
 
     @AssistedFactory

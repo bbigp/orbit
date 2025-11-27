@@ -1,0 +1,11 @@
+
+@font-face {
+    font-family: 'LocalFont';
+    src: url('../fonts/my-font.ttf'); /* 相对路径引用本地字体 */
+}
+
+body {
+    font-family: 'LocalFont', sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
