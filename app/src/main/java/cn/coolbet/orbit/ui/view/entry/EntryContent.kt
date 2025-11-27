@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -15,22 +19,26 @@ import cn.coolbet.orbit.model.domain.Entry
 @Composable
 fun EntryContent(entry: Entry){
     val context = LocalContext.current
+    val content = entry.readableContent.ifEmpty { entry.content }
     val fullHtml = """
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
+            <meta charset="UTF-8">
             <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-            <link rel="stylesheet" type="text/css" href="file:///android_asset/css/styles.css">
+            <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
+            <title>${entry.title}</title>
         </head>
         <body>
-            <h1>本地样式和字体测试</h1>
-            <p>${entry.content}</p>
+            <div id="br-article" class="active">
+                <div class="br-content">${content}</div>
+            </div>
         </body>
         </html>
     """
 
     AndroidView(
-        modifier = Modifier,
+        modifier = Modifier.fillMaxSize(),
         factory = {
             WebView(context).apply {
                 // 配置 WebView 布局参数
@@ -38,6 +46,7 @@ fun EntryContent(entry: Entry){
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+                isVerticalScrollBarEnabled = false
                 // 启用 JavaScript (如果需要)
                 settings.javaScriptEnabled = true
                 // 允许访问文件系统，以便加载本地资源

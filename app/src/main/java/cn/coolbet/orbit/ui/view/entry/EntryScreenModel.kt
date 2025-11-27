@@ -26,8 +26,26 @@ class EntryScreenModel @AssistedInject constructor(
     interface Factory: ScreenModelFactory {
         fun create(entry: Entry): EntryScreenModel
     }
+
+
+    fun startLoading() {
+        mutableState.update { it.copy(isLoadingContent = true) }
+    }
+
+    fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String) {
+        mutableState.update {
+            it.copy(
+                isLoadingContent = false,
+                entry = it.entry.copy(
+                    readableContent = readableContent, leadImageURL = leadImageURL,
+                    summary = summary
+                )
+            )
+        }
+    }
 }
 
 data class EntryState(
-    val entry: Entry = Entry.EMPTY
+    val entry: Entry = Entry.EMPTY,
+    val isLoadingContent: Boolean = false
 )

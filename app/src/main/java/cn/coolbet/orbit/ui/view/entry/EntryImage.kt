@@ -31,7 +31,7 @@ fun EntryImage(
     alt: String = ""
 ) {
     Column(
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+        modifier = Modifier.padding(vertical = 8.dp)
     ) {
         SubcomposeAsyncImage(
             model = url,

@@ -28,9 +28,7 @@ fun EntryTitle(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-    ) {
+    Column {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             entry.title,

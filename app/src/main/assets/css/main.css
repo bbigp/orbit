@@ -1,11 +1,322 @@
 
-@font-face {
+/*@font-face {
     font-family: 'LocalFont';
     src: url('../fonts/my-font.ttf'); /* 相对路径引用本地字体 */
+}*/
+
+
+/* Base Styles are Mobile-first */
+/* 有问题的2个属性 --text-primary  --text-secondary
+不考虑做深色模式
+@media (prefers-color-scheme: dark) {
+  :root {
+    --textPrimary: #fff;
+    --textTertiary: rgba(255, 255, 255, 0.3);
+    --textBlue: rgba(10, 132, 255, 1);
+    --bgSecondary: rgba(255, 255, 255, 0.06);
+    --bgTertiary: rgba(255, 255, 255, 0.1);
+    --borderThin: rgba(255, 255, 255, 0.16);
+    --borderStong: rgba(255, 255, 255, 0.2);
+  }
+}
+@media (prefers-color-scheme: light) {
+  :root {
+  }
+}
+*/
+@font-face {
+  font-family: 'DM Sans';
+  src: url("../fonts/DMSans-Regular.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url("../fonts/DMSans-Medium.ttf") format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url("../fonts/DMSans-Bold.ttf") format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url("../fonts/DMMono-Regular.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DM Mono';
+  src: url("../fonts/DMMono-Medium.ttf") format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+:root {
+  font-family: 'DM Sans', 'DM Mono', sans-serif;
+
+  --font-size-base: 16px;
+  font-size: var(--font-size-base);
+
+  --line-height-multiplier: 1.5;
+  line-height: var(--line-height-multiplier);
+
+  /* Weights & Letter Spacing */
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  --textPrimary: rgba(0, 0, 0, 0.95);
+  --textTertiary: rgba(0, 0, 0, 0.25);
+  --textBlue: rgba(0, 122, 255, 1);
+  --bgSecondary: rgba(0, 0, 0, 0.04);
+  --bgTertiary: rgba(0, 0, 0, 0.08);
+  --borderThin: rgba(0, 0, 0, 0.12);
+  --borderStong: rgba(0, 0, 0, 0.16);
 }
 
 body {
-    font-family: 'LocalFont', sans-serif;
-    padding: 20px;
-    background-color: #f4f4f4;
+  background-color: transparent;
+  color: var(--textPrimary);
+  word-break: break-word;
+  text-autospace: normal;
+  padding: 0 0px 12px 0px;
+  margin: 0;
+  overflow-y: hidden;
+}
+
+/* === Headings === */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--font-weight-medium);
+}
+
+h1 {
+  font-size: 1.375rem; /* ~22px */
+  line-height: 1.75rem; /* ~28px */
+  letter-spacing: var(--tracking-tight);
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 1.25rem; /* ~20px */
+  line-height: 1.625rem; /* ~26px */
+  letter-spacing: var(--tracking-tight);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.125rem; /* ~18px */
+  line-height: 1.5rem; /* ~24px */
+  letter-spacing: var(--tracking-normal);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+h4 {
+  font-size: 1rem; /* ~16px */
+  line-height: 1.375rem; /* ~22px */
+  letter-spacing: var(--tracking-normal);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+h5 {
+  font-size: 0.875rem; /* ~14px */
+  line-height: 1.25rem; /* ~20px */
+  letter-spacing: var(--tracking-normal);
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+h6 {
+  font-size: 0.8125rem; /* ~13px */
+  line-height: 1.125rem;
+  letter-spacing: var(--tracking-normal);
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* === Paragraph === */
+p {
+  font-size: 1rem;
+  line-height: var(--line-height-multiplier);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--tracking-normal);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* === Divider === */
+hr {
+  border: none;
+  border-top: 1px dashed var(--borderThin);
+  margin: 2.5rem 0;
+
+  /* Figma 中 Dash 为 2px，Gap 为 4px，Dash Cap 为 Round，下方为 AI 给出的模拟代码，可看是否用得上或有其他方式实现 */
+  background: repeating-linear-gradient(
+    to right,
+    var(--borderThin),
+    var(--borderThin) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  height: 1px;
+  border-top: none;
+  border-radius: 999px; /* 模拟 Round Dash Cap */
+}
+
+/* === Lists === */
+ul,
+ol {
+  margin-left: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+ul > li + li,
+ol > li + li {
+  margin-top: 0.5rem;
+}
+
+li {
+  font-size: 1rem;
+  line-height: var(--line-height-multiplier);
+  font-weight: var(--font-weight-normal);
+}
+
+/* === Links === */
+a,
+a:active {
+  color: var(--text-primary);
+  font-feature-settings: 'liga' off;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-decoration-color: var(--text-secondary);
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
+}
+
+/* === Blockquotes === */
+blockquote {
+  font-size: 1rem;
+  line-height: var(--line-height-multiplier);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--tracking-normal);
+  border-left: 4px solid var(--borderStong);
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 2px;
+  quotes: '“' '”';
+}
+
+blockquote p::before {
+  content: open-quote;
+}
+blockquote p::after {
+  content: close-quote;
+}
+
+/* media */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 隐藏没有 src 属性或 src 为空的 audio */
+audio:not([src]):not(:has(source)), audio[src=""]:not(:has(source)) {
+  display: none;
+}
+
+figure {
+  margin: 1.5rem 0;
+  color: var(--textTertiary);
+  font-feature-settings: 'ss03' on, 'liga' off;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+}
+
+figcaption {
+  margin-top: 0.5px;
+  color: var(--textTertiary);
+  font-feature-settings: 'ss03' on, 'liga' off;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+}
+
+/* 特殊情况：figure 后紧跟 figcaption，则 figure 的 margin-bottom 改为 8px */
+figure:has(+ figcaption), img:has(+ figcaption) {
+  margin-bottom: 8px;
+}
+figure:has(figcaption) img {
+  margin-bottom: 8px;
+}
+
+/* table */
+.br-table-container {
+  max-width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+table {
+  margin: 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-radius: 12px;
+  border: 0.5px solid var(--borderThin);
+  border-spacing: 0;
+}
+th,
+td {
+  min-width: 100px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 0.5px solid var(--borderThin);
+}
+
+th {
+  background-color: var(--bgSecondary);
+}
+
+
+
+#br-skeleton, #br-article {
+    display: none;
+}
+#br-skeleton.active, #br-article.active {
+    display: block;
+}
+.br-content {
+    overflow: hidden;
 }

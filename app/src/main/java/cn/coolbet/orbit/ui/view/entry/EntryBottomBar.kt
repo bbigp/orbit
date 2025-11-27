@@ -44,6 +44,7 @@ fun EntryBottomBar(
                 NavigatorBus.pop()
             })
             ObIcon(id = R.drawable.check_o)
+            ObIcon(id = R.drawable.star)
             ObIcon(id = R.drawable.page)
             ObIcon(id = R.drawable.chevron_down)
             ObIcon(id = R.drawable.more)
