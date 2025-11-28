@@ -1,7 +1,10 @@
 package cn.coolbet.orbit.model.domain
 
+import android.os.Parcelable
 import cn.coolbet.orbit.model.OrderPublishedAt
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Feed(
     override val id: Long,
     val userId: Long = 0,

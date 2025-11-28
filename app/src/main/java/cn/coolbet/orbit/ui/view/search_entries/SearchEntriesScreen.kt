@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.search_entries
 
+import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,10 +24,12 @@ import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextFieldAppbar
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class SearchEntriesScreen(
     val meta: Meta,
-): Screen {
+): Screen, Parcelable {
 
     @Composable
     override fun Content() {

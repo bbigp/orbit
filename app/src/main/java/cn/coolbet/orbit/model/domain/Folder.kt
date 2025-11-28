@@ -1,7 +1,10 @@
 package cn.coolbet.orbit.model.domain
 
+import android.os.Parcelable
 import cn.coolbet.orbit.model.OrderPublishedAt
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Folder (
     override val id: Long,
     val userId: Long = 0,
@@ -20,8 +23,6 @@ data class Folder (
 
     override val metaId: MetaId get() = MetaId("o", id)
     override val feedIds: List<Long> get() = feeds.map { it.id }.toList()
-    override val siteURL: String get() = ""
-    override val url: String = ""
 }
 
 

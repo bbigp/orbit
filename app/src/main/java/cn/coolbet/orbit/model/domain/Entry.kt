@@ -1,7 +1,9 @@
 package cn.coolbet.orbit.model.domain
 
-import java.util.Date
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Entry(
     val id: Long,
     val userId: Long,
@@ -25,7 +27,7 @@ data class Entry(
 
     val feed: Feed = Feed.EMPTY,
     val medias: List<Media> = emptyList(),
-) {
+): Parcelable {
     companion object {
         val EMPTY = Entry(id = 0, userId = 0)
     }

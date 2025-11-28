@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.entries
 
+import android.os.Parcelable
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
@@ -32,12 +32,12 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class EntriesScreen(
     val metaId: MetaId,
-): Screen {
-
-    override val key: ScreenKey = metaId.toString()
+): Screen, Parcelable {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

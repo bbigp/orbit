@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt") // 启用 Kotlin 注解处理器
     id("com.google.dagger.hilt.android") // Hilt 插件
+    id("kotlin-parcelize")
 }
 
 android {

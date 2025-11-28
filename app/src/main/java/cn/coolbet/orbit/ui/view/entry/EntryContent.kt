@@ -46,6 +46,7 @@ fun EntryContent(entry: Entry){
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+                settings.textZoom = 100
                 isVerticalScrollBarEnabled = false
                 // 启用 JavaScript (如果需要)
                 settings.javaScriptEnabled = true

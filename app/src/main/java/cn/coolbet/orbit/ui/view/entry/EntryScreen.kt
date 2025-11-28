@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.entry
 
+import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,10 +29,12 @@ import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObIconTextButton
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class EntryScreen(
     val data: Entry
-): Screen {
+): Screen, Parcelable {
 
     @Composable
     override fun Content() {

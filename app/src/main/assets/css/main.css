@@ -97,7 +97,6 @@ body {
   text-autospace: normal;
   padding: 0 0px 12px 0px;
   margin: 0;
-  overflow-y: hidden;
 }
 
 /* === Headings === */
@@ -160,7 +159,7 @@ h6 {
 
 /* === Paragraph === */
 p {
-  font-size: 1rem;
+  font-size: 1rem !important;
   line-height: var(--line-height-multiplier);
   font-weight: var(--font-weight-normal);
   letter-spacing: var(--tracking-normal);
