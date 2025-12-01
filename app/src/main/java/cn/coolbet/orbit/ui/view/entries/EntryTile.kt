@@ -33,6 +33,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,9 +52,13 @@ import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.view.FeedIconDefaults
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.ImageRequest
 
 @Composable
 fun EntryTile(entry: Entry) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier.click(
             {
@@ -88,7 +93,10 @@ fun EntryTile(entry: Entry) {
             }
             if (entry.pic.isNotEmpty()) {
                 SubcomposeAsyncImage(
-                    model = entry.pic,
+                    model = ImageRequest.Builder(context)
+                        .data(entry.pic)
+                        .httpHeaders(NetworkHeaders.Builder().add("Referer", entry.url).build())
+                        .build(),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

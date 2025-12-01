@@ -1,7 +1,10 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
+import cn.coolbet.orbit.dao.EntryDao
+import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.view.home.HomeScreenState
 import dagger.assisted.Assisted
@@ -11,9 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class EntryScreenModel @AssistedInject constructor(
     @Assisted private val entry: Entry,
+    private val entryDao: EntryDao,
 ): ScreenModel {
     private val mutableState = MutableStateFlow(EntryState(entry = entry))
     val state: StateFlow<EntryState> = mutableState.asStateFlow()
@@ -33,14 +38,17 @@ class EntryScreenModel @AssistedInject constructor(
     }
 
     fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String) {
-        mutableState.update {
-            it.copy(
-                isLoadingContent = false,
-                entry = it.entry.copy(
-                    readableContent = readableContent, leadImageURL = leadImageURL,
-                    summary = summary
+        screenModelScope.launch {
+            entryDao.updateReadingModeData(readableContent, leadImageURL, summary, entry.id)
+            mutableState.update {
+                it.copy(
+                    isLoadingContent = false,
+                    entry = it.entry.copy(
+                        readableContent = readableContent, leadImageURL = leadImageURL,
+                        summary = summary
+                    )
                 )
-            )
+            }
         }
     }
 }

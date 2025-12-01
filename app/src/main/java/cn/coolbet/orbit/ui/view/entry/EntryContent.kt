@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,10 +42,24 @@ fun EntryContent(entry: Entry){
         </html>
     """
 
+    var webView: WebView? by remember { mutableStateOf(null) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            webView?.stopLoading()
+            webView?.clearHistory()
+            webView?.loadUrl("about:blank") // 推荐：加载空白页
+            webView?.onPause() // 推荐：暂停活动
+            webView?.destroy()
+            webView = null
+        }
+    }
+
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = {
             WebView(context).apply {
+                webView = this
                 // 配置 WebView 布局参数
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,

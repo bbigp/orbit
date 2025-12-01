@@ -27,7 +27,7 @@ data class EntryEntity(
 
     @ColumnInfo(name = "summary", defaultValue = "") val summary: String = "",
     @ColumnInfo(name = "readable_content", defaultValue = "") val readableContent: String = "",
-    @ColumnInfo(name = "leadImage_url", defaultValue = "") val leadImageURL: String = "",
+    @ColumnInfo(name = "lead_image_url", defaultValue = "") val leadImageURL: String = "",
 )
 
 

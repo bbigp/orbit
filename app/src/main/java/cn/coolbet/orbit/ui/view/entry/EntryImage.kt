@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,17 +25,24 @@ import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.entries.pulsatingShimmer
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
+import coil3.request.ImageRequest
 
 @Composable
 fun EntryImage(
     url: String,
     alt: String = ""
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
         SubcomposeAsyncImage(
-            model = url,
+            model = ImageRequest.Builder(context)
+                .data(url)
+                .httpHeaders(NetworkHeaders.Builder().add("Referer", url).build())
+                .build(),
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier

@@ -110,6 +110,17 @@ abstract class EntryDao(protected val db: AppDatabase) {
     """)
     abstract suspend fun countFeedUnread(): List<UnreadCount>
 
+    @Query("""
+        update entries set 
+            readable_content = :readable, 
+            lead_image_url = :leadImageURL,
+            summary = :summary
+        where id = :id
+    """)
+    abstract suspend fun updateReadingModeData(readable: String, leadImageURL: String, summary: String,
+        id: Long
+    )
+
     @Query("select * from entries limit 10")
     internal abstract suspend fun getEntriesImpl(): List<EntryEntity>
 

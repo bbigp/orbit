@@ -9,12 +9,18 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.io.IOException
 
@@ -30,6 +36,19 @@ fun ReaderView(
         readAssetFile(context, "js/mercury.web.js")
     }
     val bridge = remember { ContentExtractorBridge(onContentExtracted) }
+    var webView: WebView? by remember { mutableStateOf(null) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            webView?.stopLoading()
+            webView?.clearHistory()
+            webView?.loadUrl("about:blank") // 推荐：加载空白页
+            webView?.onPause() // 推荐：暂停活动
+            webView?.destroy()
+            webView = null
+        }
+    }
+
 
     // 🌟 使用 Modifier.size(0.dp) 或其他方式使其不可见，但不应使用 Modifier.size(0.dp)
     //    因为它可能会阻止 WebView 正确加载和执行脚本。
@@ -40,6 +59,7 @@ fun ReaderView(
         modifier = Modifier.size(1.dp),
         factory = {
             WebView(context).apply {
+                webView = this
                 layoutParams = ViewGroup.LayoutParams(1, 1) // 确保 View 级别也是 1x1
                 settings.javaScriptEnabled = true
                 settings.allowFileAccess = false
@@ -79,14 +99,13 @@ class ContentExtractorBridge(private val onContentExtracted: (ExtractedContent) 
 }
 private val gson = Gson()
 
-@Serializable
 data class ExtractedContent(
     val author: String? = "",
     val content: String? = "",
-    val datePublished: String? = "",
+    @SerializedName("date_published") val datePublished: String? = "",
     val domain: String? = "",
     val excerpt: String? = "",
-    val leadImageUrl: String? = "",
+    @SerializedName("lead_image_url") val leadImageUrl: String? = "",
     val title: String? = "",
     val url: String? = ""
 )
