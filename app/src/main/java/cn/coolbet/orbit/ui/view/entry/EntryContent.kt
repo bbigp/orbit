@@ -1,11 +1,17 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.JsPromptResult
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
@@ -16,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.coolbet.orbit.model.domain.Entry
 
@@ -43,6 +50,7 @@ fun EntryContent(entry: Entry){
     """
 
     var webView: WebView? by remember { mutableStateOf(null) }
+    var webViewHeight by remember { mutableStateOf(1.dp) }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -56,23 +64,46 @@ fun EntryContent(entry: Entry){
     }
 
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth().height(webViewHeight),
         factory = {
             WebView(context).apply {
                 webView = this
-                // 配置 WebView 布局参数
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                this.isVerticalScrollBarEnabled = false
+                this.isHorizontalScrollBarEnabled = false
+                this.overScrollMode = View.OVER_SCROLL_NEVER
                 settings.textZoom = 100
-                isVerticalScrollBarEnabled = false
-                // 启用 JavaScript (如果需要)
                 settings.javaScriptEnabled = true
-                // 允许访问文件系统，以便加载本地资源
+                settings.loadsImagesAutomatically = true
+                settings.allowContentAccess = true
                 settings.allowFileAccess = true
-                // 确保在应用内部处理页面跳转，而不是打开外部浏览器
-                webViewClient = WebViewClient()
+                webViewClient = object : WebViewClient() {
+                    @SuppressLint("LocalContextResourcesRead")
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        Log.i("EntryContent", "onPageFinished")
+                        view?.evaluateJavascript(
+                            "(function() { return document.documentElement.scrollHeight; })();"
+                        ) { result ->
+                            // 🌟 结果在这里异步返回
+                            Log.i("EntryContent", "JS Result: $result")
+
+                            try {
+                                // result 是一个 JSON 字符串，包含返回的数字（例如："1234"）
+                                // 需要移除可能的引号并转换为浮点数/整数
+                                val pxHeight = result.toFloat().toInt()
+
+                                // 转换为 Compose 密度无关像素 (dp)
+                                val density = context.resources.displayMetrics.density
+                                webViewHeight = (pxHeight / density).dp
+
+                            } catch (e: Exception) {
+                                Log.e("WebViewHeight", "Failed to parse height: $result", e)
+                                // 如果解析失败，可以设置一个默认高度
+                                webViewHeight = 200.dp
+                            }
+                        }
+                    }
+                }
                 // 2. 加载本地 HTML 内容
                 // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
                 // 这样 WebView 就能找到 CSS/字体文件。
