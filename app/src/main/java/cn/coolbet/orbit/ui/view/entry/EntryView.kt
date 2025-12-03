@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
@@ -39,7 +40,9 @@ fun EntryView(entry: Entry) {
                 EntryImage(entry.pic)
             }
             EntryTitle(entry)
-            EntryContent(entry)
+            Box(modifier = Modifier.clipToBounds()) {
+                EntryContent(entry)
+            }
             NoMoreIndicator(height = 60.dp)
             Spacer(modifier = Modifier.height(12.dp))
             Spacer(modifier = Modifier.height(8.dp))
