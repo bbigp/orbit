@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.kit
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -123,7 +124,11 @@ fun ObBackTopAppBar(
         title = title,
         actions = actions,
         navigationIcon = {
-            ObIcon(id = R.drawable.arrow_left, onClick = { navigator?.pop() }, background = background)
+            ObIcon(
+                id = R.drawable.arrow_left,
+                modifier = Modifier.background(background)
+                    .clickable(onClick = { navigator?.pop() })
+            )
         },
         background = background,
     )

@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.view.entries
 
 import android.os.Parcelable
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -64,7 +65,9 @@ data class EntriesScreen(
                     actions = {
                         ObIcon(
                             R.drawable.search,
-                            onClick = { NavigatorBus.push(Route.SearchEntries(state.meta)) }
+                            modifier = Modifier.clickable(
+                                onClick = { NavigatorBus.push(Route.SearchEntries(state.meta)) }
+                            ),
                         )
                     }
                 )

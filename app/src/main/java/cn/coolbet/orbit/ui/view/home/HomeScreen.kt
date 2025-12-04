@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.home
 
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,7 +62,10 @@ object HomeScreen: Screen {
             topBar = {
                 ObTopAppbar(
                     navigationIcon = {
-                        ObIcon(id = R.drawable.lines_3, onClick = { NavigatorBus.push(Route.Profile) })
+                        ObIcon(
+                            id = R.drawable.lines_3,
+                            modifier = Modifier.clickable(onClick = { NavigatorBus.push(Route.Profile) }),
+                        )
                     },
                     actions = {
                         ObIconGroup {
@@ -71,9 +75,11 @@ object HomeScreen: Screen {
                                 ObIcon(
                                     id = R.drawable.sync,
                                     contentScale = ContentScale.None,
-                                    onClick = { syncViewModel.syncData(checkLastExecuteTime = false) }
+                                    modifier = Modifier.clickable(
+                                        onClick = { syncViewModel.syncData(checkLastExecuteTime = false) }
+                                    ),
                                 )
-                            ObIcon(id = R.drawable.add, onClick = { })
+                            ObIcon(id = R.drawable.add)
                         }
                     }
                 )

@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -32,9 +33,13 @@ fun SyncSubscriptions(time: String) {
             Text("Sync Subscriptions", maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15)
             Text("Last Synced $time", modifier = Modifier.padding(start = 1.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R11B50)
         }
-        ObIcon(id = R.drawable.check_o, color = Black75, onClick = {
-            NavigatorBus.push(Route.Sync)
-        })
+        ObIcon(
+            id = R.drawable.check_o,
+            color = Black75,
+            modifier = Modifier.clickable(
+                onClick = { NavigatorBus.push(Route.Sync) }
+            )
+        )
     }
 }
 

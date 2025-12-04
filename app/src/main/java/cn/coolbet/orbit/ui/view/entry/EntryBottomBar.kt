@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -34,22 +36,23 @@ fun EntryBottomBar(
                 .background(ObTheme.colors.primaryContainer)
     ) {
         SpacerDivider(thickness = 1.dp)
-        Spacer(modifier = Modifier.height(16.dp))
         Row(
-            modifier = Modifier.height(28.dp).padding(horizontal = 20.dp).fillMaxWidth(),
+            modifier = Modifier.height(48.dp)
+                .padding(start = 20.dp, end = 20.dp, bottom = 4.dp, top = 8.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
         ) {
-            ObIcon(id = R.drawable.arrow_left, onClick = {
-                NavigatorBus.pop()
-            })
+            ObIcon(
+                id = R.drawable.arrow_left,
+                modifier = Modifier.clickable(onClick = { NavigatorBus.pop() }),
+            )
             ObIcon(id = R.drawable.check_o)
             ObIcon(id = R.drawable.star)
             ObIcon(id = R.drawable.page)
             ObIcon(id = R.drawable.chevron_down)
             ObIcon(id = R.drawable.more)
         }
-        Spacer(modifier = Modifier.height(4.dp))
     }
 
 }

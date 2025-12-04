@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.kit
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,15 +31,14 @@ import cn.coolbet.orbit.ui.theme.ObTheme
 @Composable
 fun ObIcon(
     id: Int,
+    modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     color: Color = ObTheme.colors.primary,
-    background: Color = ObTheme.colors.primaryContainer,
-    onClick: () -> Unit = {}
 ) {
+    val defaultModifier = Modifier.size(28.dp)
+        .background(ObTheme.colors.primaryContainer)
     Box(
-        modifier = Modifier.size(28.dp)
-            .background(background)
-            .click(onClick = onClick),
+        modifier = defaultModifier.then(modifier),
         contentAlignment = Alignment.Center,
     ) {
         Image(

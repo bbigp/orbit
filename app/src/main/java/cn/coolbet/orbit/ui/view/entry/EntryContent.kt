@@ -9,6 +9,7 @@ import android.webkit.JsPromptResult
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,10 +18,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -32,9 +35,8 @@ import cn.coolbet.orbit.model.domain.Entry
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
-fun EntryContent(entry: Entry){
+fun EntryContent(entry: Entry, scrollState: ScrollState){
     val context = LocalContext.current
-    val density = LocalDensity.current
     val content = entry.readableContent.ifEmpty { entry.content }
     val fullHtml = """
         <!DOCTYPE html>
@@ -49,21 +51,16 @@ fun EntryContent(entry: Entry){
             <div id="br-article" class="active">
                 <div class="br-content">${content}</div>
             </div>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const height = document.getElementById('br-article').getBoundingClientRect().height
-                    console.log(height)
-                    Android.onExtractionComplete(height);
-                });
-            </script> 
         </body>
         </html>
     """
 
+
+
     var webView: WebView? by remember { mutableStateOf(null) }
     var webViewHeight by remember { mutableStateOf(1.dp) }
     val bridge = remember { HeightBridge(onHeight = { height ->
-        webViewHeight = height.dp + 10.dp
+        webViewHeight = height.dp
     }) }
 
     DisposableEffect(Unit) {
@@ -78,9 +75,7 @@ fun EntryContent(entry: Entry){
     }
 
     AndroidView(
-        modifier = Modifier.fillMaxWidth().height(webViewHeight).graphicsLayer { // 尝试显式设置裁剪
-            clip = true
-        },
+        modifier = Modifier.fillMaxWidth().height(webViewHeight),
         factory = {
             WebView(context).apply {
                 webView = this
@@ -93,25 +88,17 @@ fun EntryContent(entry: Entry){
                 settings.allowContentAccess = true
                 settings.allowFileAccess = true
                 addJavascriptInterface(bridge, "Android")
-                viewTreeObserver.addOnGlobalLayoutListener {
-                    // contentHeight 是 WebView 内部内容的总高度（按缩放后的像素）
-                    // 乘以 scale 得到实际渲染像素高度
-                    val actualContentHeightPx = this.contentHeight * this.scale
-
-                    // 2. 转换为 Compose 的 DP 单位
-                    webViewHeight = with(density) { actualContentHeightPx.toDp() }
-                }
                 webViewClient = object : WebViewClient() {
                     @SuppressLint("LocalContextResourcesRead")
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
                         Log.i("EntryContent", "onPageFinished")
 //                        "(function() { return document.documentElement.scrollHeight; })();"
-//                        view?.evaluateJavascript("""
-//                    const height = document.getElementById('br-article').getBoundingClientRect().height
-//                    console.log(height)
-//                    Android.onExtractionComplete(height);
-//                        """.trimIndent(), null)
+                        view?.evaluateJavascript("""
+                            const height = document.getElementById('br-article').getBoundingClientRect().height
+                            console.log(height)
+                            Android.onExtractionComplete(height);
+                        """.trimIndent(), null)
                     }
                 }
                 // 2. 加载本地 HTML 内容
@@ -127,7 +114,10 @@ fun EntryContent(entry: Entry){
             }
         },
         update = { webView ->
-
+            if (scrollState.value > 40) {
+                // 强制 WebView 视图对齐到顶部 (清除任何残留的微小负位移)
+                webView.scrollTo(0, 0)
+            }
         }
     )
 }

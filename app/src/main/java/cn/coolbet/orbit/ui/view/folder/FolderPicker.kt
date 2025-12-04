@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.folder
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -89,14 +90,15 @@ fun FolderPickerSheet(
                 ) {
                     ObIcon(
                         id = R.drawable.arrow_left,
-                        onClick = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                if (!sheetState.isVisible) {
-                                    onDismiss()
+                        modifier = Modifier.clickable(
+                            onClick = {
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        onDismiss()
+                                    }
                                 }
                             }
-                        },
-                        background = Color.Transparent
+                        ).background(Color.Transparent)
                     )
                 }
                 Text(

@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,13 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
@@ -41,7 +45,7 @@ fun EntryView(entry: Entry) {
             }
             EntryTitle(entry)
             Box(modifier = Modifier.clipToBounds()) {
-                EntryContent(entry)
+                EntryContent(entry, scrollState)
             }
             NoMoreIndicator(height = 60.dp)
             Spacer(modifier = Modifier.height(12.dp))
@@ -57,6 +61,9 @@ fun EntryView(entry: Entry) {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Spacer(modifier = Modifier.height(48.dp))
+        }
+        Box(modifier = Modifier.background(Color.White).wrapContentSize()) {
+            Text("${scrollState.value}    ${scrollState.maxValue}")
         }
     }
 }
