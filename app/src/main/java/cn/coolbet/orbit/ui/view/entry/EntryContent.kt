@@ -59,8 +59,8 @@ fun EntryContent(entry: Entry, scrollState: ScrollState){
 
     var webView: WebView? by remember { mutableStateOf(null) }
     var webViewHeight by remember { mutableStateOf(1.dp) }
-    val bridge = remember { HeightBridge(onHeight = { height ->
-        webViewHeight = height.dp
+    val heightBridge = remember { HeightBridge(onHeight = { height ->
+        webViewHeight = height.dp + 20.dp
     }) }
 
     DisposableEffect(Unit) {
@@ -87,7 +87,7 @@ fun EntryContent(entry: Entry, scrollState: ScrollState){
                 settings.loadsImagesAutomatically = true
                 settings.allowContentAccess = true
                 settings.allowFileAccess = true
-                addJavascriptInterface(bridge, "Android")
+                addJavascriptInterface(heightBridge, "Android")
                 webViewClient = object : WebViewClient() {
                     @SuppressLint("LocalContextResourcesRead")
                     override fun onPageFinished(view: WebView?, url: String?) {
