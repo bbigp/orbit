@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.entry
 
+import android.content.Intent
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
@@ -27,10 +28,13 @@ import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObIconTextButton
+import androidx.core.net.toUri
 
 @Composable
-fun EntryView(entry: Entry) {
+fun EntryView(state: EntryState) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val entry = state.entry
     CompositionLocalProvider(
         LocalOverscrollFactory provides null,
     ) {
@@ -44,22 +48,26 @@ fun EntryView(entry: Entry) {
                 EntryImage(entry.pic)
             }
             EntryTitle(entry)
-            Box(modifier = Modifier.clipToBounds()) {
-                EntryContent(entry, scrollState)
+            EntryContent(state, scrollState)
+            NoMoreIndicator(height = 40.dp)
+            if (entry.url.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ObIconTextButton(
+                        content = "View Website",
+                        icon = R.drawable.out_o,
+                        sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 32.dp),
+                        colors = OButtonDefaults.secondary,
+                        iconOnRight = true,
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, entry.url.toUri())
+                            context.startActivity(intent)
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            NoMoreIndicator(height = 60.dp)
-            Spacer(modifier = Modifier.height(12.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ObIconTextButton(
-                    content = "View Website",
-                    icon = R.drawable.out_o,
-                    sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 32.dp),
-                    colors = OButtonDefaults.secondary,
-                    iconOnRight = true
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
             Spacer(modifier = Modifier.height(48.dp))
         }
         Box(modifier = Modifier.background(Color.White).wrapContentSize()) {
@@ -77,5 +85,5 @@ fun PreviewEntryView() {
         feed = Feed.EMPTY.copy(title = "The Verge"),
         publishedAt = System.currentTimeMillis()
     )
-    EntryView(entry)
+    EntryView(EntryState(entry))
 }

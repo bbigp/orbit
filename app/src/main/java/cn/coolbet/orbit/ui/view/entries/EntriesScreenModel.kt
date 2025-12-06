@@ -7,10 +7,13 @@ import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
+import cn.coolbet.orbit.manager.EventBus
+import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.domain.replace
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -25,6 +28,7 @@ class EntriesScreenModel @AssistedInject constructor(
     @Assisted private val metaId: MetaId,
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
+    private val eventBus: EventBus,
 ): StateScreenModel<EntriesState>(initialState = EntriesState()) {
 
     @AssistedFactory
@@ -34,7 +38,20 @@ class EntriesScreenModel @AssistedInject constructor(
 
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
-    init { loadInitialData() }
+    init {
+        loadInitialData()
+        screenModelScope.launch {
+            eventBus.subscribe<Evt.EntryUpdated> { event ->
+                mutableState.update { currentState ->
+                    val updatedItems = currentState.items.replace(event.entry)
+                    if (updatedItems == currentState.items) {
+                        return@update currentState
+                    }
+                    return@update currentState.copy(items = updatedItems)
+                }
+            }
+        }
+    }
 
 
     fun loadInitialData() {

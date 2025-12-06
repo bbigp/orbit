@@ -24,10 +24,11 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.ObTheme
 
-@Preview(showBackground = true)
 @Composable
 fun EntryBottomBar(
+    state: EntryState
 ) {
+    val changeReaderView = LocalChangeReaderView.current
     Column(
         modifier =
             Modifier.fillMaxWidth()
@@ -49,7 +50,10 @@ fun EntryBottomBar(
             )
             ObIcon(id = R.drawable.check_o)
             ObIcon(id = R.drawable.star)
-            ObIcon(id = R.drawable.page)
+            ObIcon(
+                id = if (state.readerView) R.drawable.book else R.drawable.page,
+                modifier = Modifier.clickable(onClick = { changeReaderView() })
+            )
             ObIcon(id = R.drawable.chevron_down)
             ObIcon(id = R.drawable.more)
         }

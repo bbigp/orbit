@@ -35,25 +35,29 @@ import cn.coolbet.orbit.model.domain.Entry
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
-fun EntryContent(entry: Entry, scrollState: ScrollState){
+fun EntryContent(state: EntryState, scrollState: ScrollState){
     val context = LocalContext.current
-    val content = entry.readableContent.ifEmpty { entry.content }
-    val fullHtml = """
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-            <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
-            <title>${entry.title}</title>
-        </head>
-        <body>
-            <div id="br-article" class="active">
-                <div class="br-content">${content}</div>
-            </div>
-        </body>
-        </html>
-    """
+    val entry = state.entry
+    val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {
+        val content = if (state.readerView) entry.readableContent else entry.content
+        mutableStateOf("""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+                <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
+                <title>${entry.title}</title>
+            </head>
+            <body>
+                <div id="br-article" class="active">
+                    <div class="br-content">${content}</div>
+                </div>
+            </body>
+            </html>
+        """.trimIndent())
+
+    }
 
 
 
@@ -72,6 +76,19 @@ fun EntryContent(entry: Entry, scrollState: ScrollState){
             webView?.destroy()
             webView = null
         }
+    }
+
+    LaunchedEffect(fullHtml, webView) {
+        // 加载本地 HTML 内容
+        // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
+        // 这样 WebView 就能找到 CSS/字体文件。
+        webView?.loadDataWithBaseURL(
+            "file:///android_asset/", // Base URL for resolving relative paths (e.g., in CSS)
+            fullHtml,
+            "text/html",
+            "UTF-8",
+            null
+        )
     }
 
     AndroidView(
@@ -101,16 +118,6 @@ fun EntryContent(entry: Entry, scrollState: ScrollState){
                         """.trimIndent(), null)
                     }
                 }
-                // 2. 加载本地 HTML 内容
-                // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
-                // 这样 WebView 就能找到 CSS/字体文件。
-                loadDataWithBaseURL(
-                    "file:///android_asset/", // Base URL for resolving relative paths (e.g., in CSS)
-                    fullHtml,
-                    "text/html",
-                    "UTF-8",
-                    null
-                )
             }
         },
         update = { webView ->

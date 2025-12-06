@@ -60,10 +60,12 @@ class ProfileScreenModel @Inject constructor(
     }
 
     fun changeUser(unreadMark: UnreadMark? = null, autoRead: Boolean? = null,
-            openContent: OpenContentWith? = null, rootFolderId: Long? = null,
+                   openContent: OpenContentWith? = null, rootFolderId: Long? = null,
+                   autoReaderView: Boolean? = null,
     ) {
         val newUser = preference.userSetting(unreadMark = unreadMark, autoRead = autoRead,
             openContent = openContent, rootFolderId = rootFolderId,
+            autoReaderView = autoReaderView,
         )
         session.startSession(newUser)
     }

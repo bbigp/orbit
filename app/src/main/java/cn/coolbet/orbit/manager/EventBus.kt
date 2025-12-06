@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.manager
 
+import cn.coolbet.orbit.model.domain.Entry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -48,4 +49,5 @@ class EventBus @Inject constructor() {
 
 sealed class Evt {
     data class CacheInvalidated(val userId: Long): Evt()
+    data class EntryUpdated(val entry: Entry): Evt()
 }

@@ -44,3 +44,16 @@ data class Entry(
         //content remove html tag
     }
 }
+
+
+fun List<Entry>.replace(newItem: Entry): List<Entry> {
+    val index = this.indexOfFirst { it.id == newItem.id }
+
+    if (index == -1) {
+        return this
+    }
+    return this.toMutableList().apply {
+        this[index] = newItem
+    }
+    // 注意：toList() 隐式地在返回时创建了不可变列表
+}

@@ -42,7 +42,8 @@ class Preference @Inject constructor(
     }
 
     fun userSetting(unreadMark: UnreadMark? = null, autoRead: Boolean? = null,
-        openContent: OpenContentWith? = null, rootFolderId: Long? = null,
+                    openContent: OpenContentWith? = null, rootFolderId: Long? = null,
+                    autoReaderView: Boolean? = null,
     ): User {
         val user = userProfile()
         val newUser = user.copy(
@@ -50,6 +51,7 @@ class Preference @Inject constructor(
             autoRead = autoRead ?: user.autoRead,
             openContent = openContent ?: user.openContent,
             rootFolder = rootFolderId ?: user.rootFolder,
+            autoReaderView = autoReaderView ?: user.autoReaderView,
         )
         saveUser(newUser)
         return newUser

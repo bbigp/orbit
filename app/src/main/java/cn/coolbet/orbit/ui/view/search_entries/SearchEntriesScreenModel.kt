@@ -6,10 +6,13 @@ import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.dao.SearchDao
 import cn.coolbet.orbit.manager.EntryManager
+import cn.coolbet.orbit.manager.EventBus
+import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.replace
 import cn.coolbet.orbit.model.entity.SearchRecord
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -23,6 +26,7 @@ class SearchEntriesScreenModel @AssistedInject constructor(
     private val searchDao: SearchDao,
     private val entryManager: EntryManager,
     private val session: Session,
+    private val eventBus: EventBus,
 ): StateScreenModel<SearchEntriesState>(initialState = SearchEntriesState()) {
 
     @AssistedFactory
@@ -32,6 +36,17 @@ class SearchEntriesScreenModel @AssistedInject constructor(
 
     init {
         loadSearchList()
+        screenModelScope.launch {
+            eventBus.subscribe<Evt.EntryUpdated> { event ->
+                mutableState.update { currentState ->
+                    val updatedItems = currentState.items.replace(event.entry)
+                    if (updatedItems == currentState.items) {
+                        return@update currentState
+                    }
+                    return@update currentState.copy(items = updatedItems)
+                }
+            }
+        }
     }
 
     fun loadSearchList() {

@@ -47,7 +47,7 @@ fun EntryImage(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(241.dp)
+                .height(180.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .border(
                     width = 0.5.dp,

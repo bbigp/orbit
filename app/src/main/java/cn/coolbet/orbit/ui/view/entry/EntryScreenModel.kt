@@ -5,6 +5,9 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.manager.EntryManager
+import cn.coolbet.orbit.manager.EventBus
+import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.view.home.HomeScreenState
 import dagger.assisted.Assisted
@@ -19,22 +22,39 @@ import kotlinx.coroutines.launch
 class EntryScreenModel @AssistedInject constructor(
     @Assisted private val entry: Entry,
     private val entryDao: EntryDao,
+    private val session: Session,
+    private val eventBus: EventBus,
 ): ScreenModel {
-    private val mutableState = MutableStateFlow(EntryState(entry = entry))
-    val state: StateFlow<EntryState> = mutableState.asStateFlow()
-
-    init {
-//        mutableState.update { it.copy(entry) }
-    }
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
         fun create(entry: Entry): EntryScreenModel
     }
 
+    private val mutableState = MutableStateFlow(EntryState(entry = entry))
+    val state: StateFlow<EntryState> = mutableState.asStateFlow()
+
+    init {
+        mutableState.update {
+            it.copy(
+                readerView = entry.readableContent.isNotEmpty(),
+                readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,
+            )
+        }
+    }
+
+    fun changeDisplayMode(){
+        mutableState.update {
+            if (!it.readerView && it.entry.readableContent.isEmpty()) {
+                it.copy(readerView = true, isLoadingReadableContent = true)
+            } else {
+                it.copy(readerView = !it.readerView)
+            }
+        }
+    }
 
     fun startLoading() {
-        mutableState.update { it.copy(isLoadingContent = true) }
+        mutableState.update { it.copy(isLoadingReadableContent = true) }
     }
 
     fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String) {
@@ -42,18 +62,23 @@ class EntryScreenModel @AssistedInject constructor(
             entryDao.updateReadingModeData(readableContent, leadImageURL, summary, entry.id)
             mutableState.update {
                 it.copy(
-                    isLoadingContent = false,
+                    isLoadingReadableContent = false,
                     entry = it.entry.copy(
                         readableContent = readableContent, leadImageURL = leadImageURL,
                         summary = summary
-                    )
+                    ),
+                    readerView = readableContent.isNotEmpty(),
+                    readingModeEnabled = false
                 )
             }
+            eventBus.post(Evt.EntryUpdated(state.value.entry))
         }
     }
 }
 
 data class EntryState(
     val entry: Entry = Entry.EMPTY,
-    val isLoadingContent: Boolean = false
+    val readingModeEnabled: Boolean = false,
+    val readerView: Boolean = false,
+    val isLoadingReadableContent: Boolean = false
 )

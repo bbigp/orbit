@@ -167,6 +167,14 @@ object ProfileScreen: Screen {
                                 showFolderPicker = true
                             }
                         )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileSwitch(
+                            title = "Automatic Reader View", icon = R.drawable.book,
+                            checked = state.user.autoReaderView,
+                            onCheckedChange = { v->
+                                model.changeUser(autoReaderView = v)
+                            }
+                        )
                     }
                 }
                 item {  Spacer(modifier = Modifier.height(16.dp)) }
