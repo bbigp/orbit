@@ -52,15 +52,7 @@ fun EntryBottomBar(
 ) {
     val changeReaderView = LocalChangeReaderView.current
     val expandedState = remember { MutableTransitionState(false) }
-    var isClickDisabled by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    LaunchedEffect(expandedState.targetState) {
-        if (!expandedState.targetState) {
-            isClickDisabled = true
-            delay(100) // 2. 引入一个短暂延迟，以确保 Row 的 clickable 在状态改变后立即执行时被忽略
-            isClickDisabled = false
-        }
-    }
 
     Column(
         modifier =
@@ -91,7 +83,6 @@ fun EntryBottomBar(
                 ObIcon(
                     id = R.drawable.more,
                     modifier = Modifier.clickable(
-                        enabled = !isClickDisabled,
                         onClick = { expandedState.targetState = !expandedState.targetState }
                     )
                 )

@@ -62,6 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.window.PopupProperties
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black95
@@ -125,6 +126,11 @@ fun ObDropdownMenu(
             Popup(
                 onDismissRequest = onDismissRequest,
                 popupPositionProvider = positionProvider,
+                properties = PopupProperties(
+                    focusable = true,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true // 默认是 true，如果为 true 仍穿透，问题在底层
+                )
             ) {
                 Surface(
                     modifier = Modifier

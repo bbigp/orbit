@@ -44,15 +44,6 @@ fun ListTileChevronUpDown(
 ) {
     val expandedState = remember { MutableTransitionState(false) }
     val closeMenu = { expandedState.targetState = false }
-    var isClickDisabled by remember { mutableStateOf(false) }
-
-    LaunchedEffect(expandedState.targetState) {
-        if (!expandedState.targetState) {
-            isClickDisabled = true
-            delay(100) // 2. 引入一个短暂延迟，以确保 Row 的 clickable 在状态改变后立即执行时被忽略
-            isClickDisabled = false
-        }
-    }
     val finalOnClick: (() -> Unit) = onClick ?: {
         expandedState.targetState = !expandedState.targetState
     }
@@ -63,7 +54,6 @@ fun ListTileChevronUpDown(
             .height(48.dp)
             .background(ObTheme.colors.primaryContainer)
             .clickable(
-                enabled = !isClickDisabled,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = finalOnClick
