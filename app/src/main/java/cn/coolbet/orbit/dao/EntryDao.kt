@@ -63,13 +63,13 @@ abstract class EntryDao(protected val db: AppDatabase) {
         dbHelper.beginTransaction()
         try {
             val sql = """
-                insert into entries(
+                insert or ignore into entries(
                     id, user_id, hash, feed_id, status,
                     title, url, published_at, content, author,
                     starred, reading_time, tags, created_at, changed_at
                 ) VALUES (
                     ?, ?, ?, ?, ?,      ?, ?, ?, ?, ?,      ?, ?, ?, ?, ?
-                ) ON CONFLICT(id) DO nothing
+                )
             """
             val medias = mutableListOf<Media>()
             for (item in items) {
@@ -84,11 +84,11 @@ abstract class EntryDao(protected val db: AppDatabase) {
 
             if (medias.isEmpty()) return@withContext
             val mediaSql = """
-                insert into medias(
+                insert or ignore into medias(
                     id, user_id, entry_id, url, mime_type, size
                 ) values (
                     ?, ?, ?, ?, ?,       ?
-                ) ON CONFLICT(id) DO nothing
+                )
             """
             for (item in medias) {
                 val args = arrayOf<Any>(item.id, item.userId, item.entryId, item.url, item.mimeType, item.size)
@@ -104,7 +104,7 @@ abstract class EntryDao(protected val db: AppDatabase) {
     abstract suspend fun clearAll()
 
     @Query("""
-        select feed_id, count(*) filter (where status = 'unread') as count 
+        select feed_id, sum(case when status = 'unread' then 1 else 0 end) as count 
         from entries
         group by feed_id
     """)

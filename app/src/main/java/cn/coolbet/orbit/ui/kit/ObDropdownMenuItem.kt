@@ -31,11 +31,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MenuDefaults.ShadowElevation
@@ -69,6 +72,7 @@ import cn.coolbet.orbit.ui.theme.ContentRed
 fun ObDropdownMenu(
     expandedState: MutableTransitionState<Boolean>,
     onDismissRequest: () -> Unit,
+    dpOffset: DpOffset = DpOffset(0.dp, 0.dp),
     content: @Composable () -> Unit
 ) {
 
@@ -113,7 +117,7 @@ fun ObDropdownMenu(
         // 1. 创建你的自定义定位提供者
         val positionProvider = remember(density) {
             ObDropdownPositionProvider(
-                contentOffset = DpOffset(0.dp, 0.dp), // 默认不偏移
+                contentOffset = dpOffset,
                 density = density
             )
         }
@@ -138,7 +142,7 @@ fun ObDropdownMenu(
                         },
                     shadowElevation = 8.dp,
                     shape = RoundedCornerShape(16.dp),
-                    color = ContainerSecondary,
+                    color = Color.White,
                 ) {
                     Column(
                         modifier = Modifier.wrapContentSize()
@@ -152,27 +156,31 @@ fun ObDropdownMenu(
 }
 
 @Composable
-fun DropdownMenuDivider() {
-    Box(modifier = Modifier.width(240.dp)) { SpacerDivider() }
+fun DropdownMenuDivider(
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = Modifier.width(240.dp).then(modifier)) { SpacerDivider() }
 }
 
 @Composable
 fun ObDropdownMenuItem(
+    modifier: Modifier = Modifier,
     text: String = "",
     leadingIcon: Int? = null,
     trailingIcon: Int? = null,
     colors: ObMenuItemColors = ObMenuDefaults.defaultColors,
     onClick: () -> Unit = {}
 ){
+    val defaultModifier = Modifier.height(44.dp)
+        .wrapContentWidth().widthIn(max = 240.dp)
+        .padding(all = 0.dp)
+        .clickable(
+            onClick = onClick,
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        )
     Row(
-        modifier = Modifier.height(44.dp).width(240.dp)
-            .padding(all = 0.dp)
-            .background(colors.background)
-            .clickable(
-                onClick = onClick,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ),
+        modifier = defaultModifier.then(modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(8.dp))
@@ -195,7 +203,7 @@ fun ObDropdownMenuItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = AppTypography.R15.copy(color = colors.color),
-            modifier = Modifier.weight(1f)
+            modifier = if (trailingIcon != null) Modifier.weight(1f) else Modifier
         )
         Spacer(modifier = Modifier.width(8.dp))
 

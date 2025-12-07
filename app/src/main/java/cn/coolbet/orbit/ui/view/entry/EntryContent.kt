@@ -1,12 +1,16 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.JsPromptResult
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.ScrollState
@@ -30,6 +34,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
+import cn.coolbet.orbit.common.openURL
 import cn.coolbet.orbit.model.domain.Entry
 
 
@@ -63,17 +69,24 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
 
     var webView: WebView? by remember { mutableStateOf(null) }
     var webViewHeight by remember { mutableStateOf(1.dp) }
-    val heightBridge = remember { HeightBridge(onHeight = { height ->
-        webViewHeight = height.dp + 20.dp
-    }) }
+    val heightBridge = remember {
+        HeightBridge(onHeight = { height ->
+            webViewHeight = height.dp + 30.dp
+        }, openURL = { url ->
+            openURL(context, url.toUri())
+        })
+    }
 
     DisposableEffect(Unit) {
         onDispose {
-            webView?.stopLoading()
-            webView?.clearHistory()
-            webView?.loadUrl("about:blank") // 推荐：加载空白页
-            webView?.onPause() // 推荐：暂停活动
-            webView?.destroy()
+            webView?.apply {
+                stopLoading()
+                clearHistory()
+                webView?.loadUrl("about:blank") // 推荐：加载空白页
+                onPause() // 推荐：暂停活动
+                removeJavascriptInterface("Android")
+                destroy()
+            }
             webView = null
         }
     }
@@ -92,7 +105,9 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
     }
 
     AndroidView(
-        modifier = Modifier.fillMaxWidth().height(webViewHeight),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(webViewHeight),
         factory = {
             WebView(context).apply {
                 webView = this
@@ -101,6 +116,8 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
                 this.overScrollMode = View.OVER_SCROLL_NEVER
                 settings.textZoom = 100
                 settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                settings.cacheMode = WebSettings.LOAD_DEFAULT
                 settings.loadsImagesAutomatically = true
                 settings.allowContentAccess = true
                 settings.allowFileAccess = true
@@ -116,6 +133,42 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
                             console.log(height)
                             Android.onExtractionComplete(height);
                         """.trimIndent(), null)
+
+                        view?.evaluateJavascript("""
+                            document.body.addEventListener('click', function(event) {
+                                // 检查是否点击的是 a 标签
+                                let element = event.target.tagName == "A" ? event.target : event.target.closest('a');
+                                if (element) {
+                                    try {
+                                        let url = new URL(element.href);
+                                        Android.url(url.href)
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                    } catch(e) {
+                                        Android.error('a-tag-clicked-with-invalid-url')
+                                    }
+                                } else if (event.target && event.target.tagName == "IMG" && event.target.src) {
+                                    let img = event.target;
+                                    let rect = img.getBoundingClientRect();
+                                    let data = { src: img.src, left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+                                    Android.openImg(JSON.stringify(data))
+                                } else {
+                                    Android.onClick('body-clicked')
+                                }
+                            }, true);
+                        """.trimIndent(), null)
+                    }
+
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): WebResourceResponse? {
+                        val response = super.shouldInterceptRequest(view, request)
+                        val url = request?.url.toString()
+                        if (url.contains(".jpg") || url.contains(".png") || url.contains(".gif")) {
+                            Log.d("EntryContent", "Intercepting potential image request: $url ${response?.mimeType}")
+                        }
+                        return response
                     }
                 }
             }
@@ -129,11 +182,34 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
     )
 }
 
-class HeightBridge(private val onHeight: (Int) -> Unit) {
+class HeightBridge(
+    private val onHeight: (Int) -> Unit,
+    private val openURL: (String) -> Unit,
+) {
 
     @JavascriptInterface
     fun onExtractionComplete(height: String) {
         Log.i("EntryContent", "Bridge $height")
         onHeight(height.toFloat().toInt())
+    }
+
+    @JavascriptInterface
+    fun onClick(data: String) {
+        Log.i("EntryContent", "onClick: $data")
+    }
+
+    @JavascriptInterface
+    fun url(url: String) {
+        openURL(url)
+    }
+
+    @JavascriptInterface
+    fun openImg(url: String) {
+
+    }
+
+    @JavascriptInterface
+    fun error(msg: String) {
+        Log.i("EntryContent", "error: $msg")
     }
 }

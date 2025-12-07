@@ -34,7 +34,7 @@ abstract class SyncTaskRecordDao {
         update sync_task_records
         set entry = :entry, media = :media, feed = :feed, folder = :folder,
             error_msg = :errorMsg, from_time = :fromTime, to_time = :toTime,
-            status = :status, changed_at = unixepoch('now') * 1000
+            status = :status, changed_at = STRFTIME('%s', 'now') * 1000
         where id = :id
     """)
     abstract suspend fun updateFinish(entry: Int, media: Int, feed: Int, folder: Int, errorMsg: String = "",

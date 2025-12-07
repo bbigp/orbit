@@ -19,33 +19,46 @@ abstract class FeedDao(private val db: AppDatabase) {
         val sql = """
             INSERT INTO feeds (id, user_id, feed_url, site_url, title, 
             icon_url, error_count, error_msg, folder_id, hide_globally) VALUES 
-            (?, ?, ?, ?, ?,     ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET 
-            feed_url = excluded.feed_url, site_url = excluded.site_url,
-            title = excluded.title, 
-            error_count = excluded.error_count, error_msg = excluded.error_msg,
-            icon_url = excluded.icon_url,
-            folder_id = excluded.folder_id,
-            hide_globally = excluded.hide_globally
+            (?, ?, ?, ?, ?,     ?, ?, ?, ?, ?)
         """
-        for (feed in feeds) {
-            val args = arrayOf<Any>(
-                feed.id,
-                feed.userId,
-                feed.feedURL,
-                feed.siteURL,
-                feed.title,
-                feed.iconURL,
-                feed.errorCount,
-                feed.errorMsg,
-                feed.folderId,
-                feed.hideGlobally,
+        feeds.forEach { feed ->
+            val rowsUpdated = updateFeed(feed.feedURL, feed.siteURL, feed.title,
+                feed.errorCount, feed.errorMsg, feed.iconURL,
+                feed.folderId, feed.hideGlobally, feed.id
             )
-            db.openHelper.writableDatabase.execSQL(sql, args)
+            if (rowsUpdated == 0) {
+                val args = arrayOf<Any>(
+                    feed.id,
+                    feed.userId,
+                    feed.feedURL,
+                    feed.siteURL,
+                    feed.title,
+                    feed.iconURL,
+                    feed.errorCount,
+                    feed.errorMsg,
+                    feed.folderId,
+                    feed.hideGlobally,
+                )
+                db.openHelper.writableDatabase.execSQL(sql, args)
+            }
+
         }
     }
 
     @Query("delete from feeds")
     abstract suspend fun clearAll()
+
+    @Query("""
+        update feeds set feed_url = :feedURL, site_url = :siteURL,
+            title = :title, error_count = :errorCount, error_msg = :errorMsg,
+            icon_url = :iconURL, folder_id = :folderId,
+            hide_globally = :hideGlobally 
+        where id = :id
+    """)
+    abstract suspend fun updateFeed(feedURL: String, siteURL: String, title: String, errorCount: Int,
+                                    errorMsg: String, iconURL: String, folderId: Long, hideGlobally: Boolean,
+                                    id: Long
+    ): Int
 
 
     @Query("select * from feeds")

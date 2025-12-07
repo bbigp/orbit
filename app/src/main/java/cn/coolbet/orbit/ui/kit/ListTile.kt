@@ -122,7 +122,7 @@ fun ListTileSwitch(
         Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = AppTypography.R15, modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.width(12.dp))
-        Spacer(modifier = Modifier.width(44.dp)) //40 + 4
+//        Spacer(modifier = Modifier.width(44.dp)) //40 + 4
         ObSwitch(
             checked = checked,
             onCheckedChange = onCheckedChange,

@@ -163,7 +163,7 @@ internal object MenuPosition {
 internal data class ObDropdownPositionProvider(
     val contentOffset: DpOffset,
     val density: Density,
-    val verticalMargin: Int = with(density) { 48.dp.roundToPx() },
+    val verticalMargin: Int = with(density) { 8.dp.roundToPx() },
     val onPositionCalculated: (anchorBounds: IntRect, menuBounds: IntRect) -> Unit = { _, _ -> }
 ) : PopupPositionProvider {
     // Horizontal position

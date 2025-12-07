@@ -1,11 +1,18 @@
 package cn.coolbet.orbit.manager
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import android.text.format.DateUtils
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import cn.coolbet.orbit.R
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.FeedDao
 import cn.coolbet.orbit.dao.FolderDao
@@ -34,6 +41,24 @@ class SyncWorker @AssistedInject constructor(
     private val eventBus: EventBus,
 ) : CoroutineWorker(appContext, workerParams) {
 
+    private val NOTIFICATION_ID = 101
+    private val CHANNEL_ID = "sync_channel"
+    private val CHANNEL_NAME = "数据同步"
+
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        createNotificationChannel()
+
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setContentTitle("同步中") // 通知标题
+            .setContentText("正在后台同步您的数据...") // 通知内容
+            // 🌟 必须设置一个小图标，否则通知不会显示
+            .setSmallIcon(R.drawable.loading) // 替换为您的实际图标资源
+            .setOngoing(true) // 设置为持续通知，表示工作正在进行
+            .setCategory(Notification.CATEGORY_SERVICE) // 类别设置为服务
+            .build()
+        return ForegroundInfo(NOTIFICATION_ID, notification)
+    }
+
     override suspend fun doWork(): Result {
 //        val ignoreLastSyncTime = inputData.getBoolean(IGNORE_TIME_KEY, false)
         this.startTask()
@@ -41,6 +66,27 @@ class SyncWorker @AssistedInject constructor(
         // 失败后重试 (Result.retry())
         // 彻底失败 (Result.failure())
         return Result.success()
+    }
+
+    /**
+     * 创建通知渠道 (仅在 API 26 及以上版本需要)。
+     */
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_LOW // 前台服务通常使用 IMPORTANCE_LOW
+            ).apply {
+                description = "用于显示后台数据同步状态"
+                // 设置为静音，因为是持续性通知，避免打扰用户
+                setSound(null, null)
+            }
+
+            // 将渠道注册到系统
+            val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
     }
 
     suspend fun startTask(fullResync: Boolean = false) {

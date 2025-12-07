@@ -29,6 +29,7 @@ import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObIconTextButton
 import androidx.core.net.toUri
+import cn.coolbet.orbit.common.openURL
 
 @Composable
 fun EntryView(state: EntryState) {
@@ -60,10 +61,7 @@ fun EntryView(state: EntryState) {
                         sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 32.dp),
                         colors = OButtonDefaults.secondary,
                         iconOnRight = true,
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, entry.url.toUri())
-                            context.startActivity(intent)
-                        }
+                        onClick = { openURL(context, entry.url.toUri()) }
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))

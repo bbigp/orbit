@@ -18,17 +18,25 @@ abstract class FolderDao(private val db: AppDatabase) {
     suspend fun batchSave(items: List<Folder>) = withContext(Dispatchers.IO) {
         val sql = """
             INSERT INTO folders (id, user_id, title, hide_globally) VALUES 
-            (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET 
-            title = excluded.title, hide_globally = excluded.hide_globally
+            (?, ?, ?, ?)
         """
-        for (item in items) {
-            val args = arrayOf<Any>(item.id, item.userId, item.title, item.hideGlobally)
-            db.openHelper.writableDatabase.execSQL(sql, args)
+        items.forEach { folder ->
+            val rowsUpdated = updateFolder(folder.title, folder.hideGlobally, folder.id)
+            if (rowsUpdated == 0) {
+                val args = arrayOf<Any>(folder.id, folder.userId, folder.title, folder.hideGlobally)
+                db.openHelper.writableDatabase.execSQL(sql, args)
+            }
+
         }
     }
 
     @Query("delete from folders")
     abstract suspend fun clearAll()
+
+    @Query("""
+        update folders set title = :title, hide_globally = :hideGlobally where id = :id
+    """)
+    abstract suspend fun updateFolder(title: String, hideGlobally: Boolean, id: Long): Int
 
 
 
