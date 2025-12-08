@@ -1,10 +1,16 @@
 package cn.coolbet.orbit.ui.view.entries
 
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,7 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
@@ -34,6 +45,7 @@ import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 import kotlinx.parcelize.Parcelize
+import kotlin.math.roundToInt
 
 @Parcelize
 data class EntriesScreen(
@@ -50,6 +62,9 @@ data class EntriesScreen(
         val unreadState = model.unreadMapState.collectAsState()
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
+        val density = LocalDensity.current
+        val maxSwipeDistance = 100.dp
+        val maxPx = with(density) { maxSwipeDistance.toPx() }
 
         InfiniteScrollHandler(
             listState = listState,
@@ -108,7 +123,9 @@ data class EntriesScreen(
                             EntryTopTile(state.meta)
                         }
                         items(state.items, key = { it.id }) { item ->
-                            EntryTile(item)
+                            SwipeWrapper() {
+                                EntryTile(item)
+                            }
                             SpacerDivider(start = 16.dp, end = 16.dp)
                         }
                         item(key = "indicator") {
