@@ -86,7 +86,7 @@ import kotlin.math.roundToInt
 
 
 // 定义操作阈值 (DP)
-val SwipeActionThresholdDp = 40.dp // 短滑阈值
+val SwipeActionThresholdDp = 38.dp // 短滑阈值
 val ActionTriggerMaxDp = 70.dp    // 短滑最大触发范围
 
 
@@ -102,7 +102,7 @@ fun SwipeWrapper(
     val maxActionPx = with(density) { ActionTriggerMaxDp.toPx() }     // 120dp
 
     // 🌟 新状态：记录操作是否已执行（用于控制图标的即时消失/回弹）
-    var isActionExecuted by remember { mutableStateOf(false) }
+//    var isActionExecuted by remember { mutableStateOf(false) }
 
     // 2. 存储当前偏移量，使用 Animatable 允许动画回弹
     val offsetX = remember { Animatable(0f) }
@@ -111,7 +111,7 @@ fun SwipeWrapper(
     val draggableState = rememberDraggableState(onDelta = { delta ->
         coroutineScope.launch {
             // 确保在拖动时重置操作状态
-            if (isActionExecuted) isActionExecuted = false
+//            if (isActionExecuted) isActionExecuted = false
             // 限制向左滑动，并限制最大滑动距离（防止视图无限滑出）
             val newOffset = (offsetX.value + delta).coerceIn(0f, maxActionPx)
             offsetX.snapTo(newOffset)
@@ -126,7 +126,7 @@ fun SwipeWrapper(
                 animationSpec = tween(durationMillis = 300) // 300ms 回弹
             ).apply {
                 // 🌟 回弹完成后，重置状态
-                isActionExecuted = false
+//                isActionExecuted = false
             }
         }
     }
@@ -137,9 +137,9 @@ fun SwipeWrapper(
         // 🌟 视觉反馈层：传入所有阈值
         SwipeActionsOverlay(
             currentOffset = offsetX.value,
-            isActionExecuted = isActionExecuted, // 🌟 传递新状态
+//            isActionExecuted = isActionExecuted, // 🌟 传递新状态
             shortPx = shortPx,
-            maxActionPx = maxActionPx,
+//            maxActionPx = maxActionPx,
             startIcon = R.drawable.check_o,
             endIcon = R.drawable.unread
         )
@@ -157,9 +157,9 @@ fun SwipeWrapper(
 
                         // --- 左滑操作 (offsetX < 0) ---
                         if (finalOffset in shortPx..maxActionPx) {
-                            isActionExecuted = true
+//                            isActionExecuted = true
                             // 左短滑：已读
-                            Log.d("Swipe", "左短滑 for item $isActionExecuted")
+                            Log.d("Swipe", "左短滑 for item")
                         }
 
                         // 无论是否触发操作，松手后都需要回弹
@@ -177,9 +177,9 @@ fun SwipeWrapper(
 @Composable
 fun SwipeActionsOverlay(
     currentOffset: Float,
-    isActionExecuted: Boolean,
+//    isActionExecuted: Boolean,
     shortPx: Float,
-    maxActionPx: Float,
+//    maxActionPx: Float,
     startIcon: Int,
     endIcon: Int
 ) {
@@ -189,27 +189,27 @@ fun SwipeActionsOverlay(
     var containerColor: Color
 
     // 3. 判断当前处于哪个操作阶段
-    if (isActionExecuted) {
-        icon = endIcon
-        containerColor = Color(0xFF28CD41)
-        iconColor = Color.White
-        val backgroundAlpha = (currentOffset / maxActionPx).coerceIn(0f, 1f)
-        return Box(
-            modifier = Modifier.padding(start = 20.dp)
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(containerColor.copy(backgroundAlpha)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                modifier = Modifier.size(20.dp).graphicsLayer(alpha = backgroundAlpha),
-                painter = painterResource(id = icon),
-                contentDescription = "",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(iconColor),
-            )
-        }
-    } else {
+//    if (isActionExecuted) {
+//        icon = endIcon
+//        containerColor = Color(0xFF28CD41)
+//        iconColor = Color.White
+//        val backgroundAlpha = (currentOffset / maxActionPx).coerceIn(0f, 1f)
+//        return Box(
+//            modifier = Modifier.padding(start = 20.dp)
+//                .size(32.dp)
+//                .clip(CircleShape)
+//                .background(containerColor.copy(backgroundAlpha)),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Image(
+//                modifier = Modifier.size(20.dp).graphicsLayer(alpha = backgroundAlpha),
+//                painter = painterResource(id = icon),
+//                contentDescription = "",
+//                contentScale = ContentScale.Fit,
+//                colorFilter = ColorFilter.tint(iconColor),
+//            )
+//        }
+//    } else {
         when {
             // 阶段 B: 右短滑颜色渐变 (40dp - 120dp)
             currentOffset > shortPx -> {
@@ -225,24 +225,28 @@ fun SwipeActionsOverlay(
             }
             else -> return // 不滑动，不渲染
         }
-    }
+//    }
 
     // 5. 渲染操作区域
-    Box(
-        modifier = Modifier.padding(start = 20.dp)
-            .size(32.dp)
-            .clip(CircleShape)
-            .background(if (isActionExecuted) Color.Transparent else containerColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            modifier = Modifier.size(20.dp),
-            painter = painterResource(id = icon),
-            contentDescription = "",
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(iconColor),
-        )
+    Column {
+        Text("$currentOffset")
+        Box(
+            modifier = Modifier.padding(start = 20.dp)
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(containerColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = Modifier.size(20.dp),
+                painter = painterResource(id = icon),
+                contentDescription = "",
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(iconColor),
+            )
+        }
     }
+
 }
 
 @Composable
