@@ -126,14 +126,12 @@ data class EntriesScreen(
                         }
                         items(state.items, key = { it.id }) { item ->
                             SwipeWrapper(
-                                leftSwipeState = UnreadStateDefinition.copy(
-                                    isPrimary = !item.isUnread,
+                                rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
+                                    onClick = { model.toggleReadStatus(item) }
+                                ) else UnreadStateDefinition.copy(
                                     onClick = { model.toggleReadStatus(item) }
                                 ),
-                                rightSwipeState = OpenBrowserStateDefinition.copy(
-                                    onClick = { openURL(context, item.url.toUri()) }
-                                )
-//                                rightSwipeState = NoneStateDefinition
+                                leftSwipeState = NoneStateDefinition
                             ) {
                                 EntryTile(item)
                             }

@@ -27,7 +27,7 @@ fun MutableStateFlow<Map<String, Int>>.increment(
         val newMap = it.toMutableMap()
         incrementsMap.forEach { (key, increment) ->
             val currentValue = newMap[key] ?: 0
-            val newValue = currentValue + increment.coerceIn(
+            val newValue = (currentValue + increment).coerceIn(
                 minimumValue = 0,
                 maximumValue = Int.MAX_VALUE
             )

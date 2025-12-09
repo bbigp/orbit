@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import cn.coolbet.orbit.model.domain.EntryStatusConverter
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.FolderEntity
@@ -22,11 +25,16 @@ import javax.inject.Singleton
 private const val DATABASE_NAME = "orbit_db"
 
 @Database(
-    entities = [FeedEntity::class, FolderEntity::class, SyncTaskRecord::class, EntryEntity::class,
-        MediaEntity::class, SearchRecord::class],
+    entities = [
+        FeedEntity::class, FolderEntity::class, SyncTaskRecord::class, EntryEntity::class,
+        MediaEntity::class, SearchRecord::class
+    ],
     version = 1,
     exportSchema = false
 )
+@TypeConverters(value = [
+    EntryStatusConverter::class
+])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun feedDao(): FeedDao
     abstract fun folderDao(): FolderDao

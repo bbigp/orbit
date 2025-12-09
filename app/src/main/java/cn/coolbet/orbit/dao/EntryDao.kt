@@ -121,6 +121,13 @@ abstract class EntryDao(protected val db: AppDatabase) {
         id: Long
     )
 
+    @Query("""
+        update entries set
+            status = :status
+        where id = :id
+    """)
+    abstract suspend fun updateStatus(status: EntryStatus, id: Long)
+
     @Query("select * from entries limit 10")
     internal abstract suspend fun getEntriesImpl(): List<EntryEntity>
 

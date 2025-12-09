@@ -3,6 +3,7 @@ package cn.coolbet.orbit.manager
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.MediaDao
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Meta
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +26,11 @@ class EntryManager @Inject constructor(
                 feed = cacheStore.feed(it.feedId)
             )
         }
+    }
+
+    suspend fun updateStatus(status: EntryStatus, id: Long) {
+        entryDao.updateStatus(status, id)
+        //todo  save record commit server
     }
 
 }

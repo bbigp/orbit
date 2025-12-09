@@ -57,7 +57,8 @@ class CacheStore @Inject constructor(
             this.loadInitialData(event.userId)
         }
         eventBus.subscribe<Evt.ReadStatusChanged>(appScope) { event ->
-            val v = if (event.isRead) -1 else 1
+            Log.i("eventbus", "ReadStatusChanged newStatus: ${event.isUnread}")
+            val v = if (event.isUnread) 1 else -1
             _unreadCountMap.increment(mapOf(
                 "o${event.folderId}" to v,
                 "e${event.feedId}" to v

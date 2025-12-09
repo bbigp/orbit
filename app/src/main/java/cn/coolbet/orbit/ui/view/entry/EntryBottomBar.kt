@@ -72,7 +72,6 @@ fun EntryBottomBar(
                 id = R.drawable.arrow_left,
                 modifier = Modifier.clickable(onClick = { NavigatorBus.pop() }),
             )
-            ObIcon(id = R.drawable.check_o)
             ObIcon(id = R.drawable.star)
             ObIcon(
                 id = if (state.readerView) R.drawable.book else R.drawable.page,

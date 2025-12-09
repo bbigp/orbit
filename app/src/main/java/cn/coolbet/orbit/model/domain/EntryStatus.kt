@@ -1,5 +1,7 @@
 package cn.coolbet.orbit.model.domain
 
+import androidx.room.TypeConverter
+
 enum class EntryStatus(val value: String) {
     UNREAD("unread"),
     READ("read"),
@@ -11,5 +13,19 @@ enum class EntryStatus(val value: String) {
         fun from(status: String): EntryStatus {
             return EntryStatus.entries.find { it.value == status } ?: UNREAD
         }
+    }
+}
+
+class EntryStatusConverter {
+    // 🌟 将 Enum 转换为 String (存储到数据库)
+    @TypeConverter
+    fun fromStatus(status: EntryStatus): String {
+        return status.value
+    }
+
+    // 🌟 将 String 转换为 Enum (从数据库读取)
+    @TypeConverter
+    fun toStatus(statusName: String): EntryStatus {
+        return EntryStatus.from(statusName)
     }
 }

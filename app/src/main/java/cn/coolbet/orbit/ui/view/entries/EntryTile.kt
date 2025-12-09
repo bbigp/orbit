@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -60,11 +61,9 @@ import coil3.request.ImageRequest
 fun EntryTile(entry: Entry) {
     val context = LocalContext.current
     Column(
-        modifier = Modifier.click(
-            {
-                NavigatorBus.push(Route.Entry(entry))
-            }
-        ).background(Color.White)
+        modifier = Modifier.click { NavigatorBus.push(Route.Entry(entry)) }
+            .background(Color.White)
+            .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         EntryTileTopRow(entry)

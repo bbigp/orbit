@@ -52,7 +52,7 @@ sealed class Evt {
     data class EntryUpdated(val entry: Entry): Evt()
     data class ReadStatusChanged(
         val itemId: Long,
-        val isRead: Boolean,
+        val isUnread: Boolean,
         val feedId: Long,
         val folderId: Long
     ): Evt()

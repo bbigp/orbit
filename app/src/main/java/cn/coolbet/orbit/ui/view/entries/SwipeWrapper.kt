@@ -59,30 +59,26 @@ val SwipeActionThresholdDp = 38.dp // 短滑阈值
 val ActionTriggerMaxDp = 100.dp    // 短滑最大触发范围
 
 val UnreadStateDefinition = SwipeStateDefinition(
-    isPrimary = true,
-    primaryIcon = R.drawable.unread,
-    secondaryIcon = R.drawable.check_o,
+    icon = R.drawable.unread,
+    containerColor = Green,
+)
+val ReadStateDefinition = SwipeStateDefinition(
+    icon = R.drawable.check_o,
     containerColor = Green,
 )
 
 val NoneStateDefinition = SwipeStateDefinition(
-    isPrimary = true,
-    primaryIcon = R.drawable.ban,
-    secondaryIcon = R.drawable.ban,
+    icon = R.drawable.ban,
     containerColor = Blue,
 )
 
 val OpenBrowserStateDefinition = SwipeStateDefinition(
-    isPrimary = true,
-    primaryIcon = R.drawable.out_o,
-    secondaryIcon = R.drawable.out_o,
+    icon = R.drawable.out_o,
     containerColor = Purple,
 )
 
-val CollectionStateDefinition = SwipeStateDefinition(
-    isPrimary = true,
-    primaryIcon = R.drawable.star_fill,
-    secondaryIcon = R.drawable.star,
+val AddCollectionStateDefinition = SwipeStateDefinition(
+    icon = R.drawable.star,
     containerColor = Yellow,
 )
 
@@ -178,19 +174,13 @@ fun SwipeWrapper(
 }
 
 data class SwipeStateDefinition(
-    val isPrimary: Boolean,
-    private val primaryIcon: Int,
-    private val secondaryIcon: Int,
-
+    val icon: Int,
     val contentColor: Color = Color.White,
     val containerColor: Color,
     val idleContentColor: Color = Black50,
     val idleContainerColor: Color = Black08,
     val onClick: () -> Unit = {}
-) {
-    val icon: Int get() = if (isPrimary) primaryIcon else secondaryIcon
-    val idleIcon: Int get() = if (isPrimary) secondaryIcon else primaryIcon
-}
+)
 
 
 @SuppressLint("DefaultLocale")
@@ -215,7 +205,7 @@ fun SwipeActionsOverlay(
             iconColor = leftSwipeState.contentColor
         }
         currentOffset < 0f -> { // 阶段 A-Left: 渐显区域
-            icon = leftSwipeState.idleIcon
+            icon = leftSwipeState.icon
             containerColor = leftSwipeState.idleContainerColor
             iconColor = leftSwipeState.idleContentColor
         }
@@ -227,7 +217,7 @@ fun SwipeActionsOverlay(
         }
         // 阶段 A: 右短滑
         currentOffset > 0f -> {
-            icon = rightSwipeState.idleIcon
+            icon = rightSwipeState.icon
             containerColor = rightSwipeState.idleContainerColor
             iconColor = rightSwipeState.idleContentColor
         }

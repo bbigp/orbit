@@ -103,15 +103,17 @@ class EntriesScreenModel @AssistedInject constructor(
     }
 
     fun toggleReadStatus(entry: Entry) {
-        val newEntry = entry.copy(status = if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD)
-        this.replace(newEntry)
-        //todo update db
-        eventBus.post(Evt.ReadStatusChanged(
-            newEntry.id,
-            newEntry.isUnread,
-            entry.feedId,
-            entry.feed.folderId
-        ))
+        screenModelScope.launch {
+            val newEntry = entry.copy(status = if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD)
+            entryManager.updateStatus(newEntry.status, newEntry.id)
+            replace(newEntry)
+            eventBus.post(Evt.ReadStatusChanged(
+                newEntry.id,
+                newEntry.isUnread,
+                entry.feedId,
+                entry.feed.folderId
+            ))
+        }
     }
 
 }
