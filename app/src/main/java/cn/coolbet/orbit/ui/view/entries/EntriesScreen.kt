@@ -27,14 +27,18 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
+import cn.coolbet.orbit.common.openURL
+import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
@@ -62,9 +66,7 @@ data class EntriesScreen(
         val unreadState = model.unreadMapState.collectAsState()
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
-        val density = LocalDensity.current
-        val maxSwipeDistance = 100.dp
-        val maxPx = with(density) { maxSwipeDistance.toPx() }
+        val context = LocalContext.current
 
         InfiniteScrollHandler(
             listState = listState,
@@ -123,7 +125,16 @@ data class EntriesScreen(
                             EntryTopTile(state.meta)
                         }
                         items(state.items, key = { it.id }) { item ->
-                            SwipeWrapper() {
+                            SwipeWrapper(
+                                leftSwipeState = UnreadStateDefinition.copy(
+                                    isPrimary = !item.isUnread,
+                                    onClick = { model.toggleReadStatus(item) }
+                                ),
+                                rightSwipeState = OpenBrowserStateDefinition.copy(
+                                    onClick = { openURL(context, item.url.toUri()) }
+                                )
+//                                rightSwipeState = NoneStateDefinition
+                            ) {
                                 EntryTile(item)
                             }
                             SpacerDivider(start = 16.dp, end = 16.dp)

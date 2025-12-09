@@ -50,4 +50,10 @@ class EventBus @Inject constructor() {
 sealed class Evt {
     data class CacheInvalidated(val userId: Long): Evt()
     data class EntryUpdated(val entry: Entry): Evt()
+    data class ReadStatusChanged(
+        val itemId: Long,
+        val isRead: Boolean,
+        val feedId: Long,
+        val folderId: Long
+    ): Evt()
 }

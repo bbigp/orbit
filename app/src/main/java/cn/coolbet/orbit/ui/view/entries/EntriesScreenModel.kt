@@ -10,6 +10,7 @@ import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
@@ -42,14 +43,18 @@ class EntriesScreenModel @AssistedInject constructor(
         loadInitialData()
         screenModelScope.launch {
             eventBus.subscribe<Evt.EntryUpdated> { event ->
-                mutableState.update { currentState ->
-                    val updatedItems = currentState.items.replace(event.entry)
-                    if (updatedItems == currentState.items) {
-                        return@update currentState
-                    }
-                    return@update currentState.copy(items = updatedItems)
-                }
+                replace(event.entry)
             }
+        }
+    }
+
+    fun replace(entry: Entry) {
+        mutableState.update { currentState ->
+            val updatedItems = currentState.items.replace(entry)
+            if (updatedItems == currentState.items) {
+                return@update currentState
+            }
+            return@update currentState.copy(items = updatedItems)
         }
     }
 
@@ -95,6 +100,18 @@ class EntriesScreenModel @AssistedInject constructor(
                 Log.e("BasePagingScreenModel", "加载数据出错.", e)
             }
         }
+    }
+
+    fun toggleReadStatus(entry: Entry) {
+        val newEntry = entry.copy(status = if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD)
+        this.replace(newEntry)
+        //todo update db
+        eventBus.post(Evt.ReadStatusChanged(
+            newEntry.id,
+            newEntry.isUnread,
+            entry.feedId,
+            entry.feed.folderId
+        ))
     }
 
 }

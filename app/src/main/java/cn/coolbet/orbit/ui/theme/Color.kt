@@ -17,6 +17,11 @@ val Black95 = Color(0xF2000000)
 val ContentRed = Color(0xFFFF3B30)
 val ContainerRed = Color(0x1AFF3B30)
 
+val Green = Color(0xFF28CD41)
+val Blue = Color(0xFF007AFF)
+val Yellow = Color(0xFFFF9500)
+val Purple = Color(0xFF5856D6)
+
 val ContainerSecondary = Color(0xD9FFFFFF)//85白
 
 val Skeleton = Color(0xFFEAE8E8)

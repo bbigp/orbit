@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.manager
 
 import android.util.Log
+import cn.coolbet.orbit.common.increment
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.FeedDao
 import cn.coolbet.orbit.dao.FolderDao
@@ -54,6 +55,13 @@ class CacheStore @Inject constructor(
         eventBus.subscribe<Evt.CacheInvalidated>(appScope) { event ->
             Log.i("eventbus", "刷新缓存")
             this.loadInitialData(event.userId)
+        }
+        eventBus.subscribe<Evt.ReadStatusChanged>(appScope) { event ->
+            val v = if (event.isRead) -1 else 1
+            _unreadCountMap.increment(mapOf(
+                "o${event.folderId}" to v,
+                "e${event.feedId}" to v
+            ))
         }
     }
 
