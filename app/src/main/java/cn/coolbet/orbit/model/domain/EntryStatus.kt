@@ -14,6 +14,10 @@ enum class EntryStatus(val value: String) {
             return EntryStatus.entries.find { it.value == status } ?: UNREAD
         }
     }
+
+    val isUnread: Boolean get() = this == UNREAD
+    val isRead: Boolean get() = this == READ
+    val isRemoved: Boolean get() = this == REMOVED
 }
 
 class EntryStatusConverter {

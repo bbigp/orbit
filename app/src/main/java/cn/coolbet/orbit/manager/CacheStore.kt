@@ -52,17 +52,21 @@ class CacheStore @Inject constructor(
     @Volatile private var currentLoadJob: Job? = null
 
     init {
-        eventBus.subscribe<Evt.CacheInvalidated>(appScope) { event ->
-            Log.i("eventbus", "刷新缓存")
-            this.loadInitialData(event.userId)
-        }
-        eventBus.subscribe<Evt.ReadStatusChanged>(appScope) { event ->
-            Log.i("eventbus", "ReadStatusChanged newStatus: ${event.isUnread}")
-            val v = if (event.isUnread) 1 else -1
-            _unreadCountMap.increment(mapOf(
-                "o${event.folderId}" to v,
-                "e${event.feedId}" to v
-            ))
+        appScope.launch {
+            eventBus
+                .subscribe<Evt.CacheInvalidated> { event ->
+                    Log.i("eventbus", "刷新缓存")
+                    loadInitialData(event.userId)
+                }
+                .subscribe<Evt.EntryStatusUpdated> { event ->
+                    Log.i("eventbus", "EntryStatusUpdated newStatus: ${event.status} ${event.entryId}")
+                    entryDao.updateStatus(event.status, event.entryId)
+                    val count = if (event.status.isUnread) 1 else -1
+                    _unreadCountMap.increment(mapOf(
+                        "o${event.folderId}" to count,
+                        "e${event.feedId}" to count
+                    ))
+                }
         }
     }
 

@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.manager
 
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.EntryStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,33 +27,35 @@ class EventBus @Inject constructor() {
     }
 
     suspend inline fun <reified T : Evt> subscribe(
-        crossinline action: (T) -> Unit
-    ) {
+        crossinline action: suspend (T) -> Unit
+    ): EventBus {
         this.events.filterIsInstance<T>()
             .collect { event ->
                 action(event)
             }
+        return this
     }
 
     inline fun <reified T : Evt> subscribe(
         scope: CoroutineScope,
-        crossinline action: (T) -> Unit
-    ) {
+        crossinline action: suspend (T) -> Unit
+    ): EventBus {
         scope.launch {
             this@EventBus.events.filterIsInstance<T>()
                 .collect { event ->
                     action(event)
                 }
         }
+        return this
     }
 }
 
 sealed class Evt {
     data class CacheInvalidated(val userId: Long): Evt()
     data class EntryUpdated(val entry: Entry): Evt()
-    data class ReadStatusChanged(
-        val itemId: Long,
-        val isUnread: Boolean,
+    data class EntryStatusUpdated(
+        val entryId: Long,
+        val status: EntryStatus,
         val feedId: Long,
         val folderId: Long
     ): Evt()

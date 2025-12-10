@@ -1,17 +1,14 @@
 package cn.coolbet.orbit.ui.view.entry
 
-import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.EntryDao
-import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import cn.coolbet.orbit.ui.view.home.HomeScreenState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -86,32 +83,12 @@ class EntryScreenModel @AssistedInject constructor(
         if (!entry.isUnread) {
             return
         }
-        screenModelScope.launch {
-            try {
-                val newEntry = entry.copy(status = EntryStatus.READ)
-                Log.i("autoRead", "================== 1. Before updateStatus")
-
-                // ❌ 异常可能发生在这里
-                entryDao.updateStatus(newEntry.status, entry.id)
-
-                Log.i("autoRead", "================== 2. After updateStatus (Success)")
-
-                // 后续代码 (事件发送)
-                val re = eventBus.post(Evt.EntryUpdated(newEntry))
-                val re1 = eventBus.post(Evt.ReadStatusChanged(
-                    entry.id,
-                    newEntry.isUnread,
-                    entry.feedId,
-                    entry.feed.folderId
-                ))
-                Log.i("autoRead", "================== 3. Events posted: $re $re1")
-
-            } catch (e: Exception) {
-                // 🌟 关键：捕获并打印异常堆栈，找出真实原因
-                Log.e("autoRead", "!!! DATABASE UPDATE FAILED !!!", e)
-                // 如果您使用了 TypeConverter，请检查它是否是原因
-            }
-        }
+        eventBus.post(Evt.EntryStatusUpdated(
+            entry.id,
+            EntryStatus.READ,
+            entry.feedId,
+            entry.feed.folderId
+        ))
     }
 }
 

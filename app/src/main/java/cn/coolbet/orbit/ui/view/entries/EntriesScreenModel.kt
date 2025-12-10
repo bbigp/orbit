@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.collections.indexOfFirst
+import kotlin.collections.toMutableList
 
 class EntriesScreenModel @AssistedInject constructor(
     @Assisted private val metaId: MetaId,
@@ -42,9 +44,22 @@ class EntriesScreenModel @AssistedInject constructor(
     init {
         loadInitialData()
         screenModelScope.launch {
-            eventBus.subscribe<Evt.EntryUpdated> { event ->
-                replace(event.entry)
-            }
+            eventBus
+                .subscribe<Evt.EntryUpdated> { event ->
+                    replace(event.entry)
+                }
+                .subscribe<Evt.EntryStatusUpdated> { event ->
+                    mutableState.update { value ->
+                        val index = value.items.indexOfFirst { it.id == event.entryId }
+                        if (index == -1) {
+                            return@update value
+                        }
+                        val newItems = value.items.toMutableList().apply {
+                            this[index] = this[index].copy(status = event.status)
+                        }
+                        return@update value.copy(items = newItems)
+                    }
+                }
         }
     }
 
@@ -103,17 +118,12 @@ class EntriesScreenModel @AssistedInject constructor(
     }
 
     fun toggleReadStatus(entry: Entry) {
-        screenModelScope.launch {
-            val newEntry = entry.copy(status = if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD)
-            entryManager.updateStatus(newEntry.status, newEntry.id)
-            replace(newEntry)
-            eventBus.post(Evt.ReadStatusChanged(
-                newEntry.id,
-                newEntry.isUnread,
-                entry.feedId,
-                entry.feed.folderId
-            ))
-        }
+        eventBus.post(Evt.EntryStatusUpdated(
+            entry.id,
+            if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD,
+            entry.feedId,
+            entry.feed.folderId
+        ))
     }
 
 }
