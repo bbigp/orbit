@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -124,21 +125,32 @@ data class EntriesScreen(
                         item(key = "entry-top-tile") {
                             EntryTopTile(state.meta)
                         }
-                        items(state.items, key = { it.id }) { item ->
-                            SwipeWrapper(
-                                rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
-                                    onClick = { model.toggleReadStatus(item) }
-                                ) else UnreadStateDefinition.copy(
-                                    onClick = { model.toggleReadStatus(item) }
-                                ),
-                                leftSwipeState = NoneStateDefinition
-                            ) {
-                                EntryTile(item)
+                        if (state.items.isEmpty()) {
+                            item(key = "no-content-yet") {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    NoContentYet()
+                                }
                             }
-                            SpacerDivider(start = 16.dp, end = 16.dp)
-                        }
-                        item(key = "indicator") {
-                            if (state.hasMore) LoadMoreIndicator() else NoMoreIndicator()
+                        } else {
+                            items(state.items, key = { it.id }) { item ->
+                                SwipeWrapper(
+                                    rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
+                                        onClick = { model.toggleReadStatus(item) }
+                                    ) else UnreadStateDefinition.copy(
+                                        onClick = { model.toggleReadStatus(item) }
+                                    ),
+                                    leftSwipeState = NoneStateDefinition
+                                ) {
+                                    EntryTile(item)
+                                }
+                                SpacerDivider(start = 16.dp, end = 16.dp)
+                            }
+                            item(key = "indicator") {
+                                if (state.hasMore) LoadMoreIndicator() else NoMoreIndicator()
+                            }
                         }
                     }
                 }
