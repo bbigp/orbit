@@ -1,9 +1,12 @@
 package cn.coolbet.orbit.ui.view.entry
 
+import androidx.compose.runtime.compositionLocalOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
+import cn.coolbet.orbit.common.ConsumerUnit
 import cn.coolbet.orbit.dao.EntryDao
+import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.Session
@@ -21,6 +24,7 @@ import kotlinx.coroutines.launch
 class EntryScreenModel @AssistedInject constructor(
     @Assisted private val data: Entry,
     private val entryDao: EntryDao,
+    private val entryManager: EntryManager,
     private val session: Session,
     private val eventBus: EventBus,
 ): ScreenModel {
@@ -49,6 +53,16 @@ class EntryScreenModel @AssistedInject constructor(
             } else {
                 it.copy(readerView = !it.readerView)
             }
+        }
+    }
+
+    fun changeStarred() {
+        screenModelScope.launch {
+            val current = state.value.entry
+            val value = current.copy(starred = !current.starred)
+            entryManager.updateFlags(value.id, starred = value.starred)
+            mutableState.update { it.copy(entry = value) }
+            eventBus.post(Evt.EntryUpdated(value))
         }
     }
 
@@ -91,10 +105,3 @@ class EntryScreenModel @AssistedInject constructor(
         ))
     }
 }
-
-data class EntryState(
-    val entry: Entry = Entry.EMPTY,
-    val readingModeEnabled: Boolean = false,
-    val readerView: Boolean = false,
-    val isLoadingReadableContent: Boolean = false
-)

@@ -37,6 +37,7 @@ class CacheStore @Inject constructor(
     private val folderDao: FolderDao,
     private val entryDao: EntryDao,
     private val mediaDao: MediaDao,
+    private val entryManager: EntryManager,
     eventBus: EventBus,
     appScope: CoroutineScope,
 ) {
@@ -60,7 +61,7 @@ class CacheStore @Inject constructor(
                 }
                 .subscribe<Evt.EntryStatusUpdated> { event ->
                     Log.i("eventbus", "EntryStatusUpdated newStatus: ${event.status} ${event.entryId}")
-                    entryDao.updateStatus(event.status, event.entryId)
+                    entryManager.updateFlags(event.entryId, status = event.status)
                     val count = if (event.status.isUnread) 1 else -1
                     _unreadCountMap.increment(mapOf(
                         "o${event.folderId}" to count,

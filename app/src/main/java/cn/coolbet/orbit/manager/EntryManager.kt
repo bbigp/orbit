@@ -28,8 +28,8 @@ class EntryManager @Inject constructor(
         }
     }
 
-    suspend fun updateStatus(status: EntryStatus, id: Long) {
-        entryDao.updateStatus(status, id)
+    suspend fun updateFlags(id: Long, status: EntryStatus? = null, starred: Boolean? = null) {
+        entryDao.updateFlags(status, starred, id)
         //todo  save record commit server
     }
 

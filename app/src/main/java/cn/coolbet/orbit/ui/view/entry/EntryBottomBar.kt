@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DropdownMenu
@@ -21,13 +22,16 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
@@ -51,8 +55,10 @@ fun EntryBottomBar(
     state: EntryState
 ) {
     val changeReaderView = LocalChangeReaderView.current
+    val changeStarred = LocalChangeStarred.current
     val expandedState = remember { MutableTransitionState(false) }
     val context = LocalContext.current
+    val density = LocalDensity.current
 
     Column(
         modifier =
@@ -70,21 +76,26 @@ fun EntryBottomBar(
         ) {
             ObIcon(
                 id = R.drawable.arrow_left,
-                modifier = Modifier.clickable(onClick = { NavigatorBus.pop() }),
+                modifier = Modifier.clickable { NavigatorBus.pop() },
             )
-            ObIcon(id = R.drawable.star)
+            ObIcon(
+                id = if (state.entry.starred) R.drawable.collection else R.drawable.collection_slash,
+                modifier = Modifier.clickable { changeStarred() }
+            )
             ObIcon(
                 id = if (state.readerView) R.drawable.book else R.drawable.page,
-                modifier = Modifier.clickable(onClick = { changeReaderView() })
+                modifier = Modifier.clickable { changeReaderView() }
             )
             ObIcon(id = R.drawable.chevron_down)
             Box{
                 ObIcon(
                     id = R.drawable.more,
-                    modifier = Modifier.clickable(
-                        onClick = { expandedState.targetState = !expandedState.targetState }
-                    )
+                    modifier = Modifier.clickable {
+                        expandedState.targetState = !expandedState.targetState
+                    }
                 )
+                var widthPx by remember { mutableIntStateOf(0) }
+                val widthDp = with(density) { widthPx.toDp() }
                 ObDropdownMenu (
                     onDismissRequest = { expandedState.targetState = false },
                     expandedState = expandedState,
@@ -95,6 +106,9 @@ fun EntryBottomBar(
                         onClick = {
                             openURL(context, state.entry.url.toUri())
                             expandedState.targetState = false
+                        },
+                        modifier = Modifier.onSizeChanged {
+                            widthPx = it.width
                         }
                     )
                     ObDropdownMenuItem(
@@ -103,7 +117,8 @@ fun EntryBottomBar(
                         onClick = {
                             shareText(context, "${state.entry.title} \n ${state.entry.url}", state.entry.title)
                             expandedState.targetState = false
-                        }
+                        },
+                        modifier = Modifier.width(widthDp)
                     )
                     ObDropdownMenuItem(
                         text = "复制链接",
@@ -111,11 +126,13 @@ fun EntryBottomBar(
                         onClick = {
                             copyText(context, state.entry.url)
                             expandedState.targetState = false
-                        }
+                        },
+                        modifier = Modifier.width(widthDp)
                     )
                     ObDropdownMenuItem(
                         text = "阅读设置",
-                        leadingIcon = R.drawable.brush
+                        leadingIcon = R.drawable.brush,
+                        modifier = Modifier.width(widthDp)
                     )
                 }
             }

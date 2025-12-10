@@ -21,11 +21,6 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import kotlinx.parcelize.Parcelize
 
-
-val LocalChangeReaderView = compositionLocalOf<ConsumerUnit> {
-    error("No function provided")
-}
-
 @Parcelize
 data class EntryScreen(
     val data: Entry
@@ -45,7 +40,8 @@ data class EntryScreen(
         }
 
         CompositionLocalProvider(
-            LocalChangeReaderView provides model::changeDisplayMode
+            LocalChangeReaderView provides model::changeDisplayMode,
+            LocalChangeStarred provides model::changeStarred
         ) {
             Scaffold(
                 bottomBar = { EntryBottomBar(state) }
