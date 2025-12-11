@@ -37,7 +37,7 @@ class CacheStore @Inject constructor(
     private val folderDao: FolderDao,
     private val entryDao: EntryDao,
     private val mediaDao: MediaDao,
-    private val entryManager: EntryManager,
+    private val localDataManager: LocalDataManager,
     eventBus: EventBus,
     appScope: CoroutineScope,
 ) {
@@ -53,22 +53,20 @@ class CacheStore @Inject constructor(
     @Volatile private var currentLoadJob: Job? = null
 
     init {
-        appScope.launch {
-            eventBus
-                .subscribe<Evt.CacheInvalidated> { event ->
-                    Log.i("eventbus", "刷新缓存")
-                    loadInitialData(event.userId)
-                }
-                .subscribe<Evt.EntryStatusUpdated> { event ->
-                    Log.i("eventbus", "EntryStatusUpdated newStatus: ${event.status} ${event.entryId}")
-                    entryManager.updateFlags(event.entryId, status = event.status)
-                    val count = if (event.status.isUnread) 1 else -1
-                    _unreadCountMap.increment(mapOf(
-                        "o${event.folderId}" to count,
-                        "e${event.feedId}" to count
-                    ))
-                }
-        }
+        eventBus
+            .subscribe<Evt.CacheInvalidated>(appScope) { event ->
+                Log.i("eventbus", "刷新缓存")
+                loadInitialData(event.userId)
+            }
+            .subscribe<Evt.EntryStatusUpdated>(appScope) { event ->
+                Log.i("eventbus", "EntryStatusUpdated newStatus: ${event.status} ${event.entryId}")
+                localDataManager.updateFlags(event.entryId, status = event.status)
+                val count = if (event.status.isUnread) 1 else -1
+                _unreadCountMap.increment(mapOf(
+                    "o${event.folderId}" to count,
+                    "e${event.feedId}" to count
+                ))
+            }
     }
 
     fun feed(id: Long): Feed {

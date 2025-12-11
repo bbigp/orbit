@@ -43,24 +43,22 @@ class EntriesScreenModel @AssistedInject constructor(
 
     init {
         loadInitialData()
-        screenModelScope.launch {
-            eventBus
-                .subscribe<Evt.EntryUpdated> { event ->
-                    replace(event.entry)
-                }
-                .subscribe<Evt.EntryStatusUpdated> { event ->
-                    mutableState.update { value ->
-                        val index = value.items.indexOfFirst { it.id == event.entryId }
-                        if (index == -1) {
-                            return@update value
-                        }
-                        val newItems = value.items.toMutableList().apply {
-                            this[index] = this[index].copy(status = event.status)
-                        }
-                        return@update value.copy(items = newItems)
+        eventBus
+            .subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
+                replace(event.entry)
+            }
+            .subscribe<Evt.EntryStatusUpdated>(screenModelScope) { event ->
+                mutableState.update { value ->
+                    val index = value.items.indexOfFirst { it.id == event.entryId }
+                    if (index == -1) {
+                        return@update value
                     }
+                    val newItems = value.items.toMutableList().apply {
+                        this[index] = this[index].copy(status = event.status)
+                    }
+                    return@update value.copy(items = newItems)
                 }
-        }
+            }
     }
 
     fun replace(entry: Entry) {
@@ -118,6 +116,7 @@ class EntriesScreenModel @AssistedInject constructor(
     }
 
     fun toggleReadStatus(entry: Entry) {
+        Log.i("eventbus", "toggleReadStatus EntryStatusUpdated")
         eventBus.post(Evt.EntryStatusUpdated(
             entry.id,
             if (entry.isUnread) EntryStatus.READ else EntryStatus.UNREAD,

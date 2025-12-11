@@ -133,7 +133,7 @@ abstract class EntryDao(protected val db: AppDatabase) {
              end   
         where id = :id
     """)
-    abstract suspend fun updateFlags(status: EntryStatus?, starred: Boolean?, id: Long)
+    abstract suspend fun updateFlags(status: String?, starred: Boolean?, id: Long)
 
     @Query("select * from entries limit 10")
     internal abstract suspend fun getEntriesImpl(): List<EntryEntity>

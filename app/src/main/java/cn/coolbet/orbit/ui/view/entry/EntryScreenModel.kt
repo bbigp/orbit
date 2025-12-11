@@ -1,14 +1,12 @@
 package cn.coolbet.orbit.ui.view.entry
 
-import androidx.compose.runtime.compositionLocalOf
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
-import cn.coolbet.orbit.common.ConsumerUnit
 import cn.coolbet.orbit.dao.EntryDao
-import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.LocalDataManager
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
@@ -24,7 +22,7 @@ import kotlinx.coroutines.launch
 class EntryScreenModel @AssistedInject constructor(
     @Assisted private val data: Entry,
     private val entryDao: EntryDao,
-    private val entryManager: EntryManager,
+    private val localDataManager: LocalDataManager,
     private val session: Session,
     private val eventBus: EventBus,
 ): ScreenModel {
@@ -60,7 +58,7 @@ class EntryScreenModel @AssistedInject constructor(
         screenModelScope.launch {
             val current = state.value.entry
             val value = current.copy(starred = !current.starred)
-            entryManager.updateFlags(value.id, starred = value.starred)
+            localDataManager.updateFlags(value.id, starred = value.starred)
             mutableState.update { it.copy(entry = value) }
             eventBus.post(Evt.EntryUpdated(value))
         }

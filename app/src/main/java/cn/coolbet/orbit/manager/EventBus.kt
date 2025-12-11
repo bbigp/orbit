@@ -28,12 +28,11 @@ class EventBus @Inject constructor() {
 
     suspend inline fun <reified T : Evt> subscribe(
         crossinline action: suspend (T) -> Unit
-    ): EventBus {
+    ) {
         this.events.filterIsInstance<T>()
             .collect { event ->
                 action(event)
             }
-        return this
     }
 
     inline fun <reified T : Evt> subscribe(

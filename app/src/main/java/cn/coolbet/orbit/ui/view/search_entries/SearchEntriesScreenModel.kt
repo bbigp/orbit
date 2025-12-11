@@ -36,30 +36,28 @@ class SearchEntriesScreenModel @AssistedInject constructor(
 
     init {
         loadSearchList()
-        screenModelScope.launch {
-            eventBus
-                .subscribe<Evt.EntryUpdated> { event ->
-                    mutableState.update { currentState ->
-                        val updatedItems = currentState.items.replace(event.entry)
-                        if (updatedItems == currentState.items) {
-                            return@update currentState
-                        }
-                        return@update currentState.copy(items = updatedItems)
+        eventBus
+            .subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
+                mutableState.update { currentState ->
+                    val updatedItems = currentState.items.replace(event.entry)
+                    if (updatedItems == currentState.items) {
+                        return@update currentState
                     }
+                    return@update currentState.copy(items = updatedItems)
                 }
-                .subscribe<Evt.EntryStatusUpdated> { event ->
-                    mutableState.update { value ->
-                        val index = value.items.indexOfFirst { it.id == event.entryId }
-                        if (index == -1) {
-                            return@update value
-                        }
-                        val newItems = value.items.toMutableList().apply {
-                            this[index] = this[index].copy(status = event.status)
-                        }
-                        return@update value.copy(items = newItems)
+            }
+            .subscribe<Evt.EntryStatusUpdated>(screenModelScope) { event ->
+                mutableState.update { value ->
+                    val index = value.items.indexOfFirst { it.id == event.entryId }
+                    if (index == -1) {
+                        return@update value
                     }
+                    val newItems = value.items.toMutableList().apply {
+                        this[index] = this[index].copy(status = event.status)
+                    }
+                    return@update value.copy(items = newItems)
                 }
-        }
+            }
     }
 
     fun loadSearchList() {
