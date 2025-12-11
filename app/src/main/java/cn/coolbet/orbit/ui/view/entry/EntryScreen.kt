@@ -1,7 +1,6 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,25 +10,24 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
-import cn.coolbet.orbit.common.ConsumerUnit
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class EntryScreen(
-    val data: Entry
+    val data: Entry,
+    val queryContext: QueryContext
 ): Screen, Parcelable {
 
     @Composable
     override fun Content() {
         val model = getScreenModel<EntryScreenModel, EntryScreenModel.Factory>{ factory ->
-            factory.create(data)
+            factory.create(data, queryContext)
         }
         val state by model.state.collectAsState()
 
@@ -41,7 +39,8 @@ data class EntryScreen(
 
         CompositionLocalProvider(
             LocalChangeReaderView provides model::changeDisplayMode,
-            LocalChangeStarred provides model::changeStarred
+            LocalChangeStarred provides model::changeStarred,
+            LocalNextEntry provides model::nextEntry
         ) {
             Scaffold(
                 bottomBar = { EntryBottomBar(state) }

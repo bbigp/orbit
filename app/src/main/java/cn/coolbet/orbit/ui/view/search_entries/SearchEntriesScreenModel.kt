@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.search_entries
 
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
@@ -8,6 +9,7 @@ import cn.coolbet.orbit.dao.SearchDao
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
@@ -18,6 +20,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,13 +29,17 @@ class SearchEntriesScreenModel @AssistedInject constructor(
     private val searchDao: SearchDao,
     private val entryManager: EntryManager,
     private val session: Session,
-    private val eventBus: EventBus,
-): StateScreenModel<SearchEntriesState>(initialState = SearchEntriesState()) {
+    private val navigatorState: NavigatorState,
+    eventBus: EventBus,
+): ScreenModel {
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
         fun create(meta: Meta): SearchEntriesScreenModel
     }
+
+    val mutableState = navigatorState.searchUi
+    val state = mutableState.asStateFlow()
 
     init {
         loadSearchList()
@@ -98,7 +105,11 @@ class SearchEntriesScreenModel @AssistedInject constructor(
             mutableState.update { it.copy(isLoadingMore = true) }
             delay(200)
             val page = state.value.page + 1
-            val items = entryManager.getPage(meta, page, state.value.size, state.value.search)
+            val items = entryManager.getPage(
+                meta, page,
+                state.value.size,
+                state.value.search
+            )
             mutableState.update {
                 it.copy(
                     page = page, items = it.items + items,
@@ -125,19 +136,24 @@ class SearchEntriesScreenModel @AssistedInject constructor(
         }
     }
 
+    override fun onDispose() {
+        super.onDispose()
+        navigatorState.searchUi.update { SearchEntriesState() }
+    }
+
 }
 
 
 
 data class SearchEntriesState(
     val userId: Long = 0,
+    val histories: Set<String> = emptySet(),
+    val count: Int = 0,
     val meta: Meta = Feed.EMPTY,
     val search: String = "",
-    val histories: Set<String> = emptySet(),
     val page: Int = 0,
     val size: Int = 20,
     val items: List<Entry> = emptyList(),
-    val count: Int = 0,
     override val hasMore: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,

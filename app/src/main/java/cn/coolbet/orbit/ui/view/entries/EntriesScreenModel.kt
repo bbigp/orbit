@@ -1,7 +1,7 @@
 package cn.coolbet.orbit.ui.view.entries
 
 import android.util.Log
-import cafe.adriel.voyager.core.model.StateScreenModel
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.common.ILoadingState
@@ -9,6 +9,7 @@ import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Feed
@@ -21,6 +22,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,13 +34,16 @@ class EntriesScreenModel @AssistedInject constructor(
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
-): StateScreenModel<EntriesState>(initialState = EntriesState()) {
+    private val navigatorState: NavigatorState,
+): ScreenModel {
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
         fun create(metaId: MetaId): EntriesScreenModel
     }
 
+    val mutableState = navigatorState.entriesUi
+    val state = mutableState.asStateFlow()
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
     init {
@@ -123,6 +128,12 @@ class EntriesScreenModel @AssistedInject constructor(
             entry.feedId,
             entry.feed.folderId
         ))
+    }
+
+    override fun onDispose() {
+        Log.i("entries", "clear state")
+        super.onDispose()
+        navigatorState.entriesUi.update { EntriesState() }
     }
 
 }

@@ -58,12 +58,15 @@ import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 
 @Composable
-fun EntryTile(entry: Entry) {
+fun EntryTile(
+    entry: Entry,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
+    val defaultModifier = Modifier.background(Color.White)
+        .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
     Column(
-        modifier = Modifier.click { NavigatorBus.push(Route.Entry(entry)) }
-            .background(Color.White)
-            .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
+        modifier = defaultModifier.then(modifier)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         EntryTileTopRow(entry)

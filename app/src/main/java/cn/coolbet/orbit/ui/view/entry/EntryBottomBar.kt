@@ -56,6 +56,7 @@ fun EntryBottomBar(
 ) {
     val changeReaderView = LocalChangeReaderView.current
     val changeStarred = LocalChangeStarred.current
+    val nextEntry = LocalNextEntry.current
     val expandedState = remember { MutableTransitionState(false) }
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -86,7 +87,10 @@ fun EntryBottomBar(
                 id = if (state.readerView) R.drawable.book else R.drawable.page,
                 modifier = Modifier.clickable { changeReaderView() }
             )
-            ObIcon(id = R.drawable.chevron_down)
+            ObIcon(
+                id = R.drawable.chevron_down,
+                modifier = Modifier.clickable{ nextEntry() }
+            )
             Box{
                 ObIcon(
                     id = R.drawable.more,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +25,7 @@ import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextFieldAppbar
+import cn.coolbet.orbit.ui.view.entry.QueryContext
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -42,7 +44,13 @@ data class SearchEntriesScreen(
         val listState = rememberLazyListState()
 
         LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
+//            if (state.search.isEmpty()) {
+                focusRequester.requestFocus()
+//            }
+        }
+
+        DisposableEffect(Unit) {
+            onDispose { model.onDispose() }
         }
 
         InfiniteScrollHandler(
