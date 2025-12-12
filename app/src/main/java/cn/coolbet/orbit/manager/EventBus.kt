@@ -58,4 +58,5 @@ sealed class Evt {
         val feedId: Long,
         val folderId: Long
     ): Evt()
+    data class ScreenDisposeRequest(val screenName: String): Evt()
 }

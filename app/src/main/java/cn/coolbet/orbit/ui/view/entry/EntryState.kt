@@ -26,6 +26,6 @@ val LocalChangeReaderView = compositionLocalOf<ConsumerUnit> {
 val LocalChangeStarred = compositionLocalOf<ConsumerUnit> {
     error("No function provided")
 }
-val LocalNextEntry = compositionLocalOf<ConsumerUnit> {
+val LocalNextEntry = compositionLocalOf<() -> Entry?> {
     error("No function provided")
 }

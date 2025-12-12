@@ -29,8 +29,8 @@ class SearchEntriesScreenModel @AssistedInject constructor(
     private val searchDao: SearchDao,
     private val entryManager: EntryManager,
     private val session: Session,
-    private val navigatorState: NavigatorState,
-    eventBus: EventBus,
+    navigatorState: NavigatorState,
+    private val eventBus: EventBus,
 ): ScreenModel {
 
     @AssistedFactory
@@ -136,9 +136,8 @@ class SearchEntriesScreenModel @AssistedInject constructor(
         }
     }
 
-    override fun onDispose() {
-        super.onDispose()
-        navigatorState.searchUi.update { SearchEntriesState() }
+    fun onDispose(screenName: String) {
+        eventBus.post(Evt.ScreenDisposeRequest(screenName))
     }
 
 }

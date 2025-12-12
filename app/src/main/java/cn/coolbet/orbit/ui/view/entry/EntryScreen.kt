@@ -43,7 +43,7 @@ data class EntryScreen(
             LocalNextEntry provides model::nextEntry
         ) {
             Scaffold(
-                bottomBar = { EntryBottomBar(state) }
+                bottomBar = { EntryBottomBar(state, queryContext) }
             ) { paddingValues ->
                 Box(
                     modifier = Modifier.padding(paddingValues)

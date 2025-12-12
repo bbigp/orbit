@@ -17,7 +17,6 @@ import cn.coolbet.orbit.ui.view.entries.addItems
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -94,13 +93,20 @@ class EntryScreenModel @AssistedInject constructor(
         }
 
     fun loadData(entry: Entry, index: Int? = null) {
-        mutableState.update {
-            it.copy(
-                index = index ?: accessor.indexOfFirst(entry),
-                entry = entry,
-                readerView = entry.readableContent.isNotEmpty(),
-                readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,
-            )
+        screenModelScope.launch {
+            val currentIndex = index ?: accessor.indexOfFirst(entry)
+            if (currentIndex != -1 && currentIndex == accessor.total - 1 && accessor.hasMore) { //最后一个 加载数据
+                accessor.nextPage()
+                Log.i("nextEntry", "数据加载完成, 当前 $currentIndex  总共: ${accessor.total} ")
+            }
+            mutableState.update {
+                it.copy(
+                    index = currentIndex,
+                    entry = entry,
+                    readerView = entry.readableContent.isNotEmpty(),
+                    readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,
+                )
+            }
         }
     }
 
@@ -124,23 +130,13 @@ class EntryScreenModel @AssistedInject constructor(
         }
     }
 
-    fun nextEntry() {
+    fun nextEntry(): Entry? {
         val currentIndex = state.value.index
         val total = accessor.total
-        val hasMore = accessor.hasMore
         Log.i("nextEntry", "当前 $currentIndex  总共: $total ")
-        if (total == 0 || currentIndex < 0) return
-        if (currentIndex == total - 1 && !hasMore) return //最后一个元素 且 没有更多
-        screenModelScope.launch {
-            if (currentIndex == total - 1 && hasMore) { //加载数据
-                accessor.nextPage()
-            }
-            val newTotal = accessor.total
-            Log.i("nextEntry", "数据加载完成, 当前 $currentIndex  总共: $newTotal ")
-            if (currentIndex + 1 >= newTotal) return@launch
-            val entry = accessor.items[currentIndex + 1]
-            loadData(entry, currentIndex + 1)
-        }
+        if (total == 0 || currentIndex < 0) return null
+        if (currentIndex == total - 1) return null//最后一个元素
+        return accessor.items[currentIndex + 1]
     }
 
     fun startLoading() {

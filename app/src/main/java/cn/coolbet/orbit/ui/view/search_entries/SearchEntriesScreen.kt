@@ -25,13 +25,14 @@ import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextFieldAppbar
-import cn.coolbet.orbit.ui.view.entry.QueryContext
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class SearchEntriesScreen(
     val meta: Meta,
 ): Screen, Parcelable {
+
+    val screenName: String get() = this::class.simpleName ?: ""
 
     @Composable
     override fun Content() {
@@ -50,7 +51,7 @@ data class SearchEntriesScreen(
         }
 
         DisposableEffect(Unit) {
-            onDispose { model.onDispose() }
+            onDispose { model.onDispose(screenName) }
         }
 
         InfiniteScrollHandler(

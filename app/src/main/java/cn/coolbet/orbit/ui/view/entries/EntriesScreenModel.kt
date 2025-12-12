@@ -34,7 +34,7 @@ class EntriesScreenModel @AssistedInject constructor(
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
-    private val navigatorState: NavigatorState,
+    navigatorState: NavigatorState,
 ): ScreenModel {
 
     @AssistedFactory
@@ -130,10 +130,9 @@ class EntriesScreenModel @AssistedInject constructor(
         ))
     }
 
-    override fun onDispose() {
+    fun onDispose(screenName: String) {
         Log.i("entries", "clear state")
-        super.onDispose()
-        navigatorState.entriesUi.update { EntriesState() }
+        eventBus.post(Evt.ScreenDisposeRequest(screenName))
     }
 
 }

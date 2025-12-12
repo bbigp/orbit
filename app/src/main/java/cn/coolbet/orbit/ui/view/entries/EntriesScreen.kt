@@ -45,6 +45,8 @@ data class EntriesScreen(
     val metaId: MetaId,
 ): Screen, Parcelable {
 
+    val screenName: String get() = this::class.simpleName ?: ""
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
@@ -58,7 +60,7 @@ data class EntriesScreen(
         val context = LocalContext.current
 
         DisposableEffect(Unit) {
-            onDispose { model.onDispose() }
+            onDispose { model.onDispose(screenName) }
         }
 
         InfiniteScrollHandler(
