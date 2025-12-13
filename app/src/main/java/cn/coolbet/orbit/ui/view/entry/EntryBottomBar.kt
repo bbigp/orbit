@@ -36,7 +36,6 @@ import cn.coolbet.orbit.ui.kit.ObDropdownMenuItem
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.ObTheme
-import kotlinx.coroutines.delay
 
 @Composable
 fun EntryBottomBar(

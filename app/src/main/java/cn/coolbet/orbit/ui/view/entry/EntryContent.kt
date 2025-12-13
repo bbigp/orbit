@@ -1,25 +1,18 @@
 package cn.coolbet.orbit.ui.view.entry
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.JsPromptResult
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,16 +20,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import cn.coolbet.orbit.common.openURL
-import cn.coolbet.orbit.model.domain.Entry
 
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
@@ -79,19 +68,20 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
 
     DisposableEffect(Unit) {
         onDispose {
-            webView?.apply {
-                stopLoading()
-                clearHistory()
-                webView?.loadUrl("about:blank") // 推荐：加载空白页
-                onPause() // 推荐：暂停活动
-                removeJavascriptInterface("Android")
-                destroy()
+            webView?.let { view ->
+                // 彻底清理和销毁的步骤 (停止加载、移除接口、移除View、loadUrl("about:blank"), destroy())
+                view.stopLoading() // 停止任何正在进行的加载
+                view.removeJavascriptInterface("Android")
+                view.onPause()
+                (view.parent as? ViewGroup)?.removeView(view) // 3. 将其从父视图中移除，立即断开其与 View 树的连接
+                view.destroy() // 销毁 WebView 实例 (这是防止崩溃最关键的一步)
+                webView = null
+                Log.d("ReaderView", "WebView instance destroyed successfully.")
             }
-            webView = null
         }
     }
 
-    LaunchedEffect(fullHtml, webView) {
+    LaunchedEffect(fullHtml) {
         // 加载本地 HTML 内容
         // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
         // 这样 WebView 就能找到 CSS/字体文件。

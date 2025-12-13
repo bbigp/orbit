@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,14 +26,12 @@ data class EntryScreen(
     @Composable
     override fun Content() {
         val model = getScreenModel<EntryScreenModel, EntryScreenModel.Factory>{ factory ->
-            factory.create(data, queryContext)
+            factory.create(queryContext)
         }
         val state by model.state.collectAsState()
 
-        DisposableEffect(Unit) {
-            onDispose {
-                model.autoRead()
-            }
+        LaunchedEffect(data) {
+            model.loadData(data)
         }
 
         CompositionLocalProvider(
@@ -58,12 +55,14 @@ data class EntryScreen(
 
                     if (state.isLoadingReadableContent) {
                         ReaderView(
+                            key = state.entry.id,
                             url = state.entry.url,
-                            onContentExtracted = { extracted ->
+                            onContentExtracted = { extracted, id ->
                                 model.updateReadableContent(
                                     extracted.content ?: "",
                                     extracted.leadImageUrl ?: "",
-                                    extracted.excerpt ?: ""
+                                    extracted.excerpt ?: "",
+                                    id
                                 )
                             }
                         )

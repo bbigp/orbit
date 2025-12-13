@@ -18,6 +18,7 @@ interface PagingStateAccessor {
     val hasMore: Boolean
     suspend fun nextPage()
     fun indexOfFirst(item: Entry): Int
+    fun entry(id: Long): Entry?
 }
 
 val LocalChangeReaderView = compositionLocalOf<ConsumerUnit> {

@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlin.collections.plus
 
 class EntryScreenModel @AssistedInject constructor(
-    @Assisted private val data: Entry,
     @Assisted private val queryContext: QueryContext,
     private val entryDao: EntryDao,
     private val localDataManager: LocalDataManager,
@@ -37,15 +36,11 @@ class EntryScreenModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
-        fun create(data: Entry, queryContext: QueryContext): EntryScreenModel
+        fun create(queryContext: QueryContext): EntryScreenModel
     }
 
-    private val mutableState = MutableStateFlow(EntryState(entry = data))
+    private val mutableState = MutableStateFlow(EntryState())
     val state: StateFlow<EntryState> = mutableState.asStateFlow()
-
-    init {
-        loadData(data)
-    }
 
     private val accessor: PagingStateAccessor
         get() = when (queryContext.page) {
@@ -63,6 +58,9 @@ class EntryScreenModel @AssistedInject constructor(
                 }
                 override fun indexOfFirst(item: Entry): Int {
                     return navigatorState.entriesUi.value.items.indexOfFirst { it.id == item.id }
+                }
+                override fun entry(id: Long): Entry? {
+                    return navigatorState.entriesUi.value.items.find { it.id == id }
                 }
             }
             "search" -> object : PagingStateAccessor {
@@ -88,6 +86,9 @@ class EntryScreenModel @AssistedInject constructor(
                 override fun indexOfFirst(item: Entry): Int {
                     return navigatorState.searchUi.value.items.indexOfFirst { it.id == item.id }
                 }
+                override fun entry(id: Long): Entry? {
+                    return navigatorState.searchUi.value.items.find { it.id == id }
+                }
             }
             else -> throw IllegalStateException("Unknown page context: ${queryContext.page}")
         }
@@ -99,14 +100,17 @@ class EntryScreenModel @AssistedInject constructor(
                 accessor.nextPage()
                 Log.i("nextEntry", "数据加载完成, 当前 $currentIndex  总共: ${accessor.total} ")
             }
+            Log.i("entry-load-data", "entry index: $currentIndex")
             mutableState.update {
-                it.copy(
-                    index = currentIndex,
+                EntryState(
                     entry = entry,
                     readerView = entry.readableContent.isNotEmpty(),
                     readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,
+                    isLoadingReadableContent = false,
+                    index = currentIndex
                 )
             }
+            autoRead()
         }
     }
 
@@ -143,22 +147,32 @@ class EntryScreenModel @AssistedInject constructor(
         mutableState.update { it.copy(isLoadingReadableContent = true) }
     }
 
-    fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String) {
-        val entry = state.value.entry
+    fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String, id: Long) {
+        if (readableContent == "<div></div>") {
+            return
+        }
         screenModelScope.launch {
-            entryDao.updateReadingModeData(readableContent, leadImageURL, summary, entry.id)
+            entryDao.updateReadingModeData(readableContent, leadImageURL, summary, id)
+            val entry = accessor.entry(id)
+            if (entry == null) {
+                return@launch
+            }
+            val newEntry = entry.copy(
+                readableContent = readableContent, leadImageURL = leadImageURL,
+                summary = summary
+            )
             mutableState.update {
+                if (it.entry.id != id) {
+                    return@update it
+                }
                 it.copy(
                     isLoadingReadableContent = false,
-                    entry = it.entry.copy(
-                        readableContent = readableContent, leadImageURL = leadImageURL,
-                        summary = summary
-                    ),
-                    readerView = readableContent.isNotEmpty(),
+                    entry = newEntry,
+                    readerView = newEntry.readableContent.isNotEmpty(),
                     readingModeEnabled = false
                 )
             }
-            eventBus.post(Evt.EntryUpdated(state.value.entry))
+            eventBus.post(Evt.EntryUpdated(newEntry))
         }
     }
 

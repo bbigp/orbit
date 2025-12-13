@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.size
@@ -27,25 +28,30 @@ import java.io.IOException
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
 fun ReaderView(
+    key: Long,
     url: String,
     // 🌟 提取结果的回调函数
-    onContentExtracted: (ExtractedContent) -> Unit
+    onContentExtracted: (ExtractedContent, Long) -> Unit
 ) {
     val context = LocalContext.current
     val jsContent = remember {
         readAssetFile(context, "js/mercury.web.js")
     }
-    val bridge = remember { ContentExtractorBridge(onContentExtracted) }
+    val bridge = remember { ContentExtractorBridge(onContentExtracted, key) }
     var webView: WebView? by remember { mutableStateOf(null) }
 
     DisposableEffect(Unit) {
         onDispose {
-            webView?.stopLoading()
-            webView?.clearHistory()
-            webView?.loadUrl("about:blank") // 推荐：加载空白页
-            webView?.onPause() // 推荐：暂停活动
-            webView?.destroy()
-            webView = null
+            webView?.let { view ->
+                // 彻底清理和销毁的步骤 (停止加载、移除接口、移除View、loadUrl("about:blank"), destroy())
+                view.stopLoading() // 停止任何正在进行的加载
+                view.removeJavascriptInterface("Android")
+                view.onPause()
+                (view.parent as? ViewGroup)?.removeView(view) // 3. 将其从父视图中移除，立即断开其与 View 树的连接
+                view.destroy() // 销毁 WebView 实例 (这是防止崩溃最关键的一步)
+                webView = null
+                Log.d("ReaderView", "WebView instance destroyed successfully.")
+            }
         }
     }
 
@@ -67,6 +73,25 @@ fun ReaderView(
 
                 addJavascriptInterface(bridge, "Android")
                 webViewClient = object : WebViewClient() {
+
+                    // 🌟 辅助函数：安全地执行 JS
+                    fun safeEvaluateJavascript(
+                        script: String,
+                        callback: ValueCallback<String>? = null
+                    ) {
+                        webView?.let { validWebView ->
+                            // 确保在主线程执行
+                            validWebView.post {
+                                // 再次检查引用是否仍然是当前有效的实例
+                                if (webView == validWebView) {
+                                    validWebView.evaluateJavascript(script, callback)
+                                } else {
+                                    Log.w("ReaderView", "Skipping JS: WebView reference changed/destroyed during post.")
+                                }
+                            }
+                        }
+                    }
+
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
 
@@ -77,8 +102,18 @@ fun ReaderView(
                             })();
                         """
 
-                        view?.evaluateJavascript(jsContent) {
-                            view.evaluateJavascript(extractionScript) {}
+//                                validWebView.evaluateJavascript(jsContent) {
+//                                    validWebView.evaluateJavascript(extractionScript) {}
+//                                }
+
+                        // 1. 外部调用：注入第一个JS (jsContent)
+                        safeEvaluateJavascript(jsContent) {
+                            // 2. 内部回调：在执行第二个JS之前，再次调用安全函数
+                            safeEvaluateJavascript(extractionScript) { result ->
+                                // 3. 最终回调：处理结果 (这个回调也可能延迟)
+                                // 这里的 onExtractionComplete 应该已经通过 bridge 实现了安全检查
+                                // ... 处理结果逻辑 ...
+                            }
                         }
                     }
                 }
@@ -88,13 +123,16 @@ fun ReaderView(
     )
 }
 
-class ContentExtractorBridge(private val onContentExtracted: (ExtractedContent) -> Unit) {
+class ContentExtractorBridge(
+    private val onContentExtracted: (ExtractedContent, Long) -> Unit,
+    private val key: Long
+) {
 
     @JavascriptInterface
     fun onExtractionComplete(extractedContent: String) {
-        Log.i("readerView", "Bridge $extractedContent")
+        Log.i("readerView", "Bridge extractedContent $extractedContent")
         val resultObject = gson.fromJson(extractedContent, ExtractedContent::class.java)
-        onContentExtracted(resultObject)
+        onContentExtracted(resultObject, key)
     }
 }
 private val gson = Gson()
