@@ -68,7 +68,7 @@ fun EntryBottomBar(
                 modifier = Modifier.clickable { NavigatorBus.pop() },
             )
             ObIcon(
-                id = if (state.entry.starred) R.drawable.collection else R.drawable.collection_slash,
+                id = if (state.entry.starred) R.drawable.star_fill else R.drawable.star,
                 modifier = Modifier.clickable { changeStarred() }
             )
             ObIcon(

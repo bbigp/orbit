@@ -100,6 +100,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
     implementation("androidx.work:work-runtime-ktx:2.11.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
+    implementation("org.jsoup:jsoup:1.21.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

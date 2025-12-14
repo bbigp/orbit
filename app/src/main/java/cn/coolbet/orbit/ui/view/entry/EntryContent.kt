@@ -76,7 +76,7 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
                 (view.parent as? ViewGroup)?.removeView(view) // 3. 将其从父视图中移除，立即断开其与 View 树的连接
                 view.destroy() // 销毁 WebView 实例 (这是防止崩溃最关键的一步)
                 webView = null
-                Log.d("ReaderView", "WebView instance destroyed successfully.")
+                Log.d("ContentView", "WebView instance destroyed successfully.")
             }
         }
     }
@@ -116,7 +116,7 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
                     @SuppressLint("LocalContextResourcesRead")
                     override fun onPageFinished(view: WebView?, url: String?) {
                         super.onPageFinished(view, url)
-                        Log.i("EntryContent", "onPageFinished")
+                        Log.i("ContentView", "onPageFinished")
 //                        "(function() { return document.documentElement.scrollHeight; })();"
                         view?.evaluateJavascript("""
                             const height = document.getElementById('br-article').getBoundingClientRect().height
@@ -156,7 +156,7 @@ fun EntryContent(state: EntryState, scrollState: ScrollState){
                         val response = super.shouldInterceptRequest(view, request)
                         val url = request?.url.toString()
                         if (url.contains(".jpg") || url.contains(".png") || url.contains(".gif")) {
-                            Log.d("EntryContent", "Intercepting potential image request: $url ${response?.mimeType}")
+                            Log.d("ContentView", "Intercepting potential image request: $url ${response?.mimeType}")
                         }
                         return response
                     }
@@ -179,13 +179,13 @@ class HeightBridge(
 
     @JavascriptInterface
     fun onExtractionComplete(height: String) {
-        Log.i("EntryContent", "Bridge $height")
+        Log.i("ContentView", "onExtractionComplete $height")
         onHeight(height.toFloat().toInt())
     }
 
     @JavascriptInterface
     fun onClick(data: String) {
-        Log.i("EntryContent", "onClick: $data")
+        Log.i("ContentView", "onClick: $data")
     }
 
     @JavascriptInterface
@@ -200,6 +200,6 @@ class HeightBridge(
 
     @JavascriptInterface
     fun error(msg: String) {
-        Log.i("EntryContent", "error: $msg")
+        Log.i("ContentView", "error: $msg")
     }
 }

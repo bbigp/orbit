@@ -16,6 +16,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,12 +32,21 @@ import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObIconTextButton
 import androidx.core.net.toUri
 import cn.coolbet.orbit.common.openURL
+import kotlinx.coroutines.launch
 
 @Composable
 fun EntryView(state: EntryState) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val entry = state.entry
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(state.entry) {
+        coroutineScope.launch {
+            scrollState.scrollTo(0)
+        }
+    }
+
     CompositionLocalProvider(
         LocalOverscrollFactory provides null,
     ) {
@@ -45,7 +56,7 @@ fun EntryView(state: EntryState) {
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            if (entry.pic.isNotEmpty()) {
+            if (entry.insertHeroImage) {
                 EntryImage(entry.pic)
             }
             EntryTitle(entry)

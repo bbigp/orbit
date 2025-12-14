@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.model.domain
 
 import android.os.Parcelable
+import cn.coolbet.orbit.common.HTMLProcessingHelper
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -42,6 +43,9 @@ data class Entry(
     val description: String get() {
         return summary
         //content remove html tag
+    }
+    val insertHeroImage: Boolean get() {
+        return HTMLProcessingHelper.process(readableContent).insertHeroImage
     }
 }
 
