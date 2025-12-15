@@ -92,11 +92,9 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:2.51.1") // 确保您的 Hilt 版本也是最新的
     // https://mvnrepository.com/artifact/cafe.adriel.voyager/voyager-navigator
     val voyagerVersion = "1.1.0-beta03"
-    // 核心导航库
     implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
-    // 核心状态管理（ScreenModel）
+    implementation("cafe.adriel.voyager:voyager-transitions:${voyagerVersion}")
     implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
-    // 🚀 Hilt 集成，确保 ScreenModel 可以被 Hilt 注入
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
     implementation("androidx.work:work-runtime-ktx:2.11.0")
     implementation("androidx.hilt:hilt-work:1.2.0")

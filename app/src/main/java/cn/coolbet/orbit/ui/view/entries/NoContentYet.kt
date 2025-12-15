@@ -31,7 +31,7 @@ fun NoContentYet() {
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         Image(
-            painter = painterResource(id = R.drawable.no_content_yet),
+            painter = painterResource(id = R.drawable.list_graph),
             contentDescription = "",
             contentScale = ContentScale.Fit,
         )

@@ -12,6 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.transitions.SlideTransition
 import cn.coolbet.orbit.di.AppEntryPoint
 import cn.coolbet.orbit.manager.Preference
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     }
                     OrbitRouter()
                     Syncer(syncFun = { syncViewModel.syncData() })
-                    CurrentScreen()
+                    SlideTransition(navigator)
                 }
             }
         }
