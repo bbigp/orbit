@@ -18,6 +18,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +37,7 @@ import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObIcon
+import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.entry.QueryContext
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
@@ -58,6 +62,7 @@ data class EntriesScreen(
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
         val context = LocalContext.current
+        var showBottomSheet by remember { mutableStateOf(false) }
 
         DisposableEffect(Unit) {
             onDispose { model.onDispose(screenName) }
@@ -71,16 +76,29 @@ data class EntriesScreen(
             }
         )
 
+        EntriesSheet(
+            meta = state.meta,
+            showBottomSheet = showBottomSheet,
+            onDismiss = { showBottomSheet = false }
+        )
         Scaffold(
             topBar = {
                 ObBackTopAppBar(
                     actions = {
-                        ObIcon(
-                            R.drawable.search,
-                            modifier = Modifier.clickable(
-                                onClick = { NavigatorBus.push(Route.SearchEntries(state.meta)) }
-                            ),
-                        )
+                        ObIconGroup {
+                            ObIcon(
+                                R.drawable.search,
+                                modifier = Modifier.clickable {
+                                    NavigatorBus.push(Route.SearchEntries(state.meta))
+                                },
+                            )
+                            ObIcon(
+                                R.drawable.more,
+                                modifier = Modifier.clickable {
+                                    showBottomSheet = true
+                                },
+                            )
+                        }
                     }
                 )
             }

@@ -89,7 +89,7 @@ class EntriesScreenModel @AssistedInject constructor(
             }
         }
         screenModelScope.launch {
-            delay(200)
+            delay(500)
             try {
                 val meta = metaDataFlow.first()
                 val newData = entryManager.getPage(meta, page = 1, size = value.size)
