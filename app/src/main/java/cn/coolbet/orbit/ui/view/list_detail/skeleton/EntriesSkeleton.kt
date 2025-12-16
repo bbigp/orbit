@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail.skeleton
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -68,7 +68,7 @@ fun EntriesSkeleton() {
             DashedDivider(indent = 2.dp)
         } }
         items(20) {
-            EntryTileSkeleton()
+            LDMagazineSkeleton()
             Box(modifier = Modifier.padding(horizontal = 16.dp)) { SpacerDivider() }
         }
     }
@@ -91,67 +91,6 @@ fun EntryTopTileSkeleton() {
         DashedDivider(indent = 2.dp)
     }
 }
-
-@Composable
-fun EntryTileSkeleton() {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.size(18.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .shimmer()
-            )
-            Spacer(modifier = Modifier
-                .padding(start = 6.dp)
-                .clip(RoundedCornerShape(3.dp))
-                .height(12.dp)
-                .width(72.dp)
-                .shimmer()
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(modifier = Modifier.padding(top = 3.dp, bottom = 3.dp)) {
-                    Spacer(modifier = Modifier
-                        .height(14.dp)
-                        .weight(1.5f)
-                        .clip(RoundedCornerShape(4.dp))
-                        .shimmer()
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Spacer(modifier = Modifier.padding(vertical = 3.dp)
-                    .height(12.dp)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(3.dp))
-                    .shimmer()
-                )
-                Row(
-                    modifier = Modifier.padding(top = 3.dp, bottom = 3.dp)
-                ) {
-                    Spacer(modifier = Modifier
-                        .height(12.dp)
-                        .weight(1.3f)
-                        .clip(RoundedCornerShape(3.dp))
-                        .shimmer()
-                    )
-                    Spacer(modifier = Modifier.weight(1.2f))
-                }
-
-            }
-
-            Spacer(modifier = Modifier.padding(start = 26.dp)
-                .size(80.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .shimmer()
-            )
-
-        }
-    }
-}
-
 
 fun Modifier.shimmer(
     baseColor: Color = Skeleton.copy(alpha = 0.6f), // 骨架屏的基础颜色

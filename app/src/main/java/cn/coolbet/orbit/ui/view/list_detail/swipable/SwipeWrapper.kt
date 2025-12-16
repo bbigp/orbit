@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail.swipable
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -49,7 +49,6 @@ import cn.coolbet.orbit.ui.theme.Green
 import cn.coolbet.orbit.ui.theme.Purple
 import cn.coolbet.orbit.ui.theme.Yellow
 import kotlinx.coroutines.launch
-import java.time.Year
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 

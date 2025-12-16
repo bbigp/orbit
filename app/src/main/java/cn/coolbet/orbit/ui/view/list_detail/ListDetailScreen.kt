@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail
 
 import android.os.Parcelable
 import androidx.compose.foundation.LocalOverscrollFactory
@@ -39,13 +39,23 @@ import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.SpacerDivider
+import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
+import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
+import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
+import cn.coolbet.orbit.ui.view.list_detail.skeleton.EntryTopTileSkeleton
+import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.EntriesSheet
+import cn.coolbet.orbit.ui.view.list_detail.swipable.NoneStateDefinition
+import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
+import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
+import cn.coolbet.orbit.ui.view.list_detail.swipable.UnreadStateDefinition
+import cn.coolbet.orbit.ui.view.list_detail.unavailable.NoContentYet
 import cn.coolbet.orbit.ui.view.entry.QueryContext
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class EntriesScreen(
+data class ListDetailScreen(
     val metaId: MetaId,
 ): Screen, Parcelable {
 
@@ -54,7 +64,7 @@ data class EntriesScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val model = getScreenModel<EntriesScreenModel, EntriesScreenModel.Factory> { factory ->
+        val model = getScreenModel<ListDetailScreenModel, ListDetailScreenModel.Factory> { factory ->
             factory.create(metaId)
         }
         val state by model.state.collectAsState()
@@ -131,7 +141,7 @@ data class EntriesScreen(
                             EntryTopTileSkeleton()
                         }
                         items(20) {
-                            EntryTileSkeleton()
+                            LDMagazineSkeleton()
                             Box(modifier = Modifier.padding(horizontal = 16.dp)) { SpacerDivider() }
                         }
                     } else {
@@ -157,7 +167,7 @@ data class EntriesScreen(
                                     ),
                                     leftSwipeState = NoneStateDefinition
                                 ) {
-                                    EntryTile(
+                                    LDMagazine(
                                         item,
                                         modifier = Modifier.click {
                                             NavigatorBus.push(

@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail.setting_sheet
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,36 +15,32 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.common.copyText
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black08
-import cn.coolbet.orbit.ui.theme.ContainerSecondary
+import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.view.FeedIconDefaults
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,7 +103,9 @@ fun EntriesSheet(
 @Composable
 fun PreviewListCard() {
     val meta = Feed.EMPTY.copy(title = "少数派 - sspai", feedURL = "htts://sspai.com/feed")
-    ListCard(meta)
+    Column {
+        ListCard(meta)
+    }
 }
 
 
@@ -116,6 +113,7 @@ fun PreviewListCard() {
 fun ListCard(
     meta: Meta
 ) {
+    val context = LocalContext.current
     Column (
         modifier = Modifier.padding(vertical = 8.dp)
             .background(Color.Transparent, shape = RoundedCornerShape(16.dp))
@@ -127,14 +125,25 @@ fun ListCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(12.dp))
-            FeedIcon(meta.url, meta.title, FeedIconDefaults.LARGE)
+            FeedIcon(meta.iconURL, meta.title, FeedIconDefaults.LARGE)
 
             Spacer(modifier = Modifier.width(12.dp))
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(meta.title, style = AppTypography.M15, maxLines = 1)
-                Text(meta.url, style = AppTypography.R13B50, maxLines = 1)
+                Row {
+                    Text(meta.url, style = AppTypography.R13B50, maxLines = 1)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Image(
+                        modifier = Modifier.size(16.dp)
+                            .click{ copyText(context, meta.url) },
+                        painter = painterResource(id = R.drawable.copy),
+                        contentDescription = "",
+                        contentScale = ContentScale.Fit,
+                        colorFilter = ColorFilter.tint(Black25)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(14.dp))

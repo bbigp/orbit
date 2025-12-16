@@ -20,6 +20,7 @@ interface Meta: Parcelable {
             listOf(EntryStatus.UNREAD, EntryStatus.READ)
         }
     }
+    val iconURL: String get() = ""
     val recentPubTime: Int get() = 0
     val recentAddTime: Int get() = 0
 

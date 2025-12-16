@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail.item
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column

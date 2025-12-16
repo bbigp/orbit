@@ -1,8 +1,8 @@
 package cn.coolbet.orbit.manager
 
 import cafe.adriel.voyager.navigator.Navigator
-import cn.coolbet.orbit.ui.view.entries.EntriesScreen
-import cn.coolbet.orbit.ui.view.entries.EntriesState
+import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreen
+import cn.coolbet.orbit.ui.view.list_detail.ListDetailState
 import cn.coolbet.orbit.ui.view.search_entries.SearchEntriesScreen
 import cn.coolbet.orbit.ui.view.search_entries.SearchEntriesState
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +17,7 @@ class NavigatorState @Inject constructor(
     eventBus: EventBus,
     appScope: CoroutineScope,
 ){
-    val entriesUi: MutableStateFlow<EntriesState> = MutableStateFlow(EntriesState())
+    val entriesUi: MutableStateFlow<ListDetailState> = MutableStateFlow(ListDetailState())
     val searchUi: MutableStateFlow<SearchEntriesState> = MutableStateFlow(SearchEntriesState())
 
     init {
@@ -40,7 +40,7 @@ class NavigatorState @Inject constructor(
         }
         if (isContained) return
         when(event.screenName) {
-            EntriesScreen::class.java.simpleName -> {
+            ListDetailScreen::class.java.simpleName -> {
                 entriesUi.update { EntriesState() }
             }
             SearchEntriesScreen::class.java.simpleName -> {

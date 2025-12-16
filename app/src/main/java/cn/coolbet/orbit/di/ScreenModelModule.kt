@@ -4,7 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cafe.adriel.voyager.hilt.ScreenModelFactoryKey
 import cafe.adriel.voyager.hilt.ScreenModelKey
-import cn.coolbet.orbit.ui.view.entries.EntriesScreenModel
+import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreenModel
 import cn.coolbet.orbit.ui.view.entry.EntryScreenModel
 import cn.coolbet.orbit.ui.view.home.HomeScreenModel
 import cn.coolbet.orbit.ui.view.login.LoginScreenModel
@@ -46,9 +46,9 @@ interface ScreenModelModule {
 
         @Provides
         @IntoMap
-        @ScreenModelFactoryKey(EntriesScreenModel.Factory::class)
-        fun provideEntriesModelFactory(
-            factory: EntriesScreenModel.Factory
+        @ScreenModelFactoryKey(ListDetailScreenModel.Factory::class)
+        fun provideListDetailScreenModelFactory(
+            factory: ListDetailScreenModel.Factory
         ): ScreenModelFactory = factory
 
         @Provides

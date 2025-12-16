@@ -19,7 +19,7 @@ data class Feed(
     override val hideGlobally: Boolean = false,
     override val onlyShowUnread: Boolean = false,
     override val order: String = OrderPublishedAt,
-    val iconURL: String = "",
+    override val iconURL: String = "",
 
     val folder: Folder = Folder.EMPTY,
 ) : Meta {

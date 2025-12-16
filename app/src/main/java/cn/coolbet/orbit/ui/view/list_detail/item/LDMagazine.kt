@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail.item
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -38,10 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.Route
-import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.common.showTime
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
@@ -58,7 +55,7 @@ import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 
 @Composable
-fun EntryTile(
+fun LDMagazine(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
@@ -193,13 +190,13 @@ fun PreviewEntryTile() {
     Column {
         EntryTileTopRow(entry)
         SpacerDivider()
-        EntryTile(entry.copy(summary = "", leadImageURL = ""))
+        LDMagazine(entry.copy(summary = "", leadImageURL = ""))
         SpacerDivider()
-        EntryTile(entry.copy(leadImageURL = ""))
+        LDMagazine(entry.copy(leadImageURL = ""))
         SpacerDivider()
-        EntryTile(entry.copy(summary = ""))
+        LDMagazine(entry.copy(summary = ""))
         SpacerDivider()
-        EntryTile(entry)
+        LDMagazine(entry)
 
         Box(
             modifier = Modifier.padding(start = 20.dp)

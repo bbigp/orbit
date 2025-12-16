@@ -13,7 +13,7 @@ import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import cn.coolbet.orbit.ui.view.entries.addItems
+import cn.coolbet.orbit.ui.view.list_detail.addItems
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

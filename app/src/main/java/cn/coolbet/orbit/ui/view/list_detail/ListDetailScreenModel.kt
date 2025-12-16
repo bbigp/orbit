@@ -1,10 +1,9 @@
-package cn.coolbet.orbit.ui.view.entries
+package cn.coolbet.orbit.ui.view.list_detail
 
 import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
-import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
@@ -12,7 +11,6 @@ import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.replace
@@ -29,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlin.collections.indexOfFirst
 import kotlin.collections.toMutableList
 
-class EntriesScreenModel @AssistedInject constructor(
+class ListDetailScreenModel @AssistedInject constructor(
     @Assisted private val metaId: MetaId,
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
@@ -39,7 +37,7 @@ class EntriesScreenModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
-        fun create(metaId: MetaId): EntriesScreenModel
+        fun create(metaId: MetaId): ListDetailScreenModel
     }
 
     val mutableState = navigatorState.entriesUi
@@ -135,35 +133,4 @@ class EntriesScreenModel @AssistedInject constructor(
         eventBus.post(Evt.ScreenDisposeRequest(screenName))
     }
 
-}
-
-data class EntriesState(
-    val meta: Meta = Feed.EMPTY,
-    val items: List<Entry> = emptyList(),
-    val page: Int = 1,
-    val size: Int = 20,
-    override val hasMore: Boolean = false,
-    override val isRefreshing: Boolean = false,
-    override val isLoadingMore: Boolean = false,
-): ILoadingState
-
-fun EntriesState.addItems(data: List<Entry>, reset: Boolean = false, meta: Meta? = null): EntriesState {
-    val newHasMore = data.size >= this.size
-    return if (reset) {
-        this.copy(
-            items = data,
-            page = 1,
-            hasMore = newHasMore,
-            isRefreshing = false,
-            meta = meta ?: this.meta
-        )
-    } else {
-        this.copy(
-            items = this.items + data,
-            page = this.page + 1,
-            hasMore = newHasMore,
-            isLoadingMore = false,
-            meta = meta ?: this.meta
-        )
-    }
 }
