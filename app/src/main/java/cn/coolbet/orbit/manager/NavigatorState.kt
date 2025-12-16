@@ -41,7 +41,7 @@ class NavigatorState @Inject constructor(
         if (isContained) return
         when(event.screenName) {
             ListDetailScreen::class.java.simpleName -> {
-                entriesUi.update { EntriesState() }
+                entriesUi.update { ListDetailState() }
             }
             SearchEntriesScreen::class.java.simpleName -> {
                 searchUi.update { SearchEntriesState() }

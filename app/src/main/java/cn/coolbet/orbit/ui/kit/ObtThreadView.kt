@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -20,12 +21,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.ui.theme.Black16
+import kotlin.math.max
 
 @Composable
 fun ObtThreadView(
     modifier: Modifier = Modifier
 ) {
     val defaultModifier = Modifier.background(Color.White, shape = RoundedCornerShape(8.dp))
+        .widthIn(72.dp)
     Box(
         modifier = defaultModifier.then(modifier)
     ) {
@@ -59,9 +62,19 @@ fun ObtThreadView(
                     cornerRadius = 1.5.dp
                 )
                 Spacer(modifier = Modifier.height(5.dp))
-                SkeletonShape(modifier = Modifier.fillMaxWidth().height(5.dp), cornerRadius = 2.dp)
+                SkeletonShape(
+                    modifier = Modifier
+                        .height(5.dp)
+                        .width(43.dp),
+                    cornerRadius = 2.dp
+                )
                 Spacer(modifier = Modifier.height(3.dp))
-                SkeletonShape(modifier = Modifier.fillMaxWidth().height(5.dp), cornerRadius = 2.dp)
+                SkeletonShape(
+                    modifier = Modifier
+                        .height(5.dp)
+                        .width(43.dp),
+                    cornerRadius = 2.dp
+                )
                 Spacer(modifier = Modifier.height(3.dp))
                 SkeletonShape(modifier = Modifier.width(30.dp).height(5.dp), cornerRadius = 2.dp)
             }

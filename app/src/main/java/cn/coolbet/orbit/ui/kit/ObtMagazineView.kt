@@ -28,6 +28,7 @@ fun ObtMagazineView(
     modifier: Modifier = Modifier
 ) {
     val defaultModifier = Modifier.background(Color.White, shape = RoundedCornerShape(8.dp))
+        .widthIn(max = 72.dp)
     Box(
         modifier = defaultModifier.then(modifier)
     ) {
@@ -58,9 +59,23 @@ fun ObtMagazineView(
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    SkeletonShape(modifier = Modifier.fillMaxWidth(0.9f).height(5.dp), cornerRadius = 2.dp)
-                    SkeletonShape(modifier = Modifier.fillMaxWidth(0.9f).height(5.dp), cornerRadius = 2.dp)
-                    SkeletonShape(modifier = Modifier.width(20.dp).height(5.dp), cornerRadius = 2.dp)
+                    SkeletonShape(
+                        modifier = Modifier.fillMaxWidth(0.9f)
+                            .widthIn(max = 36.dp)
+                            .height(5.dp),
+                        cornerRadius = 2.dp
+                    )
+                    SkeletonShape(
+                        modifier = Modifier.fillMaxWidth(0.9f)
+                            .widthIn(max = 36.dp)
+                            .height(5.dp),
+                        cornerRadius = 2.dp
+                    )
+                    SkeletonShape(
+                        modifier = Modifier.width(20.dp)
+                            .height(5.dp),
+                        cornerRadius = 2.dp
+                    )
                 }
 
                 // --- B. 右侧图标卡片 ---

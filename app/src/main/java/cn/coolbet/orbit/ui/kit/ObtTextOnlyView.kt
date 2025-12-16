@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ fun ObtTextOnlyView(
     modifier: Modifier = Modifier
 ){
     val defaultModifier = Modifier.background(Color.White, shape = RoundedCornerShape(8.dp))
+        .widthIn(max = 72.dp)
     Box(
         modifier = defaultModifier.then(modifier)
     ) {
@@ -36,9 +38,19 @@ fun ObtTextOnlyView(
                 cornerRadius = 1.5.dp
             )
             Spacer(modifier = Modifier.height(5.dp))
-            SkeletonShape(modifier = Modifier.height(5.dp).fillMaxWidth(), cornerRadius = 2.dp)
+            SkeletonShape(
+                modifier = Modifier.height(5.dp)
+                    .fillMaxWidth(1f)
+                    .widthIn(max = 60.dp),
+                cornerRadius = 2.dp
+            )
             Spacer(modifier = Modifier.height(3.dp))
-            SkeletonShape(modifier = Modifier.height(5.dp).fillMaxWidth(), cornerRadius = 2.dp)
+            SkeletonShape(
+                modifier = Modifier.height(5.dp)
+                    .fillMaxWidth(1f)
+                    .widthIn(max = 60.dp),
+                cornerRadius = 2.dp
+            )
             Spacer(modifier = Modifier.height(3.dp))
             SkeletonShape(modifier = Modifier.height(5.dp).width(30.dp), cornerRadius = 2.dp)
         }
