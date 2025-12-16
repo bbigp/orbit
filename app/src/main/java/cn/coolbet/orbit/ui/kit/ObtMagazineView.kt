@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -27,7 +28,12 @@ fun SkeletonShape(modifier: Modifier, cornerRadius: Dp, color: Color = Black16) 
 fun ObtMagazineView(
     modifier: Modifier = Modifier
 ) {
-    val defaultModifier = Modifier.background(Color.White, shape = RoundedCornerShape(8.dp))
+    val defaultModifier = Modifier
+        .shadow(
+            elevation = 2.dp,
+            shape = RoundedCornerShape(8.dp)
+        )
+        .background(Color.White, shape = RoundedCornerShape(8.dp))
         .widthIn(max = 72.dp)
     Box(
         modifier = defaultModifier.then(modifier)

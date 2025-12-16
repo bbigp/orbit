@@ -43,7 +43,7 @@ import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
 import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.EntryTopTileSkeleton
-import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.EntriesSheet
+import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.ListDetailSettingSheet
 import cn.coolbet.orbit.ui.view.list_detail.swipable.NoneStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
@@ -86,7 +86,7 @@ data class ListDetailScreen(
             }
         )
 
-        EntriesSheet(
+        ListDetailSettingSheet(
             meta = state.meta,
             showBottomSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false }

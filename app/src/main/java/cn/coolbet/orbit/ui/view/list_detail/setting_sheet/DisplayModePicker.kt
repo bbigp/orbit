@@ -43,7 +43,9 @@ enum class LDDisplayMode(val value: String) {
 
 @Composable
 fun DisplayModePicker(){
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -59,7 +61,11 @@ fun DisplayModePicker(){
             modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            DisplayModeItem(displayMode = LDDisplayMode.Thread, modifier = Modifier.weight(1f))
+            DisplayModeItem(
+                selected = false,
+                displayMode = LDDisplayMode.Thread,
+                modifier = Modifier.weight(1f)
+            )
             DisplayModeItem(displayMode = LDDisplayMode.Card, modifier = Modifier.weight(1f))
         }
     }
@@ -72,7 +78,7 @@ private fun DisplayModeItem(
     selected: Boolean = false,
     displayMode: LDDisplayMode = LDDisplayMode.Magazine,
 ) {
-    val defaultModifier = Modifier.background(Black04, shape = RoundedCornerShape(14.dp))
+    val defaultModifier = Modifier.background(Color(0xFFECECEC), shape = RoundedCornerShape(14.dp))
         .border(width = 2.dp, color = if (selected) Black95 else Color.Transparent, shape = RoundedCornerShape(14.dp))
         .fillMaxWidth()
     Row(
@@ -82,7 +88,7 @@ private fun DisplayModeItem(
 
         Box(
             modifier = Modifier
-                .padding(start = 12.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
+                .padding(start = 8.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
             content = {
                 when (displayMode) {
                     LDDisplayMode.Magazine -> ObtMagazineView()
@@ -95,7 +101,7 @@ private fun DisplayModeItem(
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             displayMode.value, maxLines = 1, textAlign = TextAlign.Center,
-            style = if (selected) AppTypography.M15 else AppTypography.M11B50,
+            style = if (selected) AppTypography.M15 else AppTypography.M15B50,
             modifier = Modifier.padding(end = 8.dp).weight(1f)
         )
     }

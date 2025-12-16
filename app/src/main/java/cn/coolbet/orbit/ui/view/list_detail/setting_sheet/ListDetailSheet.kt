@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,22 +37,27 @@ import cn.coolbet.orbit.common.copyText
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.ui.kit.DragHandle
+import cn.coolbet.orbit.ui.kit.ListTileSwitch
+import cn.coolbet.orbit.ui.kit.ObCard
+import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.theme.Black25
+import cn.coolbet.orbit.ui.theme.ContainerSecondary
+import cn.coolbet.orbit.ui.theme.ObTheme
 import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.view.FeedIconDefaults
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntriesSheet(
+fun ListDetailSettingSheet(
     meta: Meta,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
 ){
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     LaunchedEffect(showBottomSheet) {
         if (showBottomSheet) {
             sheetState.show()
@@ -59,39 +66,61 @@ fun EntriesSheet(
         }
     }
 
-    if (sheetState.isVisible) {
+    if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = onDismiss,
             sheetState = sheetState,
             shape = RoundedCornerShape(16.dp),
-            containerColor = Color.White,
+            containerColor = ObTheme.colors.secondaryContainer,
             dragHandle = {
                 DragHandle()
             },
         ) {
             Column(
                 modifier = Modifier
-                    .padding(top = 2.dp, bottom = 21.dp, start = 16.dp, end = 16.dp)
+                    .padding(top = 8.dp, bottom = 21.dp)
                     .fillMaxWidth()
             ) {
-                ListCard(meta)
-                Spacer(modifier = Modifier.height(12.dp))
+                if (meta is Feed) {
+                    ListCard(meta)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
 
-                Text("View", maxLines = 1, style = AppTypography.M15B25, modifier = Modifier.padding(horizontal = 4.dp))
+                Text("View", maxLines = 1, style = AppTypography.M15B25,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
                 Spacer(modifier = Modifier.height(6.dp))
-                Box(modifier = Modifier.height(68.dp))
+                DisplayModePicker()
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Sort by", maxLines = 1, style = AppTypography.M15B25, modifier = Modifier.padding(horizontal = 4.dp))
-                Spacer(modifier = Modifier.height(6.dp))
+//                Text("Sort by", maxLines = 1, style = AppTypography.M15B25,
+//                    modifier = Modifier.padding(horizontal = 20.dp)
+//                )
+//                Spacer(modifier = Modifier.height(6.dp))
                 //排序
-                Spacer(modifier = Modifier.height(16.dp))
+//                Spacer(modifier = Modifier.height(16.dp))
 
 
                 Spacer(modifier = Modifier.height(8.dp))
-                // card unread only Group by Publication Date
-
-
+                Box(
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    ObCard {
+                        ListTileSwitch(
+                            title = "Unread Only", icon = R.drawable.eyes,
+                            checked = false,
+                            onCheckedChange = { v->
+                            }
+                        )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileSwitch(
+                            title = "Group by Publication Date", icon = R.drawable.list_label,
+                            checked = false,
+                            onCheckedChange = { v->
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -115,7 +144,7 @@ fun ListCard(
 ) {
     val context = LocalContext.current
     Column (
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
             .background(Color.Transparent, shape = RoundedCornerShape(16.dp))
             .border(width = 1.dp, color = Black08, shape = RoundedCornerShape(16.dp))
             .fillMaxWidth()
@@ -132,7 +161,9 @@ fun ListCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(meta.title, style = AppTypography.M15, maxLines = 1)
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(meta.url, style = AppTypography.R13B50, maxLines = 1)
                     Spacer(modifier = Modifier.width(4.dp))
                     Image(
