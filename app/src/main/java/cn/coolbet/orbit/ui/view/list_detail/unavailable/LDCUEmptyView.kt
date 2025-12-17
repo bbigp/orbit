@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 
-
+/// List Detail Content Unavailable Empty View
 @Preview(showBackground = true)
 @Composable
-fun NoContentYet() {
+fun LDCUEmptyView() {
     Column(
         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
