@@ -27,6 +27,7 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
+import cn.coolbet.orbit.ToastBus
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
@@ -75,11 +76,13 @@ object HomeScreen: Screen {
                                 ObIcon(
                                     id = R.drawable.sync,
                                     contentScale = ContentScale.None,
-                                    modifier = Modifier.clickable(
-                                        onClick = { syncViewModel.syncData(checkLastExecuteTime = false) }
-                                    ),
+                                    modifier = Modifier.clickable {
+                                        syncViewModel.syncData(checkLastExecuteTime = false)
+                                    },
                                 )
-                            ObIcon(id = R.drawable.add)
+                            ObIcon(id = R.drawable.add, modifier = Modifier.clickable {
+                                ToastBus.show("记得是地上")
+                            })
                         }
                     }
                 )

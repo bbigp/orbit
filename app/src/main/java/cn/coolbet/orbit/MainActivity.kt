@@ -10,11 +10,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import cn.coolbet.orbit.di.AppEntryPoint
 import cn.coolbet.orbit.manager.Preference
+import cn.coolbet.orbit.ui.kit.ObToast
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import cn.coolbet.orbit.ui.theme.OrbitTheme
 import cn.coolbet.orbit.ui.view.home.HomeScreen
@@ -23,6 +23,8 @@ import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 import cn.coolbet.orbit.ui.view.syncer.Syncer
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,8 +58,24 @@ class MainActivity : ComponentActivity() {
                     OrbitRouter()
                     Syncer(syncFun = { syncViewModel.syncData() })
                     SlideTransition(navigator)
+                    ObToast()
                 }
+
             }
         }
+    }
+}
+
+sealed class ToastEvent {
+    data class Show(val message: String) : ToastEvent()
+}
+
+// 全局单例，用于发送事件
+object ToastBus {
+    private val _events = MutableSharedFlow<ToastEvent>(extraBufferCapacity = 1)
+    val events = _events.asSharedFlow()
+
+    fun show(message: String) {
+        _events.tryEmit(ToastEvent.Show(message))
     }
 }

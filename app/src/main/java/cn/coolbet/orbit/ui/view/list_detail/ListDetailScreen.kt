@@ -48,9 +48,9 @@ import cn.coolbet.orbit.ui.view.list_detail.swipable.NoneStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
 import cn.coolbet.orbit.ui.view.list_detail.swipable.UnreadStateDefinition
-import cn.coolbet.orbit.ui.view.list_detail.unavailable.NoContentYet
 import cn.coolbet.orbit.ui.view.entry.QueryContext
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
+import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 import kotlinx.parcelize.Parcelize
 
@@ -154,7 +154,7 @@ data class ListDetailScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    NoContentYet()
+                                    LDCUEmptyView()
                                 }
                             }
                         } else {
@@ -190,6 +190,5 @@ data class ListDetailScreen(
             }
         }
     }
-
 
 }
