@@ -23,8 +23,6 @@ import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 import cn.coolbet.orbit.ui.view.syncer.Syncer
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,19 +61,5 @@ class MainActivity : ComponentActivity() {
 
             }
         }
-    }
-}
-
-sealed class ToastEvent {
-    data class Show(val message: String) : ToastEvent()
-}
-
-// 全局单例，用于发送事件
-object ToastBus {
-    private val _events = MutableSharedFlow<ToastEvent>(extraBufferCapacity = 1)
-    val events = _events.asSharedFlow()
-
-    fun show(message: String) {
-        _events.tryEmit(ToastEvent.Show(message))
     }
 }

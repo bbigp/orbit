@@ -38,6 +38,7 @@ import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
+import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
@@ -161,9 +162,15 @@ data class ListDetailScreen(
                             items(state.items, key = { it.id }) { item ->
                                 SwipeWrapper(
                                     rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
-                                        onClick = { model.toggleReadStatus(item) }
+                                        onClick = {
+                                            model.toggleReadStatus(item)
+                                            ObToastManager.show("Marked as Read")
+                                        }
                                     ) else UnreadStateDefinition.copy(
-                                        onClick = { model.toggleReadStatus(item) }
+                                        onClick = {
+                                            model.toggleReadStatus(item)
+                                            ObToastManager.show("Marked as Unread")
+                                        }
                                     ),
                                     leftSwipeState = NoneStateDefinition
                                 ) {

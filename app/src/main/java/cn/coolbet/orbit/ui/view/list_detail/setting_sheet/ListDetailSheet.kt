@@ -39,6 +39,7 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.ObCard
+import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
@@ -168,7 +169,10 @@ fun ListCard(
                     Spacer(modifier = Modifier.width(4.dp))
                     Image(
                         modifier = Modifier.size(16.dp)
-                            .click{ copyText(context, meta.url) },
+                            .click {
+                                copyText(context, meta.url)
+                                ObToastManager.show("Link copied")
+                            },
                         painter = painterResource(id = R.drawable.copy),
                         contentDescription = "",
                         contentScale = ContentScale.Fit,

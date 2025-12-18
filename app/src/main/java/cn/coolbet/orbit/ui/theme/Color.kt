@@ -18,7 +18,9 @@ val ContentRed = Color(0xFFFF3B30)
 val ContainerRed = Color(0x1AFF3B30)
 
 val Green = Color(0xFF28CD41)
+val Green10 = Color(0x1A28CD41)
 val Blue = Color(0xFF007AFF)
+val Blue10 = Color(0x1A007AFF)
 val Yellow = Color(0xFFFF9500)
 val Purple = Color(0xFF5856D6)
 

@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.kit
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -9,11 +10,16 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,6 +32,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -33,34 +41,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import cn.coolbet.orbit.ToastBus
-import cn.coolbet.orbit.ToastEvent
+import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.Blue
+import cn.coolbet.orbit.ui.theme.Blue10
+import cn.coolbet.orbit.ui.theme.ContainerRed
+import cn.coolbet.orbit.ui.theme.ContentRed
+import cn.coolbet.orbit.ui.theme.Green
+import cn.coolbet.orbit.ui.theme.Green10
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 
-class IosToastState {
-    var message by mutableStateOf("")
+enum class ToastType(val iconColor: Color, val iconColorOuter: Color) {
+    Error(ContentRed, ContainerRed),
+//    Warning(),
+    Success(Green, Green10),
+    Info(Blue, Blue10);
+}
+
+class ToastState {
+    var type by mutableStateOf(ToastType.Info)
     var isVisible by mutableStateOf(false)
+    var message by mutableStateOf("")
     private var job: Job? = null // 用于取消之前的计时任务
 
-    fun show(msg: String, scope: CoroutineScope) {
+    fun show(scope: CoroutineScope, text: String, toastType: ToastType = ToastType.Info, hideInSeconds: Long = 1000) {
         job?.cancel()
         job = scope.launch {
             if (isVisible) {
                 isVisible = false
                 delay(50) // 短暂延迟让动画重置
             }
-            // 给一小段延迟（如50ms），让 Compose 触发重组完成“退出-进入”的动画切换
-//            delay(50)
-            message = msg
+            type = toastType
+            message = text
             isVisible = true
 
             // 4. 开始新一轮计时
-            delay(2000)
+            delay(hideInSeconds)
             isVisible = false
 
             // 5. 动画完全结束后清空文字
@@ -77,41 +98,53 @@ class IosToastState {
 }
 
 @Composable
-fun rememberIosToastState() = remember { IosToastState() }
+fun rememberToastState() = remember { ToastState() }
+
+object ObToastManager {
+
+    private val _events = MutableSharedFlow<ObToastEvent>(extraBufferCapacity = 1)
+    val events = _events.asSharedFlow()
+
+    fun show(msg: String, type: ToastType = ToastType.Info) {
+        _events.tryEmit(ObToastEvent.Show(msg, type))
+    }
+}
+
+sealed class ObToastEvent {
+    data class Show(val message: String, val type: ToastType) : ObToastEvent()
+}
+
 
 @Composable
 fun ObToast() {
-    val navigator = LocalNavigator.currentOrThrow
-
-    val toastState = rememberIosToastState()
+    val navigator = LocalNavigator.current
+    val state = rememberToastState()
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        ToastBus.events.collect { event ->
+        ObToastManager.events.collect { event ->
             when (event) {
-                is ToastEvent.Show -> toastState.show(event.message, scope)
+                is ObToastEvent.Show -> state.show(scope, event.message, event.type)
             }
         }
     }
 
-    LaunchedEffect(navigator.lastItem) {
-        toastState.dismiss()
+    navigator?.let { nav ->
+        LaunchedEffect(nav.lastItem) {
+            state.dismiss()
+        }
     }
 
-
-
-
-    if (toastState.message.isNotEmpty()) {
+    if (state.message.isNotEmpty()) {
         Popup(
             alignment = Alignment.TopCenter,
             properties = PopupProperties(
                 focusable = false,
-                // 允许 Popup 延伸到状态栏区域
-                excludeFromSystemGesture = true
+                excludeFromSystemGesture = true // 允许 Popup 延伸到状态栏区域
             )
         ) {
             AnimatedVisibility(
-                visible = toastState.isVisible,
+                visible = state.isVisible,
                 // iOS 风格通常配合缩放(Scale)和淡入
                 enter = fadeIn(animationSpec = tween(300)) +
                         scaleIn(initialScale = 0.8f, animationSpec = tween(300)) +
@@ -127,68 +160,45 @@ fun ObToast() {
                         .statusBarsPadding()
                         .padding(top = 12.dp) // 给顶端留一点极小的呼吸间距，类似灵动岛
                         .widthIn(min = 120.dp, max = 300.dp)
+                        .then(if (Build.VERSION.SDK_INT >= 31) Modifier.blur(25.dp) else Modifier)
                         .shadow(15.dp, RoundedCornerShape(25.dp)), // 较重的阴影
-                    color = Color.White.copy(alpha = 0.8f), // 模拟半透明
-                    shape = RoundedCornerShape(25.dp),
-                    border = BorderStroke(0.5.dp, Color.Black.copy(alpha = 0.05f)) // 极细的边框增加质感
+//                    color = Color.White.copy(alpha = 0.6f), // 模拟半透明
+                    shape = RoundedCornerShape(99.dp),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f)), // 增加玻璃质感
+                    shadowElevation = 8.dp
                 ) {
-                    // 如果你的 Android 版本支持（API 31+），可以给这个 Box 加 .blur(10.dp)
                     Box(
-                        modifier = Modifier.height(40.dp).padding(horizontal = 24.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                            .background(Color.White.copy(alpha = 0.6f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = toastState.message,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier.size(20.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier.size(20.dp).clip(CircleShape)
+                                        .background(state.type.iconColorOuter)
+                                )
+                                Box(
+                                    modifier = Modifier.size(8.dp).clip(CircleShape)
+                                        .background(state.type.iconColor)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                state.message,
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                                style = AppTypography.M15,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
-//3. 如何获得真正的“毛玻璃”效果？
-//Android 原生对高斯模糊的处理比较吃性能。如果你的 App 只跑在 Android 12 (API 31) 及以上，可以直接用 Modifier.blur()。如果是通用版本，iOS 风格通常用 半透明纯色 配合 细微的内发光/边框 来模拟。
-//
-//// Android 12+ 开启毛玻璃
-//Surface(
-//modifier = Modifier
-//.blur(if (Build.VERSION.SDK_INT >= 31) 20.dp else 0.dp)
-//// ... 其他参数
-//)
-
-//enum ToastType {
-//    case error
-//    case warning
-//    case success
-//    case info
-//}
-//
-//extension ToastType {
-//    var iconColor: Color {
-//        switch self {
-//            case .error:
-//            return .red100
-//            case .warning:
-//            return .orange100
-//            case .success:
-//            return .green100
-//            case .info:
-//            return .blue100
-//        }
-//    }
-//
-//    var iconColorOuter: Color {
-//        switch self {
-//            case .error:
-//            return .red10
-//            case .warning:
-//            return .orange10
-//            case .success:
-//            return .green10
-//            case .info:
-//            return .blue10
-//        }
-//    }
-//}

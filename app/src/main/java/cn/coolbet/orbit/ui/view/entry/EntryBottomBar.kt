@@ -34,6 +34,7 @@ import cn.coolbet.orbit.common.shareText
 import cn.coolbet.orbit.ui.kit.ObDropdownMenu
 import cn.coolbet.orbit.ui.kit.ObDropdownMenuItem
 import cn.coolbet.orbit.ui.kit.ObIcon
+import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.ObTheme
 
@@ -69,7 +70,11 @@ fun EntryBottomBar(
             )
             ObIcon(
                 id = if (state.entry.starred) R.drawable.star_fill else R.drawable.star,
-                modifier = Modifier.clickable { changeStarred() }
+                modifier = Modifier.clickable {
+                    val msg = if (state.entry.starred) "Removed from Starred" else "Added to Starred"
+                    changeStarred()
+                    ObToastManager.show(msg)
+                }
             )
             ObIcon(
                 id = if (state.readerView) R.drawable.book else R.drawable.page,
@@ -121,6 +126,7 @@ fun EntryBottomBar(
                         leadingIcon = R.drawable.link,
                         onClick = {
                             copyText(context, state.entry.url)
+                            ObToastManager.show("Link copied")
                             expandedState.targetState = false
                         },
                         modifier = Modifier.width(widthDp)

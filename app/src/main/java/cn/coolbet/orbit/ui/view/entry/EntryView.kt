@@ -41,7 +41,7 @@ fun EntryView(state: EntryState) {
     val entry = state.entry
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(state.entry) {
+    LaunchedEffect(state.entry.id) {
         coroutineScope.launch {
             scrollState.scrollTo(0)
         }
