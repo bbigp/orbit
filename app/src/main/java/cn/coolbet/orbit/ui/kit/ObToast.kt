@@ -160,7 +160,6 @@ fun ObToast() {
                         .statusBarsPadding()
                         .padding(top = 12.dp) // 给顶端留一点极小的呼吸间距，类似灵动岛
                         .widthIn(min = 120.dp, max = 300.dp)
-                        .then(if (Build.VERSION.SDK_INT >= 31) Modifier.blur(25.dp) else Modifier)
                         .shadow(2.dp, RoundedCornerShape(99.dp)), // 较重的阴影
                     shape = RoundedCornerShape(99.dp),
                     border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f)), // 增加玻璃质感
@@ -168,6 +167,7 @@ fun ObToast() {
                 ) {
                     Box(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+//                            .then(if (Build.VERSION.SDK_INT >= 31) Modifier.blur(99.dp) else Modifier),
                             .background(Color.White.copy(alpha = 0.6f)),
                         contentAlignment = Alignment.Center
                     ) {
