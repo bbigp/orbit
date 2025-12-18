@@ -41,6 +41,7 @@ import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
+import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black08
@@ -171,7 +172,7 @@ fun ListCard(
                         modifier = Modifier.size(16.dp)
                             .click {
                                 copyText(context, meta.url)
-                                ObToastManager.show("Link copied")
+                                ObToastManager.show("Link copied", type = ToastType.Success)
                             },
                         painter = painterResource(id = R.drawable.copy),
                         contentDescription = "",

@@ -64,12 +64,12 @@ enum class ToastType(val iconColor: Color, val iconColorOuter: Color) {
 }
 
 class ToastState {
-    var type by mutableStateOf(ToastType.Info)
+    var type by mutableStateOf(ToastType.Success)
     var isVisible by mutableStateOf(false)
     var message by mutableStateOf("")
     private var job: Job? = null // 用于取消之前的计时任务
 
-    fun show(scope: CoroutineScope, text: String, toastType: ToastType = ToastType.Info, hideInSeconds: Long = 1000) {
+    fun show(scope: CoroutineScope, text: String, toastType: ToastType, hideInSeconds: Long = 1000) {
         job?.cancel()
         job = scope.launch {
             if (isVisible) {
@@ -105,7 +105,7 @@ object ObToastManager {
     private val _events = MutableSharedFlow<ObToastEvent>(extraBufferCapacity = 1)
     val events = _events.asSharedFlow()
 
-    fun show(msg: String, type: ToastType = ToastType.Info) {
+    fun show(msg: String, type: ToastType = ToastType.Success) {
         _events.tryEmit(ObToastEvent.Show(msg, type))
     }
 }
@@ -161,8 +161,7 @@ fun ObToast() {
                         .padding(top = 12.dp) // 给顶端留一点极小的呼吸间距，类似灵动岛
                         .widthIn(min = 120.dp, max = 300.dp)
                         .then(if (Build.VERSION.SDK_INT >= 31) Modifier.blur(25.dp) else Modifier)
-                        .shadow(15.dp, RoundedCornerShape(25.dp)), // 较重的阴影
-//                    color = Color.White.copy(alpha = 0.6f), // 模拟半透明
+                        .shadow(2.dp, RoundedCornerShape(99.dp)), // 较重的阴影
                     shape = RoundedCornerShape(99.dp),
                     border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f)), // 增加玻璃质感
                     shadowElevation = 8.dp
