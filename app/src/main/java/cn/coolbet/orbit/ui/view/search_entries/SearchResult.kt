@@ -18,8 +18,8 @@ import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.view.content.QueryContext
 import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
-import cn.coolbet.orbit.ui.view.entry.QueryContext
 
 @Composable
 fun SearchResult(

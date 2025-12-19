@@ -1,6 +1,5 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
-import android.content.Intent
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,7 @@ import cn.coolbet.orbit.common.openURL
 import kotlinx.coroutines.launch
 
 @Composable
-fun EntryView(state: EntryState) {
+fun ArticleContent(state: ContentState) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val entry = state.entry
@@ -56,11 +55,9 @@ fun EntryView(state: EntryState) {
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(20.dp))
-            if (entry.insertHeroImage) {
-                EntryImage(entry.pic)
-            }
-            EntryTitle(entry)
-            EntryContent(state, scrollState)
+            ArticleCoverImage(entry)
+            ArticleMeta(entry)
+            ArticleHtml(state, scrollState)
             NoMoreIndicator(height = 40.dp)
             if (entry.url.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -94,5 +91,5 @@ fun PreviewEntryView() {
         feed = Feed.EMPTY.copy(title = "The Verge"),
         publishedAt = System.currentTimeMillis()
     )
-    EntryView(EntryState(entry))
+    ArticleContent(ContentState(entry))
 }

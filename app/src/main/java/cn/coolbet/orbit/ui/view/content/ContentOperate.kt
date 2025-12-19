@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.background
@@ -39,8 +39,8 @@ import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.ObTheme
 
 @Composable
-fun EntryBottomBar(
-    state: EntryState,
+fun ContentOperate(
+    state: ContentState,
     queryContext: QueryContext
 ) {
     val changeReaderView = LocalChangeReaderView.current

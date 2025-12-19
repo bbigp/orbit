@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import java.io.IOException
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")

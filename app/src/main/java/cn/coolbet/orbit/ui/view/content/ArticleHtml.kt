@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -30,7 +30,7 @@ import cn.coolbet.orbit.common.openURL
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
-fun EntryContent(state: EntryState, scrollState: ScrollState){
+fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     val context = LocalContext.current
     val entry = state.entry
     val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {

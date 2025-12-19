@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
 import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.collections.plus
 
-class EntryScreenModel @AssistedInject constructor(
+class ContentScreenModel @AssistedInject constructor(
     @Assisted private val queryContext: QueryContext,
     private val entryDao: EntryDao,
     private val localDataManager: LocalDataManager,
@@ -36,11 +36,11 @@ class EntryScreenModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory: ScreenModelFactory {
-        fun create(queryContext: QueryContext): EntryScreenModel
+        fun create(queryContext: QueryContext): ContentScreenModel
     }
 
-    private val mutableState = MutableStateFlow(EntryState())
-    val state: StateFlow<EntryState> = mutableState.asStateFlow()
+    private val mutableState = MutableStateFlow(ContentState())
+    val state: StateFlow<ContentState> = mutableState.asStateFlow()
 
     private val accessor: PagingStateAccessor
         get() = when (queryContext.page) {
@@ -102,7 +102,7 @@ class EntryScreenModel @AssistedInject constructor(
             }
             Log.i("entry-load-data", "entry index: $currentIndex")
             mutableState.update {
-                EntryState(
+                ContentState(
                     entry = entry,
                     readerView = entry.readableContent.isNotEmpty(),
                     readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,

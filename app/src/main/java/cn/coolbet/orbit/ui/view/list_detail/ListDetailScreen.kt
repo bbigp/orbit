@@ -40,6 +40,7 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
+import cn.coolbet.orbit.ui.view.content.QueryContext
 import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
 import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
@@ -49,7 +50,6 @@ import cn.coolbet.orbit.ui.view.list_detail.swipable.NoneStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
 import cn.coolbet.orbit.ui.view.list_detail.swipable.UnreadStateDefinition
-import cn.coolbet.orbit.ui.view.entry.QueryContext
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem

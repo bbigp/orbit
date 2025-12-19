@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
 import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
@@ -18,14 +18,14 @@ import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class EntryScreen(
+data class ContentScreen(
     val data: Entry,
     val queryContext: QueryContext
 ): Screen, Parcelable {
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<EntryScreenModel, EntryScreenModel.Factory>{ factory ->
+        val model = getScreenModel<ContentScreenModel, ContentScreenModel.Factory>{ factory ->
             factory.create(queryContext)
         }
         val state by model.state.collectAsState()
@@ -40,7 +40,7 @@ data class EntryScreen(
             LocalNextEntry provides model::nextEntry
         ) {
             Scaffold(
-                bottomBar = { EntryBottomBar(state, queryContext) }
+                bottomBar = { ContentOperate(state, queryContext) }
             ) { paddingValues ->
                 Box(
                     modifier = Modifier.padding(paddingValues)
@@ -70,7 +70,7 @@ data class EntryScreen(
                             LoadMoreIndicator()
                         }
                     } else {
-                        EntryView(state)
+                        ArticleContent(state)
                     }
                 }
             }

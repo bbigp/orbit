@@ -1,14 +1,11 @@
-package cn.coolbet.orbit.ui.view.entry
+package cn.coolbet.orbit.ui.view.content
 
-import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,14 +14,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.common.showTime
-import cn.coolbet.orbit.common.toRelativeTime
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 
 @Composable
-fun EntryTitle(
+fun ArticleMeta(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
@@ -76,9 +72,9 @@ fun PreviewEntryTile() {
         publishedAt = System.currentTimeMillis()
     )
     Column {
-        EntryTitle(entry)
-        EntryTitle(entry.copy(author = "Jennifer Pattison TuohyJennifer Pattison TuohyJennifer Pattison TuohyJennifer Pattison Tuohy"))
-        EntryTitle(entry.copy(feed = Feed.EMPTY.copy(title = "The VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe Verge")))
-        EntryTitle(entry.copy(author = ""))
+        ArticleMeta(entry)
+        ArticleMeta(entry.copy(author = "Jennifer Pattison TuohyJennifer Pattison TuohyJennifer Pattison TuohyJennifer Pattison Tuohy"))
+        ArticleMeta(entry.copy(feed = Feed.EMPTY.copy(title = "The VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe VergeThe Verge")))
+        ArticleMeta(entry.copy(author = ""))
     }
 }
