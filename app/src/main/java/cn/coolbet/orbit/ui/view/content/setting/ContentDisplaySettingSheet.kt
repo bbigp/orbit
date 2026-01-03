@@ -54,6 +54,7 @@ fun ContentDisplaySettingSheet(
                 Spacer(modifier = Modifier.height(16.dp))
                 //Text Size
                 //Line Height
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

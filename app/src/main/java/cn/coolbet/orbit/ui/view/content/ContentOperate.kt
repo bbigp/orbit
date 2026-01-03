@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.ObTheme
+import cn.coolbet.orbit.ui.view.content.setting.ContentDisplaySettingSheet
 
 @Composable
 fun ContentOperate(
@@ -49,6 +51,12 @@ fun ContentOperate(
     val expandedState = remember { MutableTransitionState(false) }
     val context = LocalContext.current
     val density = LocalDensity.current
+    var showDisplaySettingSheet by remember { mutableStateOf(false) }
+
+    ContentDisplaySettingSheet(
+        showDisplaySettingSheet,
+        onDismiss = { showDisplaySettingSheet = false }
+    )
 
     Column(
         modifier =
@@ -134,7 +142,11 @@ fun ContentOperate(
                     ObDropdownMenuItem(
                         text = "阅读设置",
                         leadingIcon = R.drawable.brush,
-                        modifier = Modifier.width(widthDp)
+                        modifier = Modifier.width(widthDp),
+                        onClick = {
+                            expandedState.targetState = false
+                            showDisplaySettingSheet = true
+                        }
                     )
                 }
             }
