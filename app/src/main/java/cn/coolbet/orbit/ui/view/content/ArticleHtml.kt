@@ -33,6 +33,10 @@ import cn.coolbet.orbit.common.openURL
 fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     val context = LocalContext.current
     val entry = state.entry
+
+    HtmlBuilderHelper.entryHtml(entry.title, entry.author, entry.content)
+        .getHtml()
+
     val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {
         val content = if (state.readerView) entry.readableContent else entry.content
         mutableStateOf("""
@@ -43,6 +47,7 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
                 <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
                 <title>${entry.title}</title>
+                <meta name="author" content="${entry.author}">
             </head>
             <body>
                 <div id="br-article" class="active">
