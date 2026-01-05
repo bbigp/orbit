@@ -2,6 +2,7 @@ package cn.coolbet.orbit.manager
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.model.domain.User
@@ -22,7 +23,7 @@ class Preference @Inject constructor(
 //        "app_prefs", Context.MODE_PRIVATE,
 //    )
 
-    val sharedPreferences = context.getSharedPreferences(
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences(
         "user_prefs", Context.MODE_PRIVATE,
     )
 

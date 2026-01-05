@@ -4,20 +4,19 @@ import androidx.compose.ui.graphics.Color
 
 
 class ContentSettings(
-    val cssFontSize: String,
-    val cssFontFamily: String,
+    val cssFontSize: String = "15",
+    val cssFontFamily: String = "DM Sans",
     val lineHeight: Double,
     val fixedColor: Color,
-
+    val dynamicColor: Color
 ) {
     fun cssOptionString(): String {
+//        --line-height-multiplier: $lineHeight;
         return """
                 <style id='br-root-style'>
                 :root {
                     --font-size-base: ${cssFontSize}px;
                     font-size: ${cssFontSize}px;
-    
-                    --line-height-multiplier: $lineHeight;
     
                     --font-family-base: ${cssFontFamily};
                     --font-family-code: ${cssFontFamily};
@@ -28,47 +27,31 @@ class ContentSettings(
     }
 }
 
-class HtmlData(val head: String, val body: String){
-
-    fun getHtml(beforeHead: String = "", afterBody: String = "", theme: String): String {
-        return """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-                $beforeHead
-                $head
-            </head>
-            <body data-theme="$theme">
-                $body
-                $afterBody
-            </body>
-            </html>
-        """.trimIndent()
-    }
-}
-
 class HtmlBuilderHelper {
 
     companion object {
-        fun html(title: String = "", author: String = "", content: String = "", css: String = "", script: String = ""): HtmlData {
-            return HtmlData(
-                head = """
-                <title>$title</title>
-                <meta name="author" content="$author">
-                $css
-            """.trimIndent(),
-                body = """
-                <div id="br-article" class="active">
-                    <div class="br-content">$content</div>
-                </div>
-                $script
+        fun html(title: String = "", author: String = "", content: String = "", css: String = "", script: String = "", theme: String = ""): String {
+            return """
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+                    <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
+                    <title>$title</title>
+                    <meta name="author" content="$author">
+                    $css
+                </head>
+                <body data-theme="$theme">
+                    <div id="br-article" class="active">
+                        <div class="br-content">$content</div>
+                    </div>
+                </body>
+                </html>
             """.trimIndent()
-            )
         }
 
-        fun entryHtml(title: String, author: String, content: String): HtmlData {
+        fun entryHtml(title: String, author: String, content: String): String {
             return html(
                 title = title, author = author, content = content,
                 css = articleCss,

@@ -28,9 +28,10 @@ val ContainerSecondary = Color(0xD9FFFFFF)//85白
 
 val Skeleton = Color(0xFFEAE8E8)
 
-val Sepia = Color(0xFFFAEFE3)
+val BgOrange = Color(0xFFFAEFE3)
 val PrmBlack = Color(0xFF0D0D0D)
 val GreyBlack = Color(0xFF262626)
+val BgSecondary = Color(0xFFF5F5F5)
 
 
 val DarkColorScheme = darkColorScheme(

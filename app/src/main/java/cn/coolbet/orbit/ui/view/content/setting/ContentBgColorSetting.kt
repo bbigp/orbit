@@ -17,38 +17,41 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.manager.Env
+import cn.coolbet.orbit.manager.asColorState
+import cn.coolbet.orbit.manager.colorValue
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.theme.Black95
 import cn.coolbet.orbit.ui.theme.GreyBlack
-import cn.coolbet.orbit.ui.theme.ObTheme
 import cn.coolbet.orbit.ui.theme.PrmBlack
-import cn.coolbet.orbit.ui.theme.Sepia
+import cn.coolbet.orbit.ui.theme.BgOrange
+import cn.coolbet.orbit.ui.theme.BgSecondary
+
+
+private val colors = listOf(
+    Color.White,
+    BgSecondary,
+    BgOrange,
+    PrmBlack,
+    GreyBlack
+)
 
 @Composable
 fun ContentBgColorSetting() {
-    var selectedIndex by remember { mutableStateOf(0) }
-    val colors = listOf(
-        Color.White,
-        ObTheme.colors.secondaryContainer,
-        Sepia,
-        PrmBlack,
-        GreyBlack
-    )
+    val currentColor by Env.settings.articleBgColor.asColorState()
 
     Column {
         Text("Background Color",
@@ -63,9 +66,11 @@ fun ContentBgColorSetting() {
             colors.forEachIndexed { index, color ->
                 BgColorView(
                     color = color,
-                    selected = index == selectedIndex,
+                    selected = color.toArgb() == currentColor.toArgb(),
                     modifier = Modifier.weight(1f)
-                        .click { selectedIndex = index }
+                        .click {
+                            Env.settings.articleBgColor.colorValue = color
+                        }
                 )
             }
         }

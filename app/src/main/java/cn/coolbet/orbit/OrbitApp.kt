@@ -1,7 +1,6 @@
 package cn.coolbet.orbit
 
 import android.app.Application
-import android.os.Build
 import android.util.Log
 import android.webkit.WebView
 import androidx.hilt.work.HiltWorkerFactory
@@ -9,6 +8,7 @@ import androidx.work.Configuration
 import cn.coolbet.orbit.common.MinifluxIconFetcher
 import cn.coolbet.orbit.common.MinifluxIconKeyer
 import cn.coolbet.orbit.common.MinifluxIconURLMapper
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.remote.miniflux.MinIconFileApi
 import coil3.ImageLoader
@@ -28,6 +28,7 @@ class OrbitApp : Application(), SingletonImageLoader.Factory, Configuration.Prov
 
     override fun onCreate() {
         super.onCreate()
+        Env.init(this)
         session.startSession()
         WebView.setWebContentsDebuggingEnabled(true)
     }

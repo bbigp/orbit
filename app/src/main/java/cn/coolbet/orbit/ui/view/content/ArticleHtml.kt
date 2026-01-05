@@ -11,6 +11,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -34,29 +36,11 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     val context = LocalContext.current
     val entry = state.entry
 
-    HtmlBuilderHelper.entryHtml(entry.title, entry.author, entry.content)
-        .getHtml()
-
     val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {
         val content = if (state.readerView) entry.readableContent else entry.content
-        mutableStateOf("""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-                <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
-                <title>${entry.title}</title>
-                <meta name="author" content="${entry.author}">
-            </head>
-            <body>
-                <div id="br-article" class="active">
-                    <div class="br-content">${content}</div>
-                </div>
-            </body>
-            </html>
-        """.trimIndent())
-
+        mutableStateOf(
+            HtmlBuilderHelper.entryHtml(entry.title, entry.author, content)
+        )
     }
 
 
@@ -102,6 +86,7 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.Transparent)
             .height(webViewHeight),
         factory = {
             WebView(context).apply {

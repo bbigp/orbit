@@ -27,12 +27,8 @@ import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black25
 import cn.coolbet.orbit.ui.theme.Black95
-import cn.coolbet.orbit.ui.theme.GreyBlack
 import cn.coolbet.orbit.ui.theme.MonoFontFamily
-import cn.coolbet.orbit.ui.theme.ObTheme
-import cn.coolbet.orbit.ui.theme.PrmBlack
 import cn.coolbet.orbit.ui.theme.SansFontFamily
-import cn.coolbet.orbit.ui.theme.Sepia
 
 
 @Composable
