@@ -1,7 +1,10 @@
 package cn.coolbet.orbit.ui.kit
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -9,6 +12,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -17,23 +21,55 @@ import androidx.core.view.WindowCompat
 
 @Composable
 fun SystemBarAppearance(
-    darkTheme: Boolean = isSystemInDarkTheme()
+    dark: Boolean
 ) {
     val view = LocalView.current
+    val context = LocalContext.current
+    val isSystemDark = isSystemInDarkTheme()
 
-    // 使用 SideEffect 来确保主题变化时，系统栏外观也随之变化
-    SideEffect {
-        // 1. 获取当前 Window
-        val window = (view.context as Activity).window
+    if (!view.isInEditMode) {
+        DisposableEffect(dark) {
+            Log.d("ThemeCheck", "dark: $dark isSystemDark: $isSystemDark")
+            val activity = context.findActivity()
+            val window = activity?.window
+            if (window != null) {
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = !dark
+            }
 
-        // 2. 设置状态栏图标颜色
-        WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightStatusBars = !darkTheme  //顶部状态栏 电量 时间 通知
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                isAppearanceLightNavigationBars = !darkTheme //底部导航栏  主页 返回
+            onDispose {
+                val activityOnDispose = context.findActivity()
+                val windowOnDispose = activityOnDispose?.window
+                if (windowOnDispose != null) {
+                    val insetsController = WindowCompat.getInsetsController(windowOnDispose, view)
+                    insetsController.isAppearanceLightStatusBars = !isSystemDark
+                }
             }
         }
     }
+
+    // 使用 SideEffect 来确保主题变化时，系统栏外观也随之变化
+//    SideEffect {
+//        // 1. 获取当前 Window
+//        val window = (view.context as Activity).window
+//
+//        // 2. 设置状态栏图标颜色
+//        WindowCompat.getInsetsController(window, view).apply {
+//            isAppearanceLightStatusBars = !darkTheme  //顶部状态栏 电量 时间 通知
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+//                isAppearanceLightNavigationBars = !darkTheme //底部导航栏  主页 返回
+//            }
+//        }
+//    }
+}
+
+fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }
 
 @Composable

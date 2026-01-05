@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +31,6 @@ import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObIconTextButton
 import androidx.core.net.toUri
 import cn.coolbet.orbit.common.openURL
-import cn.coolbet.orbit.manager.Env
-import cn.coolbet.orbit.manager.asColorState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,7 +39,6 @@ fun ArticleContent(state: ContentState) {
     val context = LocalContext.current
     val entry = state.entry
     val coroutineScope = rememberCoroutineScope()
-    val bgColor by Env.settings.articleBgColor.asColorState()
 
     LaunchedEffect(state.entry.id) {
         coroutineScope.launch {
@@ -56,12 +52,10 @@ fun ArticleContent(state: ContentState) {
         Column(
             modifier = Modifier.fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp)
-                .background(bgColor)
         ) {
             Spacer(modifier = Modifier.height(20.dp))
             ArticleCoverImage(entry)
-            ArticleMeta(entry)
+            ArticleMeta(entry, modifier = Modifier.padding(horizontal = 16.dp))
             ArticleHtml(state, scrollState)
             NoMoreIndicator(height = 40.dp)
             if (entry.url.isNotEmpty()) {
@@ -81,7 +75,7 @@ fun ArticleContent(state: ContentState) {
             }
             Spacer(modifier = Modifier.height(48.dp))
         }
-        Box(modifier = Modifier.background(Color.White).wrapContentSize()) {
+        Box(modifier = Modifier.background(Color.Transparent).wrapContentSize()) {
             Text("${scrollState.value}    ${scrollState.maxValue}")
         }
     }

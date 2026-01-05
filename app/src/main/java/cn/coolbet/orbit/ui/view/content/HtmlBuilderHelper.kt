@@ -61,7 +61,7 @@ class HtmlBuilderHelper {
         val articleCss: String = """
             <style>
             body {
-              padding: 0 20px;
+              padding: 0 16px;
               margin: 0;
             }
             

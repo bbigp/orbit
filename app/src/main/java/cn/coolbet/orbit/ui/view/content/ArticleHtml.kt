@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -86,11 +87,11 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Transparent)
             .height(webViewHeight),
         factory = {
             WebView(context).apply {
                 webView = this
+                this.setBackgroundColor(Color.Transparent.toArgb())
                 this.isVerticalScrollBarEnabled = false
                 this.isHorizontalScrollBarEnabled = false
                 this.overScrollMode = View.OVER_SCROLL_NEVER

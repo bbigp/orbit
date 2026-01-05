@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            SystemBarAppearance()
+            SystemBarAppearance(dark = isSystemInDarkTheme())
             OrbitTheme {
                 val syncViewModel: SyncViewModel = hiltViewModel()
                 val initialScreen: Screen = if (!preference.userProfile().isEmpty) HomeScreen else LoginScreen

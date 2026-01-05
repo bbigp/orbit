@@ -31,12 +31,13 @@ import coil3.request.ImageRequest
 
 @Composable
 fun ArticleCoverImage(
-    entry: Entry
+    entry: Entry,
+    modifier: Modifier = Modifier
 ) {
     if (entry.insertHeroImage) {
         val context = LocalContext.current
         Column(
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = modifier.padding(vertical = 8.dp, horizontal = 16.dp)
         ) {
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(context)

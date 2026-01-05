@@ -36,7 +36,7 @@ fun ObIcon(
     color: Color = ObTheme.colors.primary,
 ) {
     val defaultModifier = Modifier.size(28.dp)
-        .background(ObTheme.colors.primaryContainer)
+        .background(Color.Transparent)
     Box(
         modifier = defaultModifier.then(modifier),
         contentAlignment = Alignment.Center,

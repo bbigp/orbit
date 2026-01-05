@@ -1,7 +1,6 @@
 package cn.coolbet.orbit.ui.view.content
 
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,13 +36,13 @@ import cn.coolbet.orbit.ui.kit.ObDropdownMenuItem
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
-import cn.coolbet.orbit.ui.theme.ObTheme
 import cn.coolbet.orbit.ui.view.content.setting.ContentDisplaySettingSheet
 
 @Composable
 fun ContentOperate(
     state: ContentState,
-    queryContext: QueryContext
+    queryContext: QueryContext,
+    modifier: Modifier = Modifier
 ) {
     val changeReaderView = LocalChangeReaderView.current
     val changeStarred = LocalChangeStarred.current
@@ -60,9 +59,8 @@ fun ContentOperate(
 
     Column(
         modifier =
-            Modifier.fillMaxWidth()
+            modifier.fillMaxWidth()
                 .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-                .background(ObTheme.colors.primaryContainer)
     ) {
         SpacerDivider(thickness = 1.dp)
         Row(

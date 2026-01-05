@@ -24,7 +24,9 @@ fun ArticleMeta(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             entry.title,
