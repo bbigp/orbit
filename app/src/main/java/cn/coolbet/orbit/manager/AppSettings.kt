@@ -23,6 +23,8 @@ class AppSettings(context: Context) {
     )
 
     val articleBgColor = PreferenceItem(prefs, "article_bg_color", "#FFFFFFFF")
+    val articleFontSize = PreferenceItem(prefs, "article_font_size", 15)
+    val articleFontFamily = PreferenceItem(prefs, "article_font_family", "DM Sans")
 //    var articleBgColor: String by SharedPrefsDelegate(prefs, "", "")
 
 }

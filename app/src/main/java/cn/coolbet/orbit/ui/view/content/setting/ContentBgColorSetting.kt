@@ -68,9 +68,7 @@ fun ContentBgColorSetting() {
                     color = color,
                     selected = color.toArgb() == currentColor.toArgb(),
                     modifier = Modifier.weight(1f)
-                        .click {
-                            Env.settings.articleBgColor.colorValue = color
-                        }
+                        .click { Env.settings.articleBgColor.colorValue = color }
                 )
             }
         }

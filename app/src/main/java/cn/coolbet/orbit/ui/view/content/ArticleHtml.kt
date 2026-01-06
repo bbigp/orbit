@@ -1,6 +1,8 @@
 package cn.coolbet.orbit.ui.view.content
 
 import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import cn.coolbet.orbit.common.openURL
+import cn.coolbet.orbit.manager.Env
+import com.google.gson.Gson
 
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
@@ -37,24 +41,52 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     val context = LocalContext.current
     val entry = state.entry
 
-    val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {
-        val content = if (state.readerView) entry.readableContent else entry.content
-        mutableStateOf(
-            HtmlBuilderHelper.entryHtml(entry.title, entry.author, content)
+    val fontFamily by Env.settings.articleFontFamily.asState()
+    val fontSize by Env.settings.articleFontSize.asState()
+//    val fullHtml: String by remember(state.readerView, entry.content, entry.readableContent, entry.title) {
+//        val content = if (state.readerView) entry.readableContent else entry.content
+//        mutableStateOf(
+//            HtmlBuilderHelper.html()
+//        )
+//    }
+    val htmlData = remember(state.readerView, entry.content, entry.readableContent,) {
+        HtmlBuilderHelper.articleHtmlData(
+            entry.title, entry.author,
+            if (state.readerView) entry.readableContent else entry.content,
         )
     }
+    val cssOption = remember(fontSize, fontFamily) { HtmlBuilderHelper.cssOption(fontSize, fontFamily) }
 
-
+    val payload = remember(htmlData, cssOption) {
+        Gson().toJson(ArticlePayload(
+            body = htmlData.body,
+            theme = "light",
+            head = htmlData.head,
+            cssOptionString = cssOption
+        ))
+    }
 
     var webView: WebView? by remember { mutableStateOf(null) }
     var webViewHeight by remember { mutableStateOf(1.dp) }
-    val heightBridge = remember {
-        HeightBridge(onHeight = { height ->
-            webViewHeight = height.dp + 30.dp
-        }, openURL = { url ->
-            openURL(context, url.toUri())
-        })
+
+    val webAppInterface = remember {
+        WebAppInterface(
+            onHeightChange = { height ->
+                webViewHeight = height.dp + 30.dp
+            },
+            onEvent = { event ->
+
+            }
+        )
     }
+
+//    val heightBridge = remember {
+//        HeightBridge(onHeight = { height ->
+//            webViewHeight = height.dp + 30.dp
+//        }, openURL = { url ->
+//            openURL(context, url.toUri())
+//        })
+//    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -71,18 +103,18 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
         }
     }
 
-    LaunchedEffect(fullHtml) {
-        // 加载本地 HTML 内容
-        // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
-        // 这样 WebView 就能找到 CSS/字体文件。
-        webView?.loadDataWithBaseURL(
-            "file:///android_asset/", // Base URL for resolving relative paths (e.g., in CSS)
-            fullHtml,
-            "text/html",
-            "UTF-8",
-            null
-        )
-    }
+//    LaunchedEffect(fullHtml) {
+//        // 加载本地 HTML 内容
+//        // loadDataWithBaseURL 允许我们指定一个 base URL (file:///android_asset/)
+//        // 这样 WebView 就能找到 CSS/字体文件。
+//        webView?.loadDataWithBaseURL(
+//            "file:///android_asset/", // Base URL for resolving relative paths (e.g., in CSS)
+//            fullHtml,
+//            "text/html",
+//            "UTF-8",
+//            null
+//        )
+//    }
 
     AndroidView(
         modifier = Modifier
@@ -102,56 +134,57 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 settings.loadsImagesAutomatically = true
                 settings.allowContentAccess = true
                 settings.allowFileAccess = true
-                addJavascriptInterface(heightBridge, "Android")
-                webViewClient = object : WebViewClient() {
-                    @SuppressLint("LocalContextResourcesRead")
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        Log.i("ContentView", "onPageFinished")
-//                        "(function() { return document.documentElement.scrollHeight; })();"
-                        view?.evaluateJavascript("""
-                            const height = document.getElementById('br-article').getBoundingClientRect().height
-                            console.log(height)
-                            Android.onExtractionComplete(height);
-                        """.trimIndent(), null)
-
-                        view?.evaluateJavascript("""
-                            document.body.addEventListener('click', function(event) {
-                                // 检查是否点击的是 a 标签
-                                let element = event.target.tagName == "A" ? event.target : event.target.closest('a');
-                                if (element) {
-                                    try {
-                                        let url = new URL(element.href);
-                                        Android.url(url.href)
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                    } catch(e) {
-                                        Android.error('a-tag-clicked-with-invalid-url')
-                                    }
-                                } else if (event.target && event.target.tagName == "IMG" && event.target.src) {
-                                    let img = event.target;
-                                    let rect = img.getBoundingClientRect();
-                                    let data = { src: img.src, left: rect.left, top: rect.top, width: rect.width, height: rect.height };
-                                    Android.openImg(JSON.stringify(data))
-                                } else {
-                                    Android.onClick('body-clicked')
-                                }
-                            }, true);
-                        """.trimIndent(), null)
-                    }
-
-                    override fun shouldInterceptRequest(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): WebResourceResponse? {
-                        val response = super.shouldInterceptRequest(view, request)
-                        val url = request?.url.toString()
-                        if (url.contains(".jpg") || url.contains(".png") || url.contains(".gif")) {
-                            Log.d("ContentView", "Intercepting potential image request: $url ${response?.mimeType}")
-                        }
-                        return response
-                    }
-                }
+                addJavascriptInterface(webAppInterface, "AndroidBridge")
+                loadDataWithBaseURL("file:///android_asset/", HtmlBuilderHelper.html(), "text/html", "UTF-8", null)
+//                addJavascriptInterface(heightBridge, "Android")
+//                webViewClient = object : WebViewClient() {
+//                    @SuppressLint("LocalContextResourcesRead")
+//                    override fun onPageFinished(view: WebView?, url: String?) {
+//                        super.onPageFinished(view, url)
+//                        Log.i("ContentView", "onPageFinished")
+//                        view?.evaluateJavascript("""
+//                            const height = document.getElementById('br-article').getBoundingClientRect().height
+//                            console.log(height)
+//                            Android.onExtractionComplete(height);
+//                        """.trimIndent(), null)
+//
+//                        view?.evaluateJavascript("""
+//                            document.body.addEventListener('click', function(event) {
+//                                // 检查是否点击的是 a 标签
+//                                let element = event.target.tagName == "A" ? event.target : event.target.closest('a');
+//                                if (element) {
+//                                    try {
+//                                        let url = new URL(element.href);
+//                                        Android.url(url.href)
+//                                        event.preventDefault();
+//                                        event.stopPropagation();
+//                                    } catch(e) {
+//                                        Android.error('a-tag-clicked-with-invalid-url')
+//                                    }
+//                                } else if (event.target && event.target.tagName == "IMG" && event.target.src) {
+//                                    let img = event.target;
+//                                    let rect = img.getBoundingClientRect();
+//                                    let data = { src: img.src, left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+//                                    Android.openImg(JSON.stringify(data))
+//                                } else {
+//                                    Android.onClick('body-clicked')
+//                                }
+//                            }, true);
+//                        """.trimIndent(), null)
+//                    }
+//
+//                    override fun shouldInterceptRequest(
+//                        view: WebView?,
+//                        request: WebResourceRequest?
+//                    ): WebResourceResponse? {
+//                        val response = super.shouldInterceptRequest(view, request)
+//                        val url = request?.url.toString()
+//                        if (url.contains(".jpg") || url.contains(".png") || url.contains(".gif")) {
+//                            Log.d("ContentView", "Intercepting potential image request: $url ${response?.mimeType}")
+//                        }
+//                        return response
+//                    }
+//                }
             }
         },
         update = { webView ->
@@ -159,38 +192,67 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 // 强制 WebView 视图对齐到顶部 (清除任何残留的微小负位移)
                 webView.scrollTo(0, 0)
             }
+            webView.evaluateJavascript("__brewRenderArticle($payload)", null)
         }
     )
 }
 
-class HeightBridge(
-    private val onHeight: (Int) -> Unit,
-    private val openURL: (String) -> Unit,
+data class ArticlePayload(
+    val head: String? = "",
+    val body: String? = "",
+    val theme: String? = "light",
+    val cssOptionString: String? = ""
+)
+
+class WebAppInterface(
+    private val onHeightChange: (Float) -> Unit,
+    private val onEvent: (String) -> Unit
 ) {
-
     @JavascriptInterface
-    fun onExtractionComplete(height: String) {
-        Log.i("ContentView", "onExtractionComplete $height")
-        onHeight(height.toFloat().toInt())
-    }
-
-    @JavascriptInterface
-    fun onClick(data: String) {
-        Log.i("ContentView", "onClick: $data")
-    }
-
-    @JavascriptInterface
-    fun url(url: String) {
-        openURL(url)
-    }
-
-    @JavascriptInterface
-    fun openImg(url: String) {
-
-    }
-
-    @JavascriptInterface
-    fun error(msg: String) {
-        Log.i("ContentView", "error: $msg")
+    fun postMessage(name: String, payload: String) {
+        // JS 运行在 WebView 维护的线程，UI 操作必须回到主线程
+        Handler(Looper.getMainLooper()).post {
+            when (name) {
+                "articleHeightHandler" -> {
+                    onHeightChange(payload.toFloatOrNull() ?: 0f)
+                }
+                else -> {
+                    onEvent(name)
+                    Log.d("WebViewBridge", "Event received: $name, data: $payload")
+                }
+            }
+        }
     }
 }
+
+//class HeightBridge(
+//    private val onHeight: (Int) -> Unit,
+//    private val openURL: (String) -> Unit,
+//) {
+//
+//    @JavascriptInterface
+//    fun onExtractionComplete(height: String) {
+//        Log.i("ContentView", "onExtractionComplete $height")
+//        onHeight(height.toFloat().toInt())
+//    }
+//
+//    @JavascriptInterface
+//    fun onClick(data: String) {
+//        Log.i("ContentView", "onClick: $data")
+//    }
+//
+//    @JavascriptInterface
+//    fun url(url: String) {
+//        openURL(url)
+//    }
+//
+//    @JavascriptInterface
+//    fun openImg(url: String) {
+//
+//    }
+//
+//    @JavascriptInterface
+//    fun error(msg: String) {
+//        Log.i("ContentView", "error: $msg")
+//    }
+//}

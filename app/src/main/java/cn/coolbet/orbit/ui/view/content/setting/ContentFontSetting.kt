@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black25
@@ -33,7 +34,7 @@ import cn.coolbet.orbit.ui.theme.SansFontFamily
 
 @Composable
 fun ContentFontSetting() {
-    var selectedIndex by remember { mutableStateOf(0) }
+    val currentFontFamily by Env.settings.articleFontFamily.asState()
     val fonts = listOf(
         FontDesign("Aa", "Sans Serif", SansFontFamily),
         FontDesign("Ss", "Serif", SansFontFamily),
@@ -52,8 +53,8 @@ fun ContentFontSetting() {
             fonts.forEachIndexed { index, design ->
                 FontDesignCard(
                     modifier = Modifier.weight(1f)
-                        .click { selectedIndex = index },
-                    selected = index == selectedIndex,
+                        .click { Env.settings.articleFontFamily.value = design.fontFamily() },
+                    selected = design.fontFamily() == currentFontFamily,
                     fontDesign = design
                 )
             }
@@ -102,7 +103,16 @@ data class FontDesign(
     val label: String,
     val rawValue: String,
     val family: FontFamily
-)
+) {
+    fun fontFamily(): String {
+        return when(rawValue) {
+            "Sans Serif" -> "DM Sans"
+            "Mono" -> "DM Mono"
+            "Serif" -> "DM Sans"
+            else -> "DM Sans"
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
