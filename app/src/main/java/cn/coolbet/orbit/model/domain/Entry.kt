@@ -1,7 +1,9 @@
 package cn.coolbet.orbit.model.domain
 
 import android.os.Parcelable
+import androidx.compose.ui.text.AnnotatedString
 import cn.coolbet.orbit.common.HTMLProcessingHelper
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -28,6 +30,7 @@ data class Entry(
 
     val feed: Feed = Feed.EMPTY,
     val medias: List<Media> = emptyList(),
+    @IgnoredOnParcel val segments: List<AnnotatedString> = mutableListOf()
 ): Parcelable {
     companion object {
         val EMPTY = Entry(id = 0, userId = 0)
