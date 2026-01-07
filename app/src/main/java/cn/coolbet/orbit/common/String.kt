@@ -4,16 +4,42 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.text.HtmlCompat
+import cn.coolbet.orbit.ui.theme.Blue
 import org.jsoup.Jsoup
 
 
-fun String.splitHtml(limit: Int = 250): List<AnnotatedString> {
+/**
+ * 判断是否为包含样式的 HTML 片段
+ */
+fun String.hasHtmlTags(): Boolean {
+    // 1. 去掉首尾空白符，判空
+    val text = this.trim()
+    if (text.length < 3) return false // HTML 标签至少需要 3 个字符，如 <a>
+
+    // 2. 检查开头：必须以 '<' 开头
+    val startsWithBracket = text.startsWith("<")
+
+    // 3. 检查开头第二个字符：必须是字母或斜杠 (针对闭合标签开头的情况)
+    // 这一步有效排除了 <123>、< 5 或文字开头的情况
+    val secondChar = text.getOrNull(1)
+    val isValidTagStart = secondChar != null && (secondChar.isLetter() || secondChar == '/')
+
+    // 4. 检查结尾：必须以 '>' 结尾
+    val endsWithBracket = text.endsWith(">")
+
+    // 只有全部满足，才判定为被 HTML 标签包裹的内容
+    return startsWithBracket && isValidTagStart && endsWithBracket
+}
+
+fun String.splitHtml(limit: Int = 240): List<AnnotatedString> {
     val doc = Jsoup.parse(this)
     val segments = mutableListOf<AnnotatedString>()
     var currentLength = 0
 
+    val elements = doc.body().children()
 
-    for (element in doc.select("p, div, br")) {
+    for (element in elements) {
         val plainText = element.text()
         if (plainText.isBlank()) continue
 
@@ -36,17 +62,47 @@ fun String.splitHtml(limit: Int = 250): List<AnnotatedString> {
     return segments
 }
 
-// 简易 HTML 样式转 AnnotatedString
 private fun htmlToAnnotatedString(htmlChunk: String, visibleText: String): AnnotatedString {
-    return buildAnnotatedString {
-        // 这里为了简单演示，直接添加文字。
-        // 进阶做法可以使用原生的 Html.fromHtml(htmlChunk) 得到 Spanned，
-        // 然后遍历 Spanned 的各种 Span 并映射为 SpanStyle。
-        append(visibleText)
+    val spanned = HtmlCompat.fromHtml(htmlChunk, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
-        // 示例：如果包含某个标签，就加粗（实际应用中需用正则或遍历 Span）
-//        if (htmlChunk.contains("<b>") || htmlChunk.contains("<strong>")) {
-//            addStyle(SpanStyle(fontWeight = FontWeight.Bold), 0, visibleText.length)
+    return buildAnnotatedString {
+        append(visibleText)
+        val maxLen = visibleText.length
+
+        // 1. 处理所有 URLSpan (a 标签)
+        // 关键点：不管 a 标签内部嵌套了 ins, b 还是 span，我们统一给这个区间上色
+        val urlSpans = spanned.getSpans(0, spanned.length, android.text.style.URLSpan::class.java)
+        urlSpans.forEach { span ->
+            val start = spanned.getSpanStart(span).coerceIn(0, maxLen)
+            val end = spanned.getSpanEnd(span).coerceIn(0, maxLen)
+
+            if (start < end) {
+                // 强制应用蓝色样式，优先级高于其他普通标签
+                addStyle(
+                    style = SpanStyle(
+                        color = Blue,
+                    ),
+                    start = start,
+                    end = end
+                )
+                // 写入点击注解
+                addStringAnnotation(
+                    tag = "URL",
+                    annotation = span.url,
+                    start = start,
+                    end = end
+                )
+            }
+        }
+
+        // 2. 处理其他样式（如加粗）
+//        val styleSpans = spanned.getSpans(0, spanned.length, android.text.style.StyleSpan::class.java)
+//        styleSpans.forEach { span ->
+//            val start = spanned.getSpanStart(span).coerceIn(0, maxLen)
+//            val end = spanned.getSpanEnd(span).coerceIn(0, maxLen)
+//            if (start < end && span.style == android.graphics.Typeface.BOLD) {
+//                addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+//            }
 //        }
     }
 }

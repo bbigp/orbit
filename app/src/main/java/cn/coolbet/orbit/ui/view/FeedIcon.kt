@@ -62,7 +62,12 @@ object FeedIconDefaults {
 
 
 @Composable
-fun FeedIcon(url: String, alt: String, size: FeedIconSize = FeedIconDefaults.MEDIUM) {
+fun FeedIcon(
+    modifier: Modifier = Modifier,
+    url: String,
+    alt: String,
+    size: FeedIconSize = FeedIconDefaults.MEDIUM,
+) {
     val isScrolling = LocalListIsScrolling.current
     val context = LocalContext.current
     val request = remember(url, isScrolling) {
@@ -79,7 +84,7 @@ fun FeedIcon(url: String, alt: String, size: FeedIconSize = FeedIconDefaults.MED
             }
             .build()
     }
-    Box(modifier = Modifier
+    Box(modifier = modifier
         .size(size.size)
         .clip(RoundedCornerShape(size.radius)),
         contentAlignment = Alignment.Center) {

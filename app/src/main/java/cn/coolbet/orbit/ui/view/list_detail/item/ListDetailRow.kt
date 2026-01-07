@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.view.content.QueryContext
 
@@ -14,6 +15,7 @@ fun ListDetailRow(
     item: Entry
 ){
 
+    Env.settings.articleFontSize
     LDMagazine(
         item,
         modifier = Modifier.click {

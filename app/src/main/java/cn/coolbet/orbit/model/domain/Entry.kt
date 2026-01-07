@@ -2,7 +2,10 @@ package cn.coolbet.orbit.model.domain
 
 import android.os.Parcelable
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import cn.coolbet.orbit.common.HTMLProcessingHelper
+import cn.coolbet.orbit.common.hasHtmlTags
+import cn.coolbet.orbit.common.splitHtml
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -30,7 +33,6 @@ data class Entry(
 
     val feed: Feed = Feed.EMPTY,
     val medias: List<Media> = emptyList(),
-    @IgnoredOnParcel val segments: List<AnnotatedString> = mutableListOf()
 ): Parcelable {
     companion object {
         val EMPTY = Entry(id = 0, userId = 0)
@@ -50,6 +52,25 @@ data class Entry(
     val insertHeroImage: Boolean get() {
         return HTMLProcessingHelper.process(readableContent).insertHeroImage
     }
+
+    val segments: List<AnnotatedString> get() {
+        val rawText = listOf(readableContent, content, summary)
+            .firstOrNull { it.isNotEmpty() } ?: ""
+
+        val finalHtml = when {
+            rawText.isEmpty() -> "<p></p>"
+            rawText.hasHtmlTags() -> rawText
+            else -> "<p>$rawText</p>"
+        }
+        return mutableListOf<AnnotatedString>().apply {
+            if (title.isNotEmpty()) {
+                add(buildAnnotatedString { append(title) })
+            }
+            addAll(finalHtml.splitHtml(240 - title.length))
+        }
+    }
+
+    val showReadMore: Boolean get() = segments.sumOf { it.length } + title.length >= 240
 }
 
 
