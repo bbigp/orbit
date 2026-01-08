@@ -4,6 +4,7 @@ import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
+import cn.coolbet.orbit.dao.LDSettingsDao
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
@@ -14,6 +15,7 @@ import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.replace
+import cn.coolbet.orbit.model.entity.LDSettings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -32,6 +34,7 @@ class ListDetailScreenModel @AssistedInject constructor(
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
+    private val ldSettingsDao: LDSettingsDao,
     navigatorState: NavigatorState,
 ): ScreenModel {
 
@@ -90,8 +93,11 @@ class ListDetailScreenModel @AssistedInject constructor(
             delay(500)
             try {
                 val meta = metaDataFlow.first()
+                val settings = ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
                 val newData = entryManager.getPage(meta, page = 1, size = value.size)
-                mutableState.update { it.addItems(newData, reset = true, meta) }
+                mutableState.update {
+                    it.copy(settings = settings).addItems(newData, reset = true, meta)
+                }
             } catch (e: Exception) {
                 mutableState.update { it.copy(isRefreshing = false) }
             }

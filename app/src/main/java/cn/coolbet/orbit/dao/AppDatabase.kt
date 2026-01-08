@@ -12,6 +12,8 @@ import cn.coolbet.orbit.model.domain.EntryStatusConverter
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.FolderEntity
+import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.model.entity.LDSettingsConverters
 import cn.coolbet.orbit.model.entity.MediaEntity
 import cn.coolbet.orbit.model.entity.SearchRecord
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
@@ -27,13 +29,15 @@ private const val DATABASE_NAME = "orbit_db"
 @Database(
     entities = [
         FeedEntity::class, FolderEntity::class, SyncTaskRecord::class, EntryEntity::class,
-        MediaEntity::class, SearchRecord::class
+        MediaEntity::class, SearchRecord::class,
+        LDSettings::class,
     ],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(value = [
-    EntryStatusConverter::class
+    EntryStatusConverter::class,
+    LDSettingsConverters::class,
 ])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun feedDao(): FeedDao
@@ -42,6 +46,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun entryDao(): EntryDao
     abstract fun mediaDao(): MediaDao
     abstract fun searchDao(): SearchDao
+    abstract fun lDSettingsDao(): LDSettingsDao
 }
 
 
@@ -90,6 +95,12 @@ object RoomModule {
     @Singleton
     fun provideSearchDao(database: AppDatabase): SearchDao {
         return database.searchDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideLDSettingsDao(database: AppDatabase): LDSettingsDao {
+        return database.lDSettingsDao()
     }
 
     @Provides

@@ -4,6 +4,7 @@ import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.entity.LDSettings
 
 data class ListDetailState(
     val meta: Meta = Feed.EMPTY,
@@ -13,6 +14,7 @@ data class ListDetailState(
     override val hasMore: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
+    val settings: LDSettings = LDSettings.defaultSettings
 ): ILoadingState
 
 fun ListDetailState.addItems(data: List<Entry>, reset: Boolean = false, meta: Meta? = null): ListDetailState {
