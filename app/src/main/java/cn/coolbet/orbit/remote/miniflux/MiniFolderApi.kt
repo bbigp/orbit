@@ -11,7 +11,7 @@ interface MiniFolderApi {
 }
 
 fun CategoryResponse.to(): Folder {
-    return Folder(id = this.id, title = this.title, userId = this.userId, hideGlobally = this.hideGlobally)
+    return Folder(id = this.id, title = this.title, userId = this.userId)
 }
 
 data class CategoryResponse(

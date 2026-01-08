@@ -18,13 +18,13 @@ abstract class FeedDao(private val db: AppDatabase) {
     suspend fun batchSave(feeds: List<Feed>) = withContext(Dispatchers.IO) {
         val sql = """
             INSERT INTO feeds (id, user_id, feed_url, site_url, title, 
-            icon_url, error_count, error_msg, folder_id, hide_globally) VALUES 
-            (?, ?, ?, ?, ?,     ?, ?, ?, ?, ?)
+            icon_url, error_count, error_msg, folder_id) VALUES 
+            (?, ?, ?, ?, ?,     ?, ?, ?, ?)
         """
         feeds.forEach { feed ->
             val rowsUpdated = updateFeed(feed.feedURL, feed.siteURL, feed.title,
                 feed.errorCount, feed.errorMsg, feed.iconURL,
-                feed.folderId, feed.hideGlobally, feed.id
+                feed.folderId, feed.id
             )
             if (rowsUpdated == 0) {
                 val args = arrayOf<Any>(
@@ -37,7 +37,6 @@ abstract class FeedDao(private val db: AppDatabase) {
                     feed.errorCount,
                     feed.errorMsg,
                     feed.folderId,
-                    feed.hideGlobally,
                 )
                 db.openHelper.writableDatabase.execSQL(sql, args)
             }
@@ -51,12 +50,11 @@ abstract class FeedDao(private val db: AppDatabase) {
     @Query("""
         update feeds set feed_url = :feedURL, site_url = :siteURL,
             title = :title, error_count = :errorCount, error_msg = :errorMsg,
-            icon_url = :iconURL, folder_id = :folderId,
-            hide_globally = :hideGlobally 
+            icon_url = :iconURL, folder_id = :folderId
         where id = :id
     """)
     abstract suspend fun updateFeed(feedURL: String, siteURL: String, title: String, errorCount: Int,
-                                    errorMsg: String, iconURL: String, folderId: Long, hideGlobally: Boolean,
+                                    errorMsg: String, iconURL: String, folderId: Long,
                                     id: Long
     ): Int
 

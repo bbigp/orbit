@@ -31,10 +31,10 @@ data class FeedEntity(
                 title = response.title,
                 feedURL = response.feedUrl,
                 siteURL = response.siteUrl,
-                iconURL = response.icon?.let { "v1/icons/${it.iconId}" } ?: "",
+                iconURL = response.icon.let { "v1/icons/${it.iconId}" },
                 errorCount = response.parsingErrorCount,
-                errorMsg = response.parsingErrorMessage ?: "",
-                folderId = response.category?.id ?: 0,
+                errorMsg = response.parsingErrorMessage,
+                folderId = response.category.id,
                 hideGlobally = response.hideGlobally,
             )
         }
@@ -52,9 +52,6 @@ fun Feed.toEntity(): FeedEntity {
         errorCount = this.errorCount,
         errorMsg = this.errorMsg,
         folderId = this.folderId,
-        hideGlobally = this.hideGlobally,
-        onlyShowUnread = this.onlyShowUnread,
-        orderx = this.order,
     )
 }
 
@@ -62,7 +59,6 @@ fun FeedEntity.to(): Feed {
     return Feed(
         id = this.id, userId = this.userId, feedURL = this.feedURL, siteURL = this.siteURL,
         title = this.title, errorCount = this.errorCount, errorMsg = this.errorMsg,
-        folderId = this.folderId, desc = "", hideGlobally = this.hideGlobally,
-        onlyShowUnread = this.onlyShowUnread, order = this.orderx, iconURL = this.iconURL,
+        folderId = this.folderId, desc = "", iconURL = this.iconURL,
     )
 }

@@ -24,13 +24,11 @@ data class FolderEntity (
 fun Folder.toEntity(): FolderEntity {
     return FolderEntity(
         id = this.id, userId = this.userId, title = this.title,
-        hideGlobally = this.hideGlobally,
     )
 }
 
 fun FolderEntity.to(): Folder {
     return Folder(
         id = this.id, userId = this.userId, title = this.title,
-        hideGlobally = this.hideGlobally,
     )
 }

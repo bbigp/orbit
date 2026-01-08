@@ -89,6 +89,7 @@ data class ListDetailScreen(
 
         ListDetailSettingSheet(
             meta = state.meta,
+            settings = state.settings,
             showBottomSheet = showBottomSheet,
             onDismiss = { showBottomSheet = false }
         )

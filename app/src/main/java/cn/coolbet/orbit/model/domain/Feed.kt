@@ -2,6 +2,7 @@ package cn.coolbet.orbit.model.domain
 
 import android.os.Parcelable
 import cn.coolbet.orbit.model.OrderPublishedAt
+import cn.coolbet.orbit.model.entity.LDSettings
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -15,13 +16,10 @@ data class Feed(
     val errorMsg: String = "",
     val folderId: Long = 0,
     val desc: String = "",
-
-    override val hideGlobally: Boolean = false,
-    override val onlyShowUnread: Boolean = false,
-    override val order: String = OrderPublishedAt,
     override val iconURL: String = "",
 
     val folder: Folder = Folder.EMPTY,
+    override val settings: LDSettings = LDSettings.defaultSettings
 ) : Meta {
 
     // 在 Kotlin 中可以作为 companion object 的常量或 object 实例

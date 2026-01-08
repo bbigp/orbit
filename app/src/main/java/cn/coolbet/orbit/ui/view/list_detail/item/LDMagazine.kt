@@ -159,7 +159,7 @@ fun Modifier.pulsatingShimmer(isLoading: Boolean): Modifier = composed {
 fun EntryTileTopRow(entry: Entry){
     Row(verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.width(16.dp))
-        FeedIcon(entry.feed.iconURL, entry.feed.title, size = FeedIconDefaults.SMALL)
+        FeedIcon(url = entry.feed.iconURL, alt = entry.feed.title, size = FeedIconDefaults.SMALL)
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             entry.feed.title,

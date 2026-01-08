@@ -1,12 +1,15 @@
 package cn.coolbet.orbit.model.entity
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 @Entity(tableName = "ld_settings")
+@Parcelize
 data class LDSettings(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     @ColumnInfo("user_id") val userId: Long = 0,
@@ -18,7 +21,7 @@ data class LDSettings(
     @ColumnInfo("hide_globally") val hideGlobally: Boolean = false,
     @ColumnInfo(name = "created_at", defaultValue = "0") val createdAt: Long = Date().time,
     @ColumnInfo(name = "changed_at", defaultValue = "0") val changedAt: Long = Date().time
-) {
+) : Parcelable {
 
     companion object {
         val defaultSettings = LDSettings()

@@ -21,9 +21,6 @@ fun FeedResponse.to(): Feed {
         errorMsg = this.parsingErrorMessage,
         folderId = this.category.id,
         desc = "",
-        hideGlobally = this.hideGlobally,
-        onlyShowUnread = false,
-        order = OrderPublishedAt,
         iconURL = if(this.icon.isEmpty) "" else this.icon.let { "v1/icons/${it.iconId}" },
         folder = this.category.to()
     )

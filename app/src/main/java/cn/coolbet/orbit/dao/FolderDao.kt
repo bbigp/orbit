@@ -17,13 +17,13 @@ abstract class FolderDao(private val db: AppDatabase) {
 
     suspend fun batchSave(items: List<Folder>) = withContext(Dispatchers.IO) {
         val sql = """
-            INSERT INTO folders (id, user_id, title, hide_globally) VALUES 
-            (?, ?, ?, ?)
+            INSERT INTO folders (id, user_id, title) VALUES 
+            (?, ?, ?)
         """
         items.forEach { folder ->
-            val rowsUpdated = updateFolder(folder.title, folder.hideGlobally, folder.id)
+            val rowsUpdated = updateFolder(folder.title, folder.id)
             if (rowsUpdated == 0) {
-                val args = arrayOf<Any>(folder.id, folder.userId, folder.title, folder.hideGlobally)
+                val args = arrayOf<Any>(folder.id, folder.userId, folder.title)
                 db.openHelper.writableDatabase.execSQL(sql, args)
             }
 
@@ -34,9 +34,9 @@ abstract class FolderDao(private val db: AppDatabase) {
     abstract suspend fun clearAll()
 
     @Query("""
-        update folders set title = :title, hide_globally = :hideGlobally where id = :id
+        update folders set title = :title where id = :id
     """)
-    abstract suspend fun updateFolder(title: String, hideGlobally: Boolean, id: Long): Int
+    abstract suspend fun updateFolder(title: String, id: Long): Int
 
 
 

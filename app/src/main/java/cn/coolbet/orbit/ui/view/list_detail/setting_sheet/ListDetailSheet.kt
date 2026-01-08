@@ -36,6 +36,7 @@ import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.common.copyText
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.ObCard
@@ -56,6 +57,7 @@ import cn.coolbet.orbit.ui.view.FeedIconDefaults
 @Composable
 fun ListDetailSettingSheet(
     meta: Meta,
+    settings: LDSettings,
     showBottomSheet: Boolean,
     onDismiss: () -> Unit,
 ){
@@ -92,7 +94,9 @@ fun ListDetailSettingSheet(
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                DisplayModePicker()
+                DisplayModePicker(
+                    displayMode = settings.displayMode
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
 //                Text("Sort by", maxLines = 1, style = AppTypography.M15B25,
@@ -110,14 +114,14 @@ fun ListDetailSettingSheet(
                     ObCard {
                         ListTileSwitch(
                             title = "Unread Only", icon = R.drawable.eyes,
-                            checked = false,
+                            checked = settings.unreadOnly,
                             onCheckedChange = { v->
                             }
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
                             title = "Group by Publication Date", icon = R.drawable.list_label,
-                            checked = false,
+                            checked = settings.showGroupTitle,
                             onCheckedChange = { v->
                             }
                         )
@@ -156,7 +160,7 @@ fun ListCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(12.dp))
-            FeedIcon(meta.iconURL, meta.title, FeedIconDefaults.LARGE)
+            FeedIcon(url = meta.iconURL, alt = meta.title, size = FeedIconDefaults.LARGE)
 
             Spacer(modifier = Modifier.width(12.dp))
             Column(

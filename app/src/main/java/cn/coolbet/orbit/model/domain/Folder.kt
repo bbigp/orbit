@@ -2,19 +2,19 @@ package cn.coolbet.orbit.model.domain
 
 import android.os.Parcelable
 import cn.coolbet.orbit.model.OrderPublishedAt
+import cn.coolbet.orbit.model.entity.LDSettings
 import kotlinx.parcelize.Parcelize
+import okhttp3.internal.http2.Settings
 
 @Parcelize
 data class Folder (
     override val id: Long,
     val userId: Long = 0,
     override val title: String = "",
-    override val hideGlobally: Boolean = false,
-    override val order: String = OrderPublishedAt,
-    override val onlyShowUnread: Boolean = false,
 
     val expanded: Boolean = false,
     val feeds: List<Feed> = emptyList(),
+    override val settings: LDSettings = LDSettings.defaultSettings
 ): Meta {
 
     companion object {

@@ -36,10 +36,7 @@ abstract class EntryDao(protected val db: AppDatabase) {
             recentAddTime = meta.recentAddTime,
             search = search,
         ).joinToString(separator = " and ")
-        val orderByColumn = when (meta.order) {
-            OrderCreatedAt -> "created_at"
-            else -> "published_at"
-        }
+        val orderByColumn = meta.settings.sortOrder.value
         val direction = "desc"
         val ordering = when (direction.lowercase()) {
             "asc" -> "asc"
