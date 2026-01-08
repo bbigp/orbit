@@ -14,6 +14,7 @@ class EntryManager @Inject constructor(
     private val cacheStore: CacheStore,
 ) {
 
+    //todo: 重新构造查询 meta不携带setting
     suspend fun getPage(mate: Meta, page: Int = 1, size: Int = 20, search: String = ""): List<Entry> {
         val entries = entryDao.getEntries(page, size, mate, search)
         if (entries.isEmpty()) return emptyList()
