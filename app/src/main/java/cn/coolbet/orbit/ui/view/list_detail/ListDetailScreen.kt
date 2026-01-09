@@ -17,13 +17,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
@@ -75,6 +78,14 @@ data class ListDetailScreen(
         val pullState = rememberPullToRefreshState()
         val context = LocalContext.current
         var showBottomSheet by remember { mutableStateOf(false) }
+        val density = LocalDensity.current
+        val flyDistancePx = with(density) { 80.dp.toPx() }
+        val progress by remember {
+            derivedStateOf {
+                if (listState.firstVisibleItemIndex > 0) 1f
+                else (listState.firstVisibleItemScrollOffset / flyDistancePx).coerceIn(0f, 1f)
+            }
+        }
 
         DisposableEffect(Unit) {
             onDispose { model.onDispose(screenName) }
@@ -154,7 +165,7 @@ data class ListDetailScreen(
                         }
                     } else {
                         item(key = "entry-top-tile") {
-                            EntryTopTile(state.meta)
+                            EntryTopTile(state.meta, modifier = Modifier.graphicsLayer { alpha = 1f - progress })
                         }
                         if (state.items.isEmpty()) {
                             item(key = "no-content-yet") {

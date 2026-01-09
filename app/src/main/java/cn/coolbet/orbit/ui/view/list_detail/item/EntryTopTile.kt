@@ -23,12 +23,15 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 
 
 @Composable
-fun EntryTopTile(meta: Meta) {
+fun EntryTopTile(
+    meta: Meta,
+    modifier: Modifier = Modifier
+) {
     val unreadState = LocalUnreadState.current
     val unreadMap by unreadState
     val count = unreadMap[meta.metaId.toString()] ?: 0
     Column(
-        modifier = Modifier.padding(horizontal = 14.dp)
+        modifier = modifier.padding(horizontal = 14.dp)
             .fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -36,7 +39,7 @@ fun EntryTopTile(meta: Meta) {
             meta.title,
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             style = AppTypography.M28
-        )
+        ) //8 + 34 + 4 + 13 + 16 + 2
         if (count > 0) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
