@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.ui.kit.ObtCardView
 import cn.coolbet.orbit.ui.kit.ObtMagazineView
@@ -24,12 +26,15 @@ import cn.coolbet.orbit.ui.kit.ObtTextOnlyView
 import cn.coolbet.orbit.ui.kit.ObtThreadView
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black95
+import cn.coolbet.orbit.ui.view.list_detail.LocalChangeDisplayMode
 
 
 @Composable
 fun DisplayModePicker(
+    metaId: MetaId,
     displayMode: DisplayMode = DisplayMode.Magazine
 ){
+    val changeDisplayMode = LocalChangeDisplayMode.current
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -41,11 +46,17 @@ fun DisplayModePicker(
                 selected = DisplayMode.Magazine == displayMode,
                 displayMode = DisplayMode.Magazine,
                 modifier = Modifier.weight(1f)
+                    .click {
+                        changeDisplayMode(metaId, DisplayMode.Magazine)
+                    }
             )
             DisplayModeItem(
                 selected = DisplayMode.TextOnly == displayMode,
                 displayMode = DisplayMode.TextOnly,
                 modifier = Modifier.weight(1f)
+                    .click {
+                        changeDisplayMode(metaId, DisplayMode.TextOnly)
+                    }
             )
         }
         Row(
@@ -56,11 +67,17 @@ fun DisplayModePicker(
                 selected = DisplayMode.Thread == displayMode,
                 displayMode = DisplayMode.Thread,
                 modifier = Modifier.weight(1f)
+                    .click {
+                        changeDisplayMode(metaId, DisplayMode.Thread)
+                    }
             )
             DisplayModeItem(
                 selected = DisplayMode.Card == displayMode,
                 displayMode = DisplayMode.Card,
                 modifier = Modifier.weight(1f)
+//                    .click {
+//                        changeDisplayMode(metaId, DisplayMode.Card)
+//                    }
             )
         }
     }
@@ -113,6 +130,6 @@ private fun DisplayModeItem(
 fun PreviewDisplayModeItem() {
     Column {
         DisplayModeItem()
-        DisplayModePicker()
+        DisplayModePicker(metaId = MetaId("", 0))
     }
 }

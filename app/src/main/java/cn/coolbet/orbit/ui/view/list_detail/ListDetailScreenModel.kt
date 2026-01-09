@@ -9,12 +9,14 @@ import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.ListDetailQuery
 import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.replace
+import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -77,6 +79,17 @@ class ListDetailScreenModel @AssistedInject constructor(
         }
     }
 
+    fun changeDisplayMode(metaId: MetaId, displayMode: DisplayMode){
+        screenModelScope.launch {
+            ldSettingsDao.update(metaId, displayMode = displayMode)
+            mutableState.update {
+                it.copy(
+                    settings = it.settings.copy(displayMode = displayMode)
+                )
+            }
+        }
+    }
+
 
     fun loadInitialData() {
         val value = state.value
@@ -94,7 +107,11 @@ class ListDetailScreenModel @AssistedInject constructor(
             try {
                 val meta = metaDataFlow.first()
                 val settings = ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
-                val newData = entryManager.getPage(meta, page = 1, size = value.size)
+                val newData = entryManager.getPage(
+                    query = ListDetailQuery(meta = meta, settings = settings),
+                    page = 1,
+                    size = value.size
+                )
                 mutableState.update {
                     it.copy(settings = settings).addItems(newData, reset = true, meta)
                 }
@@ -111,7 +128,7 @@ class ListDetailScreenModel @AssistedInject constructor(
             mutableState.update { it.copy(isLoadingMore = true) }
             try {
                 val newData = entryManager.getPage(
-                    state.value.meta,
+                    query = ListDetailQuery(meta = state.value.meta, settings = state.value.settings),
                     page = state.value.page + 1,
                     size = state.value.size
                 )

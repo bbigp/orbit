@@ -95,6 +95,7 @@ fun ListDetailSettingSheet(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 DisplayModePicker(
+                    metaId = meta.metaId,
                     displayMode = settings.displayMode
                 )
                 Spacer(modifier = Modifier.height(16.dp))

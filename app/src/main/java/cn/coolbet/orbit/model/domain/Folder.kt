@@ -14,7 +14,6 @@ data class Folder (
 
     val expanded: Boolean = false,
     val feeds: List<Feed> = emptyList(),
-    override val settings: LDSettings = LDSettings.defaultSettings
 ): Meta {
 
     companion object {

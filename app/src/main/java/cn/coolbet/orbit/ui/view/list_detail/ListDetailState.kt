@@ -1,10 +1,16 @@
 package cn.coolbet.orbit.ui.view.list_detail
 
+import androidx.compose.runtime.compositionLocalOf
 import cn.coolbet.orbit.common.ILoadingState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettings
+
+
+val LocalChangeDisplayMode = compositionLocalOf<(MetaId, DisplayMode) -> Unit> { { _, _ -> } }
 
 data class ListDetailState(
     val meta: Meta = Feed.EMPTY,

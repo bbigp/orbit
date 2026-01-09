@@ -11,19 +11,11 @@ interface Meta: Parcelable {
     val metaId: MetaId
     val url: String get() = ""
     val feedIds: List<Long>
-    val statuses: List<EntryStatus> get() {
-        return if (settings.unreadOnly) {
-            listOf(EntryStatus.UNREAD)
-        } else {
-            listOf(EntryStatus.UNREAD, EntryStatus.READ)
-        }
-    }
     val iconURL: String get() = ""
     val recentPubTime: Int get() = 0
     val recentAddTime: Int get() = 0
 
     val isNotEmpty: Boolean get() = id != 0L
-    val settings: LDSettings
 }
 
 @Parcelize

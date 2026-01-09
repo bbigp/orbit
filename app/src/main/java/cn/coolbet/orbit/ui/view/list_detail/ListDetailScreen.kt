@@ -51,6 +51,7 @@ import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
 import cn.coolbet.orbit.ui.view.list_detail.swipable.UnreadStateDefinition
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
+import cn.coolbet.orbit.ui.view.list_detail.item.ListDetailRow
 import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 import kotlinx.parcelize.Parcelize
@@ -87,12 +88,17 @@ data class ListDetailScreen(
             }
         )
 
-        ListDetailSettingSheet(
-            meta = state.meta,
-            settings = state.settings,
-            showBottomSheet = showBottomSheet,
-            onDismiss = { showBottomSheet = false }
-        )
+        CompositionLocalProvider(
+            LocalChangeDisplayMode provides model::changeDisplayMode
+        ) {
+            ListDetailSettingSheet(
+                meta = state.meta,
+                settings = state.settings,
+                showBottomSheet = showBottomSheet,
+                onDismiss = { showBottomSheet = false }
+            )
+        }
+
         Scaffold(
             topBar = {
                 ObBackTopAppBar(
@@ -175,17 +181,7 @@ data class ListDetailScreen(
                                     ),
                                     leftSwipeState = NoneStateDefinition
                                 ) {
-                                    LDMagazine(
-                                        item,
-                                        modifier = Modifier.click {
-                                            NavigatorBus.push(
-                                                Route.Entry(
-                                                    entry = item,
-                                                    queryContext = QueryContext.normal
-                                                )
-                                            )
-                                        }
-                                    )
+                                    ListDetailRow(item, state.settings.displayMode)
                                 }
                                 SpacerDivider(start = 16.dp, end = 16.dp)
                             }

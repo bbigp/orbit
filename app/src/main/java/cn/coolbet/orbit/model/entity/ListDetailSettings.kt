@@ -18,7 +18,7 @@ data class LDSettings(
     @ColumnInfo("sort_order") val sortOrder: LDSort = LDSort.PublishedAt,  //sortDirection
     @ColumnInfo("unread_only") val unreadOnly: Boolean = false,
     @ColumnInfo("show_group_title") val showGroupTitle: Boolean = false,
-    @ColumnInfo("hide_globally") val hideGlobally: Boolean = false,
+    @ColumnInfo("hide_globally") val hideGlobally: Boolean = false, //todo:  这个可能不对
     @ColumnInfo(name = "created_at", defaultValue = "0") val createdAt: Long = Date().time,
     @ColumnInfo(name = "changed_at", defaultValue = "0") val changedAt: Long = Date().time
 ) : Parcelable {

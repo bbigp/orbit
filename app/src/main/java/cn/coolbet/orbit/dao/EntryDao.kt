@@ -11,6 +11,7 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import cn.coolbet.orbit.manager.ListDetailQuery
 import cn.coolbet.orbit.model.OrderCreatedAt
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
@@ -28,15 +29,21 @@ import java.util.Date
 @Dao
 abstract class EntryDao(protected val db: AppDatabase) {
 
-    suspend fun getEntries(page: Int, size: Int, meta: Meta, search: String = ""): List<Entry> {
+    suspend fun getEntries(page: Int, size: Int, query: ListDetailQuery): List<Entry> {
+        val meta = query.meta
+        val statuses = if (query.settings.unreadOnly) {
+            listOf(EntryStatus.UNREAD)
+        } else {
+            listOf(EntryStatus.UNREAD, EntryStatus.READ)
+        }
         val whereClause = buildQuery(
             feedIds = meta.feedIds,
-            statuses = meta.statuses,
+            statuses = statuses,
             recentPubTime = meta.recentPubTime,
             recentAddTime = meta.recentAddTime,
-            search = search,
+            search = query.search,
         ).joinToString(separator = " and ")
-        val orderByColumn = meta.settings.sortOrder.value
+        val orderByColumn = query.settings.sortOrder.value
         val direction = "desc"
         val ordering = when (direction.lowercase()) {
             "asc" -> "asc"

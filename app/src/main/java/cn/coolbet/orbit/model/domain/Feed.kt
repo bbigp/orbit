@@ -19,7 +19,6 @@ data class Feed(
     override val iconURL: String = "",
 
     val folder: Folder = Folder.EMPTY,
-    override val settings: LDSettings = LDSettings.defaultSettings
 ) : Meta {
 
     // 在 Kotlin 中可以作为 companion object 的常量或 object 实例
