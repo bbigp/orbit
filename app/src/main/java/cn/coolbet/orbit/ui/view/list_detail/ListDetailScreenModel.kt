@@ -17,7 +17,9 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.replace
 import cn.coolbet.orbit.model.entity.DisplayMode
+import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.model.entity.LDSort
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -79,13 +81,29 @@ class ListDetailScreenModel @AssistedInject constructor(
         }
     }
 
-    fun changeDisplayMode(metaId: MetaId, displayMode: DisplayMode){
+    fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {
+        var unreadOnly: Boolean? = null
+        var sortOrder: LDSort? = null
+        var showGroupTitle: Boolean? = null
+        var displayMode: DisplayMode? = null
+        var autoReaderView: Boolean? = null
+        when(key) {
+            LDSettingKey.UnreadOnly -> unreadOnly = value as Boolean
+            LDSettingKey.SortOrder -> sortOrder = value as LDSort
+            LDSettingKey.ShowGroupTitle -> showGroupTitle = value as Boolean
+            LDSettingKey.DisPlayMode -> displayMode = value as DisplayMode
+            LDSettingKey.AutoReaderView -> autoReaderView = value as Boolean
+        }
         screenModelScope.launch {
-            ldSettingsDao.update(metaId, displayMode = displayMode)
-            mutableState.update {
-                it.copy(
-                    settings = it.settings.copy(displayMode = displayMode)
-                )
+            val updated = ldSettingsDao.update(
+                metaId, sortOrder = sortOrder, unreadOnly = unreadOnly,
+                showGroupTitle = showGroupTitle, displayMode = displayMode,
+                autoReaderView = autoReaderView,
+            )
+            if (unreadOnly != null) {
+                loadInitialData()
+            } else {
+                mutableState.update { it.copy(settings = updated) }
             }
         }
     }

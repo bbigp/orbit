@@ -89,7 +89,7 @@ data class ListDetailScreen(
         )
 
         CompositionLocalProvider(
-            LocalChangeDisplayMode provides model::changeDisplayMode
+            LocalChangeLDSettings provides model::changeLDSettings,
         ) {
             ListDetailSettingSheet(
                 meta = state.meta,

@@ -20,13 +20,14 @@ import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.entity.DisplayMode
+import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.ui.kit.ObtCardView
 import cn.coolbet.orbit.ui.kit.ObtMagazineView
 import cn.coolbet.orbit.ui.kit.ObtTextOnlyView
 import cn.coolbet.orbit.ui.kit.ObtThreadView
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black95
-import cn.coolbet.orbit.ui.view.list_detail.LocalChangeDisplayMode
+import cn.coolbet.orbit.ui.view.list_detail.LocalChangeLDSettings
 
 
 @Composable
@@ -34,7 +35,7 @@ fun DisplayModePicker(
     metaId: MetaId,
     displayMode: DisplayMode = DisplayMode.Magazine
 ){
-    val changeDisplayMode = LocalChangeDisplayMode.current
+    val changeDisplayMode = LocalChangeLDSettings.current
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -47,7 +48,7 @@ fun DisplayModePicker(
                 displayMode = DisplayMode.Magazine,
                 modifier = Modifier.weight(1f)
                     .click {
-                        changeDisplayMode(metaId, DisplayMode.Magazine)
+                        changeDisplayMode(metaId, LDSettingKey.DisPlayMode, DisplayMode.Magazine)
                     }
             )
             DisplayModeItem(
@@ -55,7 +56,7 @@ fun DisplayModePicker(
                 displayMode = DisplayMode.TextOnly,
                 modifier = Modifier.weight(1f)
                     .click {
-                        changeDisplayMode(metaId, DisplayMode.TextOnly)
+                        changeDisplayMode(metaId, LDSettingKey.DisPlayMode, DisplayMode.TextOnly)
                     }
             )
         }
@@ -68,7 +69,7 @@ fun DisplayModePicker(
                 displayMode = DisplayMode.Thread,
                 modifier = Modifier.weight(1f)
                     .click {
-                        changeDisplayMode(metaId, DisplayMode.Thread)
+                        changeDisplayMode(metaId, LDSettingKey.DisPlayMode, DisplayMode.Thread)
                     }
             )
             DisplayModeItem(

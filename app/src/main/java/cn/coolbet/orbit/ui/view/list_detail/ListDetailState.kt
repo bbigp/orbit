@@ -6,11 +6,11 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
-import cn.coolbet.orbit.model.entity.DisplayMode
+import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSettings
 
 
-val LocalChangeDisplayMode = compositionLocalOf<(MetaId, DisplayMode) -> Unit> { { _, _ -> } }
+val LocalChangeLDSettings = compositionLocalOf<(MetaId, LDSettingKey, Any) -> Unit> { { _, _, _ -> } }
 
 data class ListDetailState(
     val meta: Meta = Feed.EMPTY,

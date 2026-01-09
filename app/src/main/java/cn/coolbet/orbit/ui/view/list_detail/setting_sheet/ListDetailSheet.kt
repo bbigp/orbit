@@ -36,6 +36,7 @@ import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.common.copyText
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
@@ -51,6 +52,7 @@ import cn.coolbet.orbit.ui.theme.ContainerSecondary
 import cn.coolbet.orbit.ui.theme.ObTheme
 import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.view.FeedIconDefaults
+import cn.coolbet.orbit.ui.view.list_detail.LocalChangeLDSettings
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +64,7 @@ fun ListDetailSettingSheet(
     onDismiss: () -> Unit,
 ){
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val changeLDSettings = LocalChangeLDSettings.current
     LaunchedEffect(showBottomSheet) {
         if (showBottomSheet) {
             sheetState.show()
@@ -117,13 +120,23 @@ fun ListDetailSettingSheet(
                             title = "Unread Only", icon = R.drawable.eyes,
                             checked = settings.unreadOnly,
                             onCheckedChange = { v->
+                                changeLDSettings(meta.metaId, LDSettingKey.UnreadOnly, v)
                             }
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
-                            title = "Group by Publication Date", icon = R.drawable.list_label,
+                            title = "日期分组", icon = R.drawable.list_label,
                             checked = settings.showGroupTitle,
                             onCheckedChange = { v->
+                                changeLDSettings(meta.metaId, LDSettingKey.ShowGroupTitle, v)
+                            }
+                        )
+                        SpacerDivider(start = 52.dp, end = 12.dp)
+                        ListTileSwitch(
+                            title = "Automatic Reader View", icon = R.drawable.book,
+                            checked = settings.autoReaderView,
+                            onCheckedChange = { v->
+                                changeLDSettings(meta.metaId, LDSettingKey.AutoReaderView, v)
                             }
                         )
                     }
