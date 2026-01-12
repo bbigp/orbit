@@ -41,7 +41,8 @@ fun PreviewObTopAppbar(){
         ObBackTopAppBar(
             title = {
                 Row(
-                    modifier = Modifier
+                    modifier = Modifier,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         "state.meta.title",
@@ -51,13 +52,13 @@ fun PreviewObTopAppbar(){
                     Box(
                         modifier = Modifier.padding(start = 8.dp)
 //                                    .clip(RoundedCornerShape(20.dp))
-                            .background(Black04, shape = RoundedCornerShape(20.dp))
+                            .background(Black04, shape = RoundedCornerShape(99.dp))
                     ) {
                         Text(
                             "99+",
                             maxLines = 1,
                             style = AppTypography.M13B25,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 1.dp)
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                         )
                     }
                 }

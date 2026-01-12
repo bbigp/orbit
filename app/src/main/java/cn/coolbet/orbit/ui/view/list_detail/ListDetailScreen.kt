@@ -154,8 +154,8 @@ data class ListDetailScreen(
                             )
                             if (unreadMark == UnreadMark.NUMBER) {
                                 Box(
-                                    modifier = Modifier.padding(start = 4.dp)
-                                        .background(Black08, shape = RoundedCornerShape(99.dp))
+                                    modifier = Modifier.padding(start = 8.dp)
+                                        .background(Black08, shape = RoundedCornerShape(20.dp))
                                 ) {
                                     Text(
                                         (unreadCountMap[metaId.toString()] ?: 0).toBadgeText,
