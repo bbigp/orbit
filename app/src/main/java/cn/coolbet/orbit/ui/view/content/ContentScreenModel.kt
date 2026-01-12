@@ -6,6 +6,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.manager.EntryManager
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.LocalDataManager
@@ -105,7 +106,7 @@ class ContentScreenModel @AssistedInject constructor(
                 ContentState(
                     entry = entry,
                     readerView = entry.readableContent.isNotEmpty(),
-                    readingModeEnabled = entry.readableContent.isEmpty() && session.user.autoReaderView,
+                    readingModeEnabled = entry.readableContent.isEmpty() && true,
                     isLoadingReadableContent = false,
                     index = currentIndex
                 )
@@ -177,7 +178,7 @@ class ContentScreenModel @AssistedInject constructor(
     }
 
     fun autoRead() {
-        if (!session.user.autoRead) {
+        if (!Env.settings.autoRead.value) {
             return
         }
         val entry = state.value.entry
