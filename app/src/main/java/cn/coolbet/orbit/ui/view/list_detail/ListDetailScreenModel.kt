@@ -100,10 +100,9 @@ class ListDetailScreenModel @AssistedInject constructor(
                 showGroupTitle = showGroupTitle, displayMode = displayMode,
                 autoReaderView = autoReaderView,
             )
+            mutableState.update { it.copy(settings = updated) }
             if (unreadOnly != null) {
                 loadInitialData()
-            } else {
-                mutableState.update { it.copy(settings = updated) }
             }
         }
     }
