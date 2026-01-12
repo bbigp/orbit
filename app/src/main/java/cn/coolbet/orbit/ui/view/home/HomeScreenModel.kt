@@ -4,6 +4,7 @@ import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
@@ -31,18 +32,17 @@ class HomeScreenModel @Inject constructor(
 
     init {
         Log.d("HomeViewModel", "ViewModel initialized.")
-        combine(cacheStore.feedsState, cacheStore.foldersState, userState) { feeds, folders, user ->
-            CacheData(feeds, folders, user)  //Pair Triple
+        combine(cacheStore.feedsState, cacheStore.foldersState, Env.settings.rootFolder.state) { feeds, folders, rootFolderId ->
+            CacheData(feeds, folders, rootFolderId)  //Pair Triple
         }
         .onStart {
             _uiState.update { it.copy(isLoading = true) }
         }
-        .onEach { (feeds, folders, user) ->
-            val rootFolder = user.rootFolder
+        .onEach { (feeds, folders, rootFolderId) ->
             _uiState.update { it ->
                 it.copy(isLoading = false,
-                    feeds = feeds.asSequence().filter { it.folderId == rootFolder }.toList(),
-                    folders = folders.asSequence().filter { it.id != rootFolder }.toList()
+                    feeds = feeds.asSequence().filter { it.folderId == rootFolderId }.toList(),
+                    folders = folders.asSequence().filter { it.id != rootFolderId }.toList()
                 )
             }
         }
@@ -68,7 +68,7 @@ class HomeScreenModel @Inject constructor(
 data class CacheData(
     val feeds: List<Feed>,
     val folders: List<Folder>,
-    val user: User
+    val rootFolderId: Long
 )
 
 data class HomeScreenState (
