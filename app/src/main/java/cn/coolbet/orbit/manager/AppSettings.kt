@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.core.graphics.toColorInt
+import cn.coolbet.orbit.model.domain.OpenContentWith
+import cn.coolbet.orbit.model.domain.UnreadMark
 
 //val appSettings = remember { AppSettings(context) } // 使用 remember 确保不会在重组时重复创建实例
 //var articleBgColor by remember { mutableStateOf(appSettings.articleBgColor) }
@@ -25,6 +27,10 @@ class AppSettings(context: Context) {
     val articleBgColor = PreferenceItem(prefs, "article_bg_color", "#FFFFFFFF")
     val articleFontSize = PreferenceItem(prefs, "article_font_size", 15)
     val articleFontFamily = PreferenceItem(prefs, "article_font_family", "DM Sans")
+    val unreadMark = PreferenceItem(prefs, "unread_mark", UnreadMark.NUMBER.value)
+    val openContentWith = PreferenceItem(prefs, "open_content_with", OpenContentWith.READER_VIEW.value)
+    val rootFolder = PreferenceItem<Long>(prefs, "root_folder", 1L)
+    val autoRead = PreferenceItem(prefs, "auto_read", false)
 //    var articleBgColor: String by SharedPrefsDelegate(prefs, "", "")
 
 }
@@ -34,6 +40,29 @@ var PreferenceItem<String>.colorValue: Color
     set(color) {
         value = String.format("#%08X", (0xFFFFFFFFL and color.toArgb().toLong()))
     }
+
+//var PreferenceItem<String>.unreadMark: UnreadMark
+//    get() = UnreadMark.fromValue(value)
+//    set(mark) {
+//        value = mark.value
+//    }
+
+@Composable
+fun PreferenceItem<String>.asUnreadMarkState(): androidx.compose.runtime.State<UnreadMark> {
+    val state = this.asState()
+    return remember {
+        derivedStateOf { UnreadMark.fromValue(state.value) }
+    }
+}
+
+@Composable
+fun PreferenceItem<String>.asOpenContentState(): androidx.compose.runtime.State<OpenContentWith> {
+    val state = this.asState()
+    return remember {
+        derivedStateOf { OpenContentWith.fromValue(state.value) }
+    }
+}
+
 
 @Composable
 fun PreferenceItem<String>.asColorState(): androidx.compose.runtime.State<Color> {
@@ -83,6 +112,7 @@ class PreferenceItem<T>(
         is String -> prefs.getString(key, defaultValue) as T
         is Boolean -> prefs.getBoolean(key, defaultValue) as T
         is Int -> prefs.getInt(key, defaultValue) as T
+        is Long -> prefs.getLong(key, defaultValue) as T
         else -> defaultValue
     }
 
@@ -91,6 +121,7 @@ class PreferenceItem<T>(
             is String -> putString(key, value)
             is Boolean -> putBoolean(key, value)
             is Int -> putInt(key, value)
+            is Long -> putLong(key, value)
         }
     }
 

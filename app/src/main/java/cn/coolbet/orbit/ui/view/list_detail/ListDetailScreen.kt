@@ -1,16 +1,21 @@
 package cn.coolbet.orbit.ui.view.list_detail
 
+import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -27,14 +32,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
-import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.common.toBadgeText
+import cn.coolbet.orbit.manager.Env
+import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
@@ -43,8 +52,9 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.SpacerDivider
-import cn.coolbet.orbit.ui.view.content.QueryContext
-import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
+import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.Black04
+import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
 import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.EntryTopTileSkeleton
@@ -66,6 +76,7 @@ data class ListDetailScreen(
 
     val screenName: String get() = this::class.simpleName ?: ""
 
+    @SuppressLint("FrequentlyChangingValue")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
@@ -74,6 +85,8 @@ data class ListDetailScreen(
         }
         val state by model.state.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()
+        val unreadCountMap by unreadState
+        val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
         val listState = rememberLazyListState()
         val pullState = rememberPullToRefreshState()
         val context = LocalContext.current
@@ -82,8 +95,22 @@ data class ListDetailScreen(
         val flyDistancePx = with(density) { 80.dp.toPx() }
         val progress by remember {
             derivedStateOf {
-                if (listState.firstVisibleItemIndex > 0) 1f
-                else (listState.firstVisibleItemScrollOffset / flyDistancePx).coerceIn(0f, 1f)
+                val firstIndex = listState.firstVisibleItemIndex
+                val firstOffset = listState.firstVisibleItemScrollOffset
+
+                when {
+                    firstIndex <= 1 && firstOffset <= 0 -> 0f
+                    firstIndex > 1 -> 1f
+                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
+
+                    //因为第一项是 RefreshIndicatorItem 所以listState.firstVisibleItemIndex 必须从1开始算
+//                    // 明确：如果是第 0 项且位移为 0，进度必须是 0
+//                    firstIndex == 0 && firstOffset <= 0 -> 0f
+//                    // 如果已经滚过第一项了，进度必须是 1
+//                    firstIndex > 0 -> 1f
+//                    // 在第一项内部滚动时的计算
+//                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
+                }
             }
         }
 
@@ -113,6 +140,33 @@ data class ListDetailScreen(
         Scaffold(
             topBar = {
                 ObBackTopAppBar(
+                    title = {
+                        Row(
+                            modifier = Modifier.graphicsLayer {
+                                alpha = progress
+                            },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                state.meta.title,
+                                maxLines = 1,
+                                style = AppTypography.M17
+                            )
+                            if (unreadMark == UnreadMark.NUMBER) {
+                                Box(
+                                    modifier = Modifier.padding(start = 4.dp)
+                                        .background(Black08, shape = RoundedCornerShape(99.dp))
+                                ) {
+                                    Text(
+                                        (unreadCountMap[metaId.toString()] ?: 0).toBadgeText,
+                                        maxLines = 1,
+                                        style = AppTypography.M13B25,
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                    )
+                                }
+                            }
+                        }
+                    },
                     actions = {
                         ObIconGroup {
                             ObIcon(
@@ -165,7 +219,7 @@ data class ListDetailScreen(
                         }
                     } else {
                         item(key = "entry-top-tile") {
-                            EntryTopTile(state.meta, modifier = Modifier.graphicsLayer { alpha = 1f - progress })
+                            EntryTopTile(state.meta, modifier = Modifier.graphicsLayer { alpha = 1 - progress })
                         }
                         if (state.items.isEmpty()) {
                             item(key = "no-content-yet") {

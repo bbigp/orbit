@@ -15,8 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import cn.coolbet.orbit.common.toBadgeText
+import cn.coolbet.orbit.manager.Env
+import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.DashedDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
@@ -28,6 +32,7 @@ fun EntryTopTile(
     modifier: Modifier = Modifier
 ) {
     val unreadState = LocalUnreadState.current
+    val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
     val unreadMap by unreadState
     val count = unreadMap[meta.metaId.toString()] ?: 0
     Column(
@@ -40,10 +45,10 @@ fun EntryTopTile(
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             style = AppTypography.M28
         ) //8 + 34 + 4 + 13 + 16 + 2
-        if (count > 0) {
+        if (unreadMark == UnreadMark.NUMBER && count > 0) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "${if (count > 999) "999+" else count}未读",
+                "${count.toBadgeText}未读",
                 modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 style = AppTypography.M11B25

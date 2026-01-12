@@ -125,7 +125,7 @@ fun ListDetailSettingSheet(
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
-                            title = "日期分组", icon = R.drawable.list_label,
+                            title = "Group by Date", icon = R.drawable.list_label,
                             checked = settings.showGroupTitle,
                             onCheckedChange = { v->
                                 changeLDSettings(meta.metaId, LDSettingKey.ShowGroupTitle, v)

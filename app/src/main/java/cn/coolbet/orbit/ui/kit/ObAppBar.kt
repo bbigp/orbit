@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -23,16 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.ObTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,7 +38,31 @@ import cn.coolbet.orbit.ui.theme.ObTheme
 @Composable
 fun PreviewObTopAppbar(){
     Column {
-        ObBackTopAppBar()
+        ObBackTopAppBar(
+            title = {
+                Row(
+                    modifier = Modifier
+                ) {
+                    Text(
+                        "state.meta.title",
+                        maxLines = 1,
+                        style = AppTypography.M17,
+                    )
+                    Box(
+                        modifier = Modifier.padding(start = 8.dp)
+//                                    .clip(RoundedCornerShape(20.dp))
+                            .background(Black04, shape = RoundedCornerShape(20.dp))
+                    ) {
+                        Text(
+                            "99+",
+                            maxLines = 1,
+                            style = AppTypography.M13B25,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 1.dp)
+                        )
+                    }
+                }
+            },
+        )
         Row {
             Text("标题", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
         }
@@ -75,7 +97,7 @@ fun PreviewObTopAppbar(){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ObTopAppbar(
-    title: String = "",
+    title: @Composable () -> Unit = {},
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     background: Color = ObTheme.colors.primaryContainer,
@@ -93,29 +115,31 @@ fun ObTopAppbar(
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(modifier = Modifier.weight(1f)) { navigationIcon() }
-            Spacer(modifier = Modifier.weight(1f))
+            navigationIcon()
+            Spacer(modifier = Modifier.width(16.dp))
+            title()
+            Spacer(modifier = Modifier.width(12.dp))
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterEnd,
             ) { Row { actions() } }
         }
-        if (title != "") {
-            Text(
-                text = title, style = AppTypography.M17,
-                modifier = Modifier.align(Alignment.Center).fillMaxWidth()
-                    .padding(horizontal = ((LocalConfiguration.current.screenWidthDp + 24) / 3).dp),
-                textAlign = TextAlign.Center,
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-            )
-        }
+//        if (title != "") {
+//            Text(
+//                text = title, style = AppTypography.M17,
+//                modifier = Modifier.align(Alignment.Center).fillMaxWidth()
+//                    .padding(horizontal = ((LocalConfiguration.current.screenWidthDp + 24) / 3).dp),
+//                textAlign = TextAlign.Center,
+//                maxLines = 1, overflow = TextOverflow.Ellipsis,
+//            )
+//        }
     }
 }
 
 
 @Composable
 fun ObBackTopAppBar(
-    title: String = "",
+    title: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     background: Color = ObTheme.colors.primaryContainer,
 ) {

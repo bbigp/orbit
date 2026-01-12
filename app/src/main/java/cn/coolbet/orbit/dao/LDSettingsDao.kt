@@ -23,7 +23,7 @@ abstract class LDSettingsDao {
     abstract suspend fun get(metaId: String): LDSettings?
 
     @Transaction
-    suspend fun update(
+    open suspend fun update(
         metaId: MetaId,
         displayMode: DisplayMode? = null,
         unreadOnly: Boolean? = null,
@@ -34,6 +34,7 @@ abstract class LDSettingsDao {
         val existing = get(metaId.toString())
         if (existing != null) {
             val updated = existing.copy(
+                metaId = metaId.toString(),
                 displayMode = displayMode ?: existing.displayMode,
                 unreadOnly = unreadOnly ?: existing.unreadOnly,
                 sortOrder = sortOrder ?: existing.sortOrder,
@@ -44,6 +45,7 @@ abstract class LDSettingsDao {
             return updated
         }
         val newSettings = LDSettings.defaultSettings.copy(
+            metaId = metaId.toString(),
             displayMode = displayMode ?: DisplayMode.Magazine,
             unreadOnly = unreadOnly ?: false,
             sortOrder = sortOrder ?: LDSort.PublishedAt,

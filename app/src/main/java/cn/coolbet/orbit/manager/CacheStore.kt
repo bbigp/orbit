@@ -79,6 +79,10 @@ class CacheStore @Inject constructor(
         }
     }
 
+    fun folder(id: Long): Folder {
+        return _folders.value.find { it.id == id } ?: Folder.EMPTY
+    }
+
     fun flowFolder(id: Long): Flow<Folder> {
         return _folders.map { folders ->
             folders.find { it.id == id } ?: Folder.EMPTY
