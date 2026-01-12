@@ -61,7 +61,6 @@ object ProfileScreen: Screen {
             selectedValue = rootFolderId,
             onValueChange = { id ->
                 Env.settings.rootFolder.value = id
-                model.refreshRootFolder()
                 showFolderPicker = false
             }
         )

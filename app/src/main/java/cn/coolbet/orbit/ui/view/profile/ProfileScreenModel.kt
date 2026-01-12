@@ -12,9 +12,10 @@ import cn.coolbet.orbit.model.domain.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,24 +32,23 @@ class ProfileScreenModel @Inject constructor(
     val folders = store.foldersState
 
     init {
-        session.state
-            .filter { it.isNotEmpty }
-            .map { user ->
-                _state.update { it.copy(user = user) }
+        combine(session.state, Env.settings.rootFolder.state) { user, rootFolderId ->
+            Pair(user, rootFolderId)
+        }.onStart {
+            _state.update { it.copy(isLoading = true) }
+        }.onEach { (user, rootFolderId) ->
+            _state.update {
+                it.copy(
+                    isLoading = false, user = user,
+                    rootFolder = store.folder(rootFolderId)
+                )
             }
-            .launchIn(screenModelScope)
-        refreshRootFolder()
+        }.launchIn(screenModelScope)
     }
 
     fun logout() {
         session.endSession()
         NavigatorBus.replaceAll(Route.Login)
-    }
-
-    fun refreshRootFolder() {
-        _state.update {
-            it.copy(rootFolder = store.folder(Env.settings.rootFolder.value))
-        }
     }
 
     fun deleteLocalData() {

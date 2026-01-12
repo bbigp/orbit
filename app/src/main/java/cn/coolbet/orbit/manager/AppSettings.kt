@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.core.graphics.toColorInt
 import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.domain.UnreadMark
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 //val appSettings = remember { AppSettings(context) } // 使用 remember 确保不会在重组时重复创建实例
 //var articleBgColor by remember { mutableStateOf(appSettings.articleBgColor) }
@@ -106,6 +108,8 @@ class PreferenceItem<T>(
 
     @Composable
     fun asState() = _state.collectAsState()
+
+    val state: StateFlow<T> = _state.asStateFlow()
 
     @Suppress("UNCHECKED_CAST")
     private fun readFromPrefs(): T = when (defaultValue) {
