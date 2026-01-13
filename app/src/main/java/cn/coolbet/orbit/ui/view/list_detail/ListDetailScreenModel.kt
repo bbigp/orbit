@@ -9,29 +9,20 @@ import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
-import cn.coolbet.orbit.manager.ListDetailQuery
 import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
-import cn.coolbet.orbit.model.domain.replace
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
-import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.model.entity.LDSort
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.indexOfFirst
-import kotlin.collections.toMutableList
 
 class ListDetailScreenModel @AssistedInject constructor(
     @Assisted private val metaId: MetaId,
@@ -39,7 +30,7 @@ class ListDetailScreenModel @AssistedInject constructor(
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
     private val ldSettingsDao: LDSettingsDao,
-    navigatorState: NavigatorState,
+    private val navigatorState: NavigatorState,
 ): ScreenModel {
 
     @AssistedFactory
@@ -47,39 +38,13 @@ class ListDetailScreenModel @AssistedInject constructor(
         fun create(metaId: MetaId): ListDetailScreenModel
     }
 
-    val mutableState = navigatorState.entriesUi
-    val state = mutableState.asStateFlow()
+    val state = navigatorState.state.asStateFlow()
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
     init {
         loadInitialData()
-        eventBus
-            .subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
-                replace(event.entry)
-            }
-            .subscribe<Evt.EntryStatusUpdated>(screenModelScope) { event ->
-                mutableState.update { value ->
-                    val index = value.items.indexOfFirst { it.id == event.entryId }
-                    if (index == -1) {
-                        return@update value
-                    }
-                    val newItems = value.items.toMutableList().apply {
-                        this[index] = this[index].copy(status = event.status)
-                    }
-                    return@update value.copy(items = newItems)
-                }
-            }
     }
 
-    fun replace(entry: Entry) {
-        mutableState.update { currentState ->
-            val updatedItems = currentState.items.replace(entry)
-            if (updatedItems == currentState.items) {
-                return@update currentState
-            }
-            return@update currentState.copy(items = updatedItems)
-        }
-    }
 
     fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {
         var unreadOnly: Boolean? = null
@@ -100,62 +65,21 @@ class ListDetailScreenModel @AssistedInject constructor(
                 showGroupTitle = showGroupTitle, displayMode = displayMode,
                 autoReaderView = autoReaderView,
             )
-            mutableState.update { it.copy(settings = updated) }
             if (unreadOnly != null) {
-                loadInitialData()
+                navigatorState.initData(metaId = metaId, settings = updated)
+            } else {
+                navigatorState.state.update { it.copy(settings = updated) }
             }
         }
     }
 
 
     fun loadInitialData() {
-        val value = state.value
-        if (value.isRefreshing) return
-        mutableState.update { it.copy(isRefreshing = true) }
-        val metaDataFlow: Flow<Meta> = when {
-            metaId.isFeed -> cacheStore.flowFeed(metaId.id)
-            metaId.isFolder -> cacheStore.flowFolder(metaId.id)
-            else -> {
-                throw IllegalStateException("MetaId type is neither Feed nor Folder.")
-            }
-        }
-        screenModelScope.launch {
-            delay(500)
-            try {
-                val meta = metaDataFlow.first()
-                val settings = ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
-                val newData = entryManager.getPage(
-                    query = ListDetailQuery(meta = meta, settings = settings),
-                    page = 1,
-                    size = value.size
-                )
-                mutableState.update {
-                    it.copy(settings = settings).addItems(newData, reset = true, meta)
-                }
-            } catch (e: Exception) {
-                mutableState.update { it.copy(isRefreshing = false) }
-            }
-        }
+        navigatorState.initData(scope = screenModelScope, metaId = metaId)
     }
 
     fun nextPage() {
-        screenModelScope.launch {
-            if (!state.value.hasMore) return@launch
-            if (state.value.isLoadingMore) return@launch
-            mutableState.update { it.copy(isLoadingMore = true) }
-            try {
-                val newData = entryManager.getPage(
-                    query = ListDetailQuery(meta = state.value.meta, settings = state.value.settings),
-                    page = state.value.page + 1,
-                    size = state.value.size
-                )
-                delay(200)
-                mutableState.update { it.addItems(newData) }
-            } catch (e: Exception) {
-                mutableState.update { it.copy(isLoadingMore = false) }
-                Log.e("BasePagingScreenModel", "加载数据出错.", e)
-            }
-        }
+        navigatorState.loadMore(scope = screenModelScope)
     }
 
     fun toggleReadStatus(entry: Entry) {
@@ -168,9 +92,9 @@ class ListDetailScreenModel @AssistedInject constructor(
         ))
     }
 
-    fun onDispose(screenName: String) {
+    fun dispose() {
         Log.i("entries", "clear state")
-        eventBus.post(Evt.ScreenDisposeRequest(screenName))
+        navigatorState.dispose()
     }
 
 }

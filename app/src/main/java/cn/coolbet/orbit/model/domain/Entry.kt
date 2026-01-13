@@ -6,7 +6,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import cn.coolbet.orbit.common.HTMLProcessingHelper
 import cn.coolbet.orbit.common.hasHtmlTags
 import cn.coolbet.orbit.common.splitHtml
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -74,14 +73,17 @@ data class Entry(
 }
 
 
-fun List<Entry>.replace(newItem: Entry): List<Entry> {
-    val index = this.indexOfFirst { it.id == newItem.id }
 
-    if (index == -1) {
-        return this
-    }
+/**
+ * 通用的列表元素更新函数
+ * @param id 目标元素的 ID
+ * @param transform 定义如何将旧元素转换为新元素
+ */
+fun List<Entry>.update(id: Long, transform: (Entry) -> Entry): List<Entry> {
+    val index = this.indexOfFirst { it.id == id }
+    if (index == -1) return this
+
     return this.toMutableList().apply {
-        this[index] = newItem
+        this[index] = transform(this[index])
     }
-    // 注意：toList() 隐式地在返回时创建了不可变列表
 }

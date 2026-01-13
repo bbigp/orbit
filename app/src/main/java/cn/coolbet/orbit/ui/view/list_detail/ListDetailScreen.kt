@@ -39,6 +39,7 @@ import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
+import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.common.toBadgeText
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.asUnreadMarkState
@@ -73,8 +74,6 @@ import kotlinx.parcelize.Parcelize
 data class ListDetailScreen(
     val metaId: MetaId,
 ): Screen, Parcelable {
-
-    val screenName: String get() = this::class.simpleName ?: ""
 
     @SuppressLint("FrequentlyChangingValue")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -115,7 +114,7 @@ data class ListDetailScreen(
         }
 
         DisposableEffect(Unit) {
-            onDispose { model.onDispose(screenName) }
+            onDispose { model.dispose() }
         }
 
         InfiniteScrollHandler(
@@ -246,7 +245,9 @@ data class ListDetailScreen(
                                     ),
                                     leftSwipeState = NoneStateDefinition
                                 ) {
-                                    ListDetailRow(item, state.settings.displayMode)
+                                    ListDetailRow(item, state.settings.displayMode, modifier = Modifier.click {
+                                        NavigatorBus.push(Route.Entry(entry = item))
+                                    })
                                 }
                                 SpacerDivider(start = 16.dp, end = 16.dp)
                             }
