@@ -41,7 +41,6 @@ import cn.coolbet.orbit.ui.view.content.setting.ContentDisplaySettingSheet
 @Composable
 fun ContentOperate(
     state: ContentState,
-    queryContext: QueryContext,
     modifier: Modifier = Modifier
 ) {
     val changeReaderView = LocalChangeReaderView.current
@@ -91,7 +90,7 @@ fun ContentOperate(
                 modifier = Modifier.clickable {
                     val entry = nextEntry()
                     if (entry == null)return@clickable
-                    NavigatorBus.replace(Route.Entry(entry, queryContext))
+                    NavigatorBus.replace(Route.Entry(entry))
                 }
             )
             Box{

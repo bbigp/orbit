@@ -12,21 +12,17 @@ import cn.coolbet.orbit.manager.Evt
 import cn.coolbet.orbit.manager.LocalDataManager
 import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.manager.Session
+import cn.coolbet.orbit.manager.total
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import cn.coolbet.orbit.ui.view.list_detail.addItems
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.collections.plus
 
 class ContentScreenModel @AssistedInject constructor(
-    @Assisted private val queryContext: QueryContext,
     private val entryDao: EntryDao,
     private val localDataManager: LocalDataManager,
     private val session: Session,
@@ -35,80 +31,25 @@ class ContentScreenModel @AssistedInject constructor(
     private val entryManager: EntryManager,
 ): ScreenModel {
 
-    @AssistedFactory
-    interface Factory: ScreenModelFactory {
-        fun create(queryContext: QueryContext): ContentScreenModel
-    }
-
     private val mutableState = MutableStateFlow(ContentState())
     val state: StateFlow<ContentState> = mutableState.asStateFlow()
+    val entryStateValue = navigatorState.state.value
 
-    private val accessor: PagingStateAccessor
-        get() = when (queryContext.page) {
-            "normal" -> object : PagingStateAccessor {
-                override val items: List<Entry>
-                    get() = navigatorState.entriesUi.value.items
-                override val total: Int
-                    get() = navigatorState.entriesUi.value.items.size
-                override val hasMore: Boolean
-                    get() = navigatorState.entriesUi.value.hasMore
-                override suspend fun nextPage() {
-                    val data = navigatorState.entriesUi.value
-                    val list = entryManager.getPage(data.meta, page = data.page + 1, size = data.size)
-                    navigatorState.entriesUi.update { it.addItems(list) }
-                }
-                override fun indexOfFirst(item: Entry): Int {
-                    return navigatorState.entriesUi.value.items.indexOfFirst { it.id == item.id }
-                }
-                override fun entry(id: Long): Entry? {
-                    return navigatorState.entriesUi.value.items.find { it.id == id }
-                }
-            }
-            "search" -> object : PagingStateAccessor {
-                override val items: List<Entry>
-                    get() = navigatorState.searchUi.value.items
-                override val total: Int
-                    get() = navigatorState.searchUi.value.items.size
-                override val hasMore: Boolean
-                    get() = navigatorState.searchUi.value.hasMore
-                override suspend fun nextPage() {
-                    val data = navigatorState.searchUi.value
-                    val page = data.page + 1
-                    val items = entryManager.getPage(data.meta, page, data.size,
-                        data.search
-                    )
-                    navigatorState.searchUi.update {
-                        it.copy(
-                            page = page, items = it.items + items,
-                            hasMore = items.size >= it.size
-                        )
-                    }
-                }
-                override fun indexOfFirst(item: Entry): Int {
-                    return navigatorState.searchUi.value.items.indexOfFirst { it.id == item.id }
-                }
-                override fun entry(id: Long): Entry? {
-                    return navigatorState.searchUi.value.items.find { it.id == id }
-                }
-            }
-            else -> throw IllegalStateException("Unknown page context: ${queryContext.page}")
-        }
-
-    fun loadData(entry: Entry, index: Int? = null) {
+    fun loadData(entry: Entry) {
         screenModelScope.launch {
-            val currentIndex = index ?: accessor.indexOfFirst(entry)
-            if (currentIndex != -1 && currentIndex == accessor.total - 1 && accessor.hasMore) { //最后一个 加载数据
-                accessor.nextPage()
-                Log.i("nextEntry", "数据加载完成, 当前 $currentIndex  总共: ${accessor.total} ")
+            val index = entryStateValue.items.indexOfFirst { it.id == entry.id }
+            if (index != -1 && index == entryStateValue.total() - 1 && entryStateValue.hasMore) { //最后一个 加载数据
+                navigatorState.loadMore()
+                Log.i("nextEntry", "数据加载完成, 当前 $index  总共: ${entryStateValue.total()} ")
             }
-            Log.i("entry-load-data", "entry index: $currentIndex")
+            Log.i("entry-load-data", "entry index: $index")
             mutableState.update {
                 ContentState(
                     entry = entry,
                     readerView = entry.readableContent.isNotEmpty(),
                     readingModeEnabled = entry.readableContent.isEmpty() && true,
                     isLoadingReadableContent = false,
-                    index = currentIndex
+                    index = index
                 )
             }
             autoRead()
@@ -137,11 +78,11 @@ class ContentScreenModel @AssistedInject constructor(
 
     fun nextEntry(): Entry? {
         val currentIndex = state.value.index
-        val total = accessor.total
+        val total = entryStateValue.total()
         Log.i("nextEntry", "当前 $currentIndex  总共: $total ")
         if (total == 0 || currentIndex < 0) return null
         if (currentIndex == total - 1) return null//最后一个元素
-        return accessor.items[currentIndex + 1]
+        return entryStateValue.items[currentIndex + 1]
     }
 
     fun startLoading() {
@@ -154,7 +95,7 @@ class ContentScreenModel @AssistedInject constructor(
         }
         screenModelScope.launch {
             entryDao.updateReadingModeData(readableContent, leadImageURL, summary, id)
-            val entry = accessor.entry(id)
+            val entry = entryStateValue.items.find { it.id == id }
             if (entry == null) {
                 return@launch
             }

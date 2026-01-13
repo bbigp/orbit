@@ -32,14 +32,13 @@ data class SearchEntriesScreen(
     val meta: Meta,
 ): Screen, Parcelable {
 
-    val screenName: String get() = this::class.simpleName ?: ""
-
     @Composable
     override fun Content() {
         val model = getScreenModel<SearchEntriesScreenModel, SearchEntriesScreenModel.Factory> { factory ->
             factory.create(meta)
         }
         val state by model.state.collectAsState()
+        val entryState by model.entriesState.collectAsState()
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val listState = rememberLazyListState()
@@ -51,12 +50,12 @@ data class SearchEntriesScreen(
         }
 
         DisposableEffect(Unit) {
-            onDispose { model.onDispose(screenName) }
+            onDispose { model.dispose() }
         }
 
         InfiniteScrollHandler(
             listState = listState,
-            stateFlow = model.state,
+            stateFlow = model.entriesState,
             onLoadMore = {
                 model.nextPage()
             }
@@ -96,9 +95,9 @@ data class SearchEntriesScreen(
             }
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (state.page == 0) {
+                if (entryState.page == 0) {
                     if (state.histories.isEmpty()) {
-                        NoSearch("Search in ${state.meta.title}")
+                        NoSearch("Search in ${entryState.meta.title}")
                     } else {
                         SearchList(
                             state.histories,
@@ -107,8 +106,8 @@ data class SearchEntriesScreen(
                         )
                     }
                 } else {
-                    if (state.items.isNotEmpty()) {
-                        SearchResult(state, listState)
+                    if (entryState.items.isNotEmpty()) {
+                        SearchResult(entryState, listState)
                     } else {
                         NoSearch(hint = "No result found")
                     }

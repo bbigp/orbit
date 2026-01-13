@@ -10,7 +10,6 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreen
 import cn.coolbet.orbit.ui.view.content.ContentScreen
-import cn.coolbet.orbit.ui.view.content.QueryContext
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.profile.ProfileScreen
@@ -34,8 +33,8 @@ data class Route(val screen: Screen) {
         fun SearchEntries(meta: Meta) = Route(
             screen = SearchEntriesScreen(meta)
         )
-        fun Entry(entry: Entry, queryContext: QueryContext) = Route(
-            screen = ContentScreen(entry, queryContext)
+        fun Entry(entry: Entry) = Route(
+            screen = ContentScreen(entry)
         )
     }
 }

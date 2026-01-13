@@ -14,16 +14,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
+import cn.coolbet.orbit.manager.ListDetailState
 import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.view.content.QueryContext
 import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
 
 @Composable
 fun SearchResult(
-    state: SearchEntriesState,
+    state: ListDetailState,
     listState: LazyListState
 ) {
     LazyColumn(
@@ -41,12 +41,7 @@ fun SearchResult(
             LDMagazine(
                 item,
                 modifier = Modifier.clickable{
-                    NavigatorBus.push(
-                        Route.Entry(
-                            entry = item,
-                            queryContext = QueryContext.search
-                        )
-                    )
+                    NavigatorBus.push(Route.Entry(entry = item))
                 }
             )
             SpacerDivider(start = 16.dp, end = 16.dp)

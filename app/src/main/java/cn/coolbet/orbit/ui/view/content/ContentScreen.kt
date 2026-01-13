@@ -25,14 +25,11 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ContentScreen(
     val data: Entry,
-    val queryContext: QueryContext
 ): Screen, Parcelable {
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<ContentScreenModel, ContentScreenModel.Factory>{ factory ->
-            factory.create(queryContext)
-        }
+        val model = getScreenModel<ContentScreenModel>()
         val state by model.state.collectAsState()
         val bgColor by Env.settings.articleBgColor.asColorState()
 
@@ -49,7 +46,7 @@ data class ContentScreen(
             Scaffold(
                 containerColor = bgColor,
                 contentWindowInsets = WindowInsets(0, 0, 0,0 ),
-                bottomBar = { ContentOperate(state, queryContext) }
+                bottomBar = { ContentOperate(state) }
             ) { paddingValues ->
                 Box(
                     modifier = Modifier.padding(paddingValues)
