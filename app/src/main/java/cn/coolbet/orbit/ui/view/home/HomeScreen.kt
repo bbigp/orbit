@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
@@ -58,6 +59,10 @@ object HomeScreen: Screen {
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
         }
+        LaunchedEffect(Unit) {
+            model.clearListDetailPage()
+        }
+
         Scaffold (
             topBar = {
                 ObTopAppbar(

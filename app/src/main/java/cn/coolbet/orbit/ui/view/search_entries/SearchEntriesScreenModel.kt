@@ -36,10 +36,11 @@ class SearchEntriesScreenModel @AssistedInject constructor(
 
     private val mutableState = MutableStateFlow(SearchState())
     val state = mutableState.asStateFlow()
-    val entriesState = navigatorState.state.asStateFlow()
+    val entriesState = navigatorState.state
 
     init {
         loadSearchList()
+        navigatorState.saveState()
     }
 
     fun loadSearchList() {
@@ -82,11 +83,11 @@ class SearchEntriesScreenModel @AssistedInject constructor(
     }
 
     fun clearSearchResult() {
-        navigatorState.state.update { ListDetailState() }
+        navigatorState.internalState.update { ListDetailState() }
     }
 
     fun dispose() {
-        navigatorState.undo()
+        navigatorState.restoreState()
     }
 
 }

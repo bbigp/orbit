@@ -14,7 +14,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,9 +31,29 @@ class NavigatorState @Inject constructor(
     val ldSettingsDao: LDSettingsDao,
     val entryManager: EntryManager,
     val eventBus: EventBus,
+    appScope: CoroutineScope,
 ){
 
-    val state: MutableStateFlow<ListDetailState> = MutableStateFlow(ListDetailState())
+    // 原始的数据流
+    val internalState = MutableStateFlow(ListDetailState())
+
+    // 控制是否锁定的信号
+    private val isFrozen = MutableStateFlow(false)
+
+    // 暴露给 UI 的流：当 isFrozen 为 true 时，停止向下游发射新值
+    val state: StateFlow<ListDetailState> = internalState
+        .combine(isFrozen) { value, frozen -> value to frozen }
+        .scan(ListDetailState()) { lastEmitted, (currentReal, frozen) ->
+            // 如果处于锁定状态，拦截新数据，返回上一次发出的旧数据
+            if (frozen) lastEmitted else currentReal
+        }
+        .stateIn(
+            scope = appScope,
+            started = SharingStarted.Eagerly, // 立即启动
+            initialValue = ListDetailState()
+        )
+
+//    val state: MutableStateFlow<ListDetailState> = MutableStateFlow(ListDetailState())
     private var previousState: ListDetailState? = null
 
     fun initData(scope: CoroutineScope, metaId: MetaId, settings: LDSettings? = null, search: String = "") {
@@ -47,26 +72,33 @@ class NavigatorState @Inject constructor(
         scope.launch { loadMore() }
     }
 
-    fun undo() {
+    fun restoreState() {
+        isFrozen.value = true
         previousState?.let {
-            state.value = it
+            internalState.value = it
             previousState = null
         }
     }
 
+    fun saveState() {
+        previousState = state.value
+        internalState.update { ListDetailState() }
+    }
+
+    fun unfreeze() {
+        isFrozen.value = false
+    }
+
     fun dispose() {
-        state.update { ListDetailState() }
+        internalState.update { ListDetailState() }
         previousState = null
     }
 
 
     suspend fun initData(metaId: MetaId, settings: LDSettings? = null, search: String = "") {
-        if (search.isNotEmpty()) {
-            previousState = state.value
-        }
         val value = state.value
         if (value.isRefreshing) return
-        state.update { it.copy(isRefreshing = true) }
+        internalState.update { it.copy(isRefreshing = true) }
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -83,19 +115,19 @@ class NavigatorState @Inject constructor(
                 page = 1,
                 size = value.size
             )
-            state.update {
+            internalState.update {
                 it.copy(settings = ldSettings, search = search)
                     .addItems(newData, reset = true, meta)
             }
         } catch (e: Exception) {
-            state.update { it.copy(isRefreshing = false) }
+            internalState.update { it.copy(isRefreshing = false) }
         }
     }
 
     suspend fun loadMore() {
         if (!state.value.hasMore) return
         if (state.value.isLoadingMore) return
-        state.update { it.copy(isLoadingMore = true) }
+        internalState.update { it.copy(isLoadingMore = true) }
         try {
             val newData = entryManager.getPage(
                 query = ListDetailQuery(
@@ -107,15 +139,15 @@ class NavigatorState @Inject constructor(
                 size = state.value.size
             )
             delay(200)
-            state.update { it.addItems(newData) }
+            internalState.update { it.addItems(newData) }
         } catch (e: Exception) {
-            state.update { it.copy(isLoadingMore = false) }
+            internalState.update { it.copy(isLoadingMore = false) }
             Log.e("BasePagingScreenModel", "加载数据出错.", e)
         }
     }
 
     fun modifyEntries(id: Long, transform: (Entry) -> Entry) {
-        state.update { currentState ->
+        internalState.update { currentState ->
             val updatedItems = currentState.items.update(id, transform)
 
             if (updatedItems === currentState.items) {

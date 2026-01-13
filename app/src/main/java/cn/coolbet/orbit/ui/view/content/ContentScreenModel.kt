@@ -21,8 +21,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ContentScreenModel @AssistedInject constructor(
+class ContentScreenModel @Inject constructor(
     private val entryDao: EntryDao,
     private val localDataManager: LocalDataManager,
     private val session: Session,

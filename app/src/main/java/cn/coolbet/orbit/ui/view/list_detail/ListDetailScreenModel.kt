@@ -38,7 +38,7 @@ class ListDetailScreenModel @AssistedInject constructor(
         fun create(metaId: MetaId): ListDetailScreenModel
     }
 
-    val state = navigatorState.state.asStateFlow()
+    val state = navigatorState.state
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
     init {
@@ -68,7 +68,7 @@ class ListDetailScreenModel @AssistedInject constructor(
             if (unreadOnly != null) {
                 navigatorState.initData(metaId = metaId, settings = updated)
             } else {
-                navigatorState.state.update { it.copy(settings = updated) }
+                navigatorState.internalState.update { it.copy(settings = updated) }
             }
         }
     }
@@ -92,9 +92,9 @@ class ListDetailScreenModel @AssistedInject constructor(
         ))
     }
 
-    fun dispose() {
-        Log.i("entries", "clear state")
-        navigatorState.dispose()
+    fun unfreeze() {
+        Log.i("entries", "unfreeze")
+        navigatorState.unfreeze()
     }
 
 }

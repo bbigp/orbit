@@ -21,6 +21,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -113,8 +114,8 @@ data class ListDetailScreen(
             }
         }
 
-        DisposableEffect(Unit) {
-            onDispose { model.dispose() }
+        LaunchedEffect(Unit) {
+            model.unfreeze()
         }
 
         InfiniteScrollHandler(

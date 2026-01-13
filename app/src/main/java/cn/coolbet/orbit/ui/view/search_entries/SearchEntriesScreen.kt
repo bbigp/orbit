@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.search_entries
 
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Meta
@@ -42,6 +44,13 @@ data class SearchEntriesScreen(
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val listState = rememberLazyListState()
+        val navigator = LocalNavigator.current
+
+        val onBack: () -> Unit = {
+            model.dispose()
+            focusManager.clearFocus()
+            navigator?.pop()
+        }
 
         LaunchedEffect(Unit) {
 //            if (state.search.isEmpty()) {
@@ -49,9 +58,7 @@ data class SearchEntriesScreen(
 //            }
         }
 
-        DisposableEffect(Unit) {
-            onDispose { model.dispose() }
-        }
+        BackHandler(onBack = onBack)
 
         InfiniteScrollHandler(
             listState = listState,
@@ -71,9 +78,7 @@ data class SearchEntriesScreen(
                             "取消",
                             colors = OButtonDefaults.ghost,
                             sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 0.1.dp),
-                            onClick = {
-                                NavigatorBus.pop()
-                            }
+                            onClick = onBack
                         )
                     },
                     onValueChange = { v ->
