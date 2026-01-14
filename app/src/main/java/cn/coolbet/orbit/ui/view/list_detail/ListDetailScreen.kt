@@ -58,7 +58,7 @@ import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
-import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
+import cn.coolbet.orbit.ui.view.list_detail.item.LDHeader
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.EntryTopTileSkeleton
 import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.ListDetailSettingSheet
 import cn.coolbet.orbit.ui.view.list_detail.swipable.NoneStateDefinition
@@ -66,7 +66,7 @@ import cn.coolbet.orbit.ui.view.list_detail.swipable.ReadStateDefinition
 import cn.coolbet.orbit.ui.view.list_detail.swipable.SwipeWrapper
 import cn.coolbet.orbit.ui.view.list_detail.swipable.UnreadStateDefinition
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
-import cn.coolbet.orbit.ui.view.list_detail.item.ListDetailRow
+import cn.coolbet.orbit.ui.view.list_detail.item.LDRow
 import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.sync.RefreshIndicatorItem
 import kotlinx.parcelize.Parcelize
@@ -232,7 +232,7 @@ data class ListDetailScreen(
                         }
                     } else {
                         item(key = "entry-top-tile") {
-                            EntryTopTile(state.meta, modifier = Modifier.graphicsLayer { alpha = 1 - progress })
+                            LDHeader(state.meta, modifier = Modifier.graphicsLayer { alpha = 1 - progress })
                         }
                         if (state.items.isEmpty()) {
                             item(key = "no-content-yet") {
@@ -259,7 +259,7 @@ data class ListDetailScreen(
                                     ),
                                     leftSwipeState = NoneStateDefinition
                                 ) {
-                                    ListDetailRow(item, state.settings.displayMode, modifier = Modifier.click {
+                                    LDRow(item, state.settings.displayMode, modifier = Modifier.click {
                                         NavigatorBus.push(Route.Entry(entry = item))
                                     })
                                 }

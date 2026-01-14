@@ -30,6 +30,7 @@ fun ObAsyncImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop
 ) {
+    if (url.isEmpty()) return
     val context = LocalContext.current
     SubcomposeAsyncImage(
         model = ImageRequest.Builder(context)

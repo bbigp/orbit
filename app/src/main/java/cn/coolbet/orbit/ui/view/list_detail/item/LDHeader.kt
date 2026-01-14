@@ -27,7 +27,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 
 
 @Composable
-fun EntryTopTile(
+fun LDHeader(
     meta: Meta,
     modifier: Modifier = Modifier
 ) {
@@ -71,8 +71,8 @@ fun PreviewEntriesTopTile() {
         LocalUnreadState provides mutableStateOf(unreadMap)
     ) {
         Column {
-            EntryTopTile(meta)
-            EntryTopTile(meta.copy(id = 1))
+            LDHeader(meta)
+            LDHeader(meta.copy(id = 1))
         }
     }
 }

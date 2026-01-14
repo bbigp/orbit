@@ -7,7 +7,7 @@ import cn.coolbet.orbit.model.entity.DisplayMode
 
 
 @Composable
-fun ListDetailRow(
+fun LDRow(
     item: Entry,
     displayMode: DisplayMode,
     modifier: Modifier = Modifier
@@ -16,7 +16,7 @@ fun ListDetailRow(
         DisplayMode.Magazine -> LDMagazine(item, modifier = modifier)
         DisplayMode.TextOnly -> LDTextOnly(item, modifier = modifier)
         DisplayMode.Thread -> LDThread(item, modifier = modifier)
-        DisplayMode.Card -> LDTextOnly(item, modifier = modifier)
+        DisplayMode.Card -> LDCard(item, modifier = modifier)
     }
 
 }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,6 +43,7 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.showTime
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.ui.kit.ObAsyncImage
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
@@ -59,14 +61,13 @@ fun LDMagazine(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val defaultModifier = Modifier.background(Color.White)
-        .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
     Column(
-        modifier = defaultModifier.then(modifier)
+        modifier = Modifier.background(Color.White)
+            .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
+            .then(modifier)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        EntryTileTopRow(entry)
+        LDItemFeedLabel(entry.feed, entry.publishedAt)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -90,39 +91,18 @@ fun LDMagazine(
                     )
                 }
             }
-            if (entry.pic.isNotEmpty()) {
-                SubcomposeAsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(entry.pic)
-                        .httpHeaders(NetworkHeaders.Builder().add("Referer", entry.url).build())
-                        .build(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .padding(start = 12.dp)
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(
-                            width = 0.5.dp,
-                            color = Black08,
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    loading = {
-                        Box(modifier = Modifier.fillMaxSize().pulsatingShimmer(true))
-                    },
-                    error = {
-                        Image(
-                            painter = painterResource(R.drawable.no_media),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
-                    },
-                    success = {
-                        SubcomposeAsyncImageContent()
-                    }
-                )
-            }
+            ObAsyncImage(
+                url = entry.pic,
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        width = 0.5.dp,
+                        color = Black08,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -155,28 +135,6 @@ fun Modifier.pulsatingShimmer(isLoading: Boolean): Modifier = composed {
     )
 }
 
-@Composable
-fun EntryTileTopRow(entry: Entry){
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.width(16.dp))
-        FeedIcon(url = entry.feed.iconURL, alt = entry.feed.title, size = FeedIconDefaults.SMALL)
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            entry.feed.title,
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = AppTypography.M13,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            entry.publishedAt.showTime(),
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = AppTypography.M13B25,
-            modifier = Modifier.wrapContentWidth()
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -188,7 +146,7 @@ fun PreviewEntryTile() {
         summary = "少数派的近期动态少数派11月主题征稿进行中：平台独占KillerApp、聊聊卫星通讯。投稿有奖励GAMEBABYforiPhone17系列现已上市。进一步了解《蓝皮书》系列新版上架，一起探索全新iOS ..."
     )
     Column {
-        EntryTileTopRow(entry)
+        LDItemFeedLabel(entry.feed, entry.publishedAt)
         SpacerDivider()
         LDMagazine(entry.copy(summary = "", leadImageURL = ""))
         SpacerDivider()

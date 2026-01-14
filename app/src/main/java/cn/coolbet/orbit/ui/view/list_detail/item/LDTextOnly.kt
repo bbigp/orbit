@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.list_detail.item
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,8 +33,10 @@ fun LDTextOnly(
 ){
 
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
+            .background(Color.White)
             .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
+            .then(modifier)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Row(
