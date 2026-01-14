@@ -5,6 +5,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
+import cn.coolbet.orbit.model.domain.OpenContentWith
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
@@ -21,7 +22,8 @@ data class LDSettings(
     @ColumnInfo("hide_globally") val hideGlobally: Boolean = false, //todo:  这个可能不对
     @ColumnInfo("auto_reader_view") val autoReaderView: Boolean = false,
     @ColumnInfo(name = "created_at", defaultValue = "0") val createdAt: Long = Date().time,
-    @ColumnInfo(name = "changed_at", defaultValue = "0") val changedAt: Long = Date().time
+    @ColumnInfo(name = "changed_at", defaultValue = "0") val changedAt: Long = Date().time,
+    @ColumnInfo(name = "open_content_with") val openContentWith: OpenContentWith = OpenContentWith.Default
 ) : Parcelable {
 
     companion object {
@@ -34,7 +36,8 @@ enum class LDSettingKey {
     ShowGroupTitle,
     SortOrder,
     DisPlayMode,
-    AutoReaderView
+    AutoReaderView,
+    OpenContentWith
 }
 
 class LDSettingsConverters {
@@ -49,6 +52,12 @@ class LDSettingsConverters {
 
     @TypeConverter
     fun toLDSort(value: String): LDSort = LDSort.fromValue(value)
+
+    @TypeConverter
+    fun fromOpenContentWith(value: OpenContentWith): String = value.value
+
+    @TypeConverter
+    fun toOpenContentWith(value: String): OpenContentWith = OpenContentWith.fromValue(value)
 }
 
 enum class DisplayMode(val value: String) {

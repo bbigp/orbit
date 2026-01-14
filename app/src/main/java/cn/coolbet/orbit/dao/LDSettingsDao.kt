@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.model.entity.LDSort
@@ -29,7 +30,8 @@ abstract class LDSettingsDao {
         unreadOnly: Boolean? = null,
         sortOrder: LDSort? = null,
         showGroupTitle: Boolean? = null,
-        autoReaderView: Boolean? = null
+        autoReaderView: Boolean? = null,
+        openContentWith: OpenContentWith? = null
     ): LDSettings {
         val existing = get(metaId.toString())
         if (existing != null) {
@@ -39,7 +41,8 @@ abstract class LDSettingsDao {
                 unreadOnly = unreadOnly ?: existing.unreadOnly,
                 sortOrder = sortOrder ?: existing.sortOrder,
                 showGroupTitle = showGroupTitle ?: existing.showGroupTitle,
-                autoReaderView = autoReaderView ?: existing.autoReaderView
+                autoReaderView = autoReaderView ?: existing.autoReaderView,
+                openContentWith = openContentWith ?: existing.openContentWith
             )
             updateImpl(updated)
             return updated
@@ -50,7 +53,8 @@ abstract class LDSettingsDao {
             unreadOnly = unreadOnly ?: false,
             sortOrder = sortOrder ?: LDSort.PublishedAt,
             showGroupTitle = showGroupTitle ?: false,
-            autoReaderView = autoReaderView ?: false
+            autoReaderView = autoReaderView ?: false,
+            openContentWith = openContentWith ?: OpenContentWith.Default
         )
         insert(newSettings)
         return newSettings

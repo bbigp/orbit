@@ -21,6 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,11 +38,15 @@ import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.common.copyText
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.GenerateMenuItems
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.DragHandle
+import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.kit.ObToastManager
@@ -123,20 +131,19 @@ fun ListDetailSettingSheet(
                                 changeLDSettings(meta.metaId, LDSettingKey.UnreadOnly, v)
                             }
                         )
+                        ListTileSwitch(
+                            title = "Automatic Reader View", icon = R.drawable.book,
+                            checked = settings.autoReaderView,
+                            onCheckedChange = { v->
+                                changeLDSettings(meta.metaId, LDSettingKey.AutoReaderView, v)
+                            }
+                        )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
                             title = "Group by Date", icon = R.drawable.list_label,
                             checked = settings.showGroupTitle,
                             onCheckedChange = { v->
                                 changeLDSettings(meta.metaId, LDSettingKey.ShowGroupTitle, v)
-                            }
-                        )
-                        SpacerDivider(start = 52.dp, end = 12.dp)
-                        ListTileSwitch(
-                            title = "Automatic Reader View", icon = R.drawable.book,
-                            checked = settings.autoReaderView,
-                            onCheckedChange = { v->
-                                changeLDSettings(meta.metaId, LDSettingKey.AutoReaderView, v)
                             }
                         )
                     }

@@ -103,7 +103,6 @@ fun ContentOperate(
                 var widthPx by remember { mutableIntStateOf(0) }
                 val widthDp = with(density) { widthPx.toDp() }
                 ObDropdownMenu (
-                    onDismissRequest = { expandedState.targetState = false },
                     expandedState = expandedState,
                 ) {
                     ObDropdownMenuItem(

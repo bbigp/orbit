@@ -48,13 +48,10 @@ class SearchEntriesScreenModel @AssistedInject constructor(
         }
     }
 
-    fun input(word: String){
-        mutableState.update { it.copy(search = word.trim()) }
-    }
-
-    fun load(word: String) {
+    fun load(search: String) {
         screenModelScope.launch {
-            val trimWord = word.trim()
+            val trimWord = search.trim()
+            if (trimWord.isEmpty()) return@launch
             delay(300)
 
             val now = System.currentTimeMillis()
@@ -87,6 +84,4 @@ class SearchEntriesScreenModel @AssistedInject constructor(
 data class SearchState(
     val userId: Long = 0,
     val histories: Set<String> = emptySet(),
-    val count: Int = 0,
-    val search: String = "",
 )

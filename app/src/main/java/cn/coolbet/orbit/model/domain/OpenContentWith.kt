@@ -13,7 +13,7 @@ enum class OpenContentWith(val value: String) {
     @SerializedName("SystemBrowser") SYSTEM_BROWSER("系统浏览器");
     companion object {
         fun fromValue(value: String?): OpenContentWith =
-            OpenContentWith.entries.find { it.value == value } ?: READER_VIEW
+            OpenContentWith.entries.find { it.value == value } ?: Default
     }
 }
 

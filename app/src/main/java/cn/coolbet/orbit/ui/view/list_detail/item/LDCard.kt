@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.ui.kit.NoMedia
 import cn.coolbet.orbit.ui.kit.ObAsyncImage
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
@@ -26,22 +27,26 @@ fun LDCard(
     entry: Entry,
     modifier: Modifier = Modifier
 ) {
+    val imageModifier = Modifier
+        .padding(horizontal = 16.dp)
+        .border(0.5.dp, Black08, RoundedCornerShape(12.dp))
+        .clip(RoundedCornerShape(12.dp))
+        .height(200.dp)
+        .fillMaxWidth()
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(Color.White)
             .then(if (entry.isUnread) Modifier else Modifier.alpha(0.5f))
             .then(modifier)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        ObAsyncImage(
-            url = entry.leadImageURL,
-            modifier = Modifier.padding(horizontal = 16.dp)
-                .border(0.5.dp, Black08, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .height(246.dp)
-                .fillMaxWidth()
-        )
-        Text(entry.title, maxLines = 1, style = AppTypography.M15, modifier = Modifier.padding(top = 12.dp))
+        if (entry.pic.isEmpty()) {
+            NoMedia(modifier = imageModifier)
+        } else {
+            ObAsyncImage(url = entry.pic, modifier = imageModifier)
+        }
+        Text(entry.title, maxLines = 1, style = AppTypography.M15, modifier = Modifier.padding(top = 12.dp, start = 16.dp, end = 16.dp))
         LDItemFeedLabel(entry.feed, entry.publishedAt, modifier = Modifier.padding(top = 4.dp))
         Spacer(modifier = Modifier.height(16.dp))
     }

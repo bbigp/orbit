@@ -76,9 +76,9 @@ fun DisplayModePicker(
                 selected = DisplayMode.Card == displayMode,
                 displayMode = DisplayMode.Card,
                 modifier = Modifier.weight(1f)
-//                    .click {
-//                        changeDisplayMode(metaId, DisplayMode.Card)
-//                    }
+                    .click {
+                        changeDisplayMode(metaId, LDSettingKey.DisPlayMode, DisplayMode.Card)
+                    }
             )
         }
     }

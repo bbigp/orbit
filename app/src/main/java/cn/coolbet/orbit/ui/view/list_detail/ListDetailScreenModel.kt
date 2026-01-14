@@ -13,6 +13,7 @@ import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSort
@@ -49,18 +50,20 @@ class ListDetailScreenModel @AssistedInject constructor(
         var showGroupTitle: Boolean? = null
         var displayMode: DisplayMode? = null
         var autoReaderView: Boolean? = null
+        var openContentWith: OpenContentWith? = null
         when(key) {
             LDSettingKey.UnreadOnly -> unreadOnly = value as Boolean
             LDSettingKey.SortOrder -> sortOrder = value as LDSort
             LDSettingKey.ShowGroupTitle -> showGroupTitle = value as Boolean
             LDSettingKey.DisPlayMode -> displayMode = value as DisplayMode
             LDSettingKey.AutoReaderView -> autoReaderView = value as Boolean
+            LDSettingKey.OpenContentWith -> openContentWith = value as OpenContentWith
         }
         screenModelScope.launch {
             val updated = ldSettingsDao.update(
                 metaId, sortOrder = sortOrder, unreadOnly = unreadOnly,
                 showGroupTitle = showGroupTitle, displayMode = displayMode,
-                autoReaderView = autoReaderView,
+                autoReaderView = autoReaderView, openContentWith = openContentWith
             )
             if (unreadOnly != null) {
                 coordinator.initData(metaId = metaId, settings = updated)

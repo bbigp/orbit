@@ -11,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
@@ -43,6 +46,8 @@ data class SearchEntriesScreen(
         val focusManager = LocalFocusManager.current
         val listState = rememberLazyListState()
         val navigator = LocalNavigator.current
+        var showSearchResult by rememberSaveable { mutableStateOf(false) }
+        var search by rememberSaveable { mutableStateOf("") }
 
         val onBack: () -> Unit = {
             focusManager.clearFocus()
@@ -51,9 +56,11 @@ data class SearchEntriesScreen(
         }
 
         LaunchedEffect(Unit) {
-//            if (state.search.isEmpty()) {
+            if (search.isEmpty()) {
                 focusRequester.requestFocus()
-//            }
+            } else {
+                focusManager.clearFocus()
+            }
         }
 
         BackHandler(onBack = onBack)
@@ -69,7 +76,7 @@ data class SearchEntriesScreen(
         Scaffold(
             topBar = {
                 ObTextFieldAppbar(
-                    value = state.search,
+                    value = search,
                     icon = R.drawable.search,
                     button = {
                         ObTextButton(
@@ -82,37 +89,44 @@ data class SearchEntriesScreen(
                     onValueChange = { v ->
                         if (v == "") {
                             model.coordinator.reset()
+                            search = ""
+                            showSearchResult = false
                             focusRequester.requestFocus()
                         } else {
-                            model.input(v)
+                            search = v
                         }
                     },
                     focusRequester = focusRequester,
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
-                            model.load(state.search)
+                            model.load(search)
+                            showSearchResult = true
                         }
                     )
                 )
             }
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (ldState.page == 0) {
-                    if (state.histories.isEmpty()) {
-                        NoSearch("Search in ${ldState.meta.title}")
-                    } else {
-                        SearchList(
-                            state.histories,
-                            onClick = { word -> model.load(word) },
-                            deleteSearchList = { model.deleteHistories() }
-                        )
-                    }
-                } else {
+                if (showSearchResult) {
                     if (ldState.items.isNotEmpty()) {
                         SearchResult(ldState, listState)
                     } else {
                         NoSearch(hint = "No result found")
+                    }
+                } else {
+                    if (state.histories.isEmpty()) {
+                        NoSearch("Search in ${model.meta.title}")
+                    } else {
+                        SearchList(
+                            state.histories,
+                            onClick = { word ->
+                                search = word
+                                model.load(word)
+                                showSearchResult = true
+                            },
+                            deleteSearchList = { model.deleteHistories() }
+                        )
                     }
                 }
             }
