@@ -72,7 +72,6 @@ import cn.coolbet.orbit.ui.theme.ContentRed
 @Composable
 fun ObDropdownMenu(
     expandedState: MutableTransitionState<Boolean>,
-    onDismissRequest: () -> Unit,
     dpOffset: DpOffset = DpOffset(0.dp, 0.dp),
     content: @Composable () -> Unit
 ) {
@@ -124,7 +123,9 @@ fun ObDropdownMenu(
         }
         if (alpha > 0f) {
             Popup(
-                onDismissRequest = onDismissRequest,
+                onDismissRequest = {
+                    expandedState.targetState = false
+                },
                 popupPositionProvider = positionProvider,
                 properties = PopupProperties(
                     focusable = true,

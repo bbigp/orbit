@@ -19,18 +19,18 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.asOpenContentState
 import cn.coolbet.orbit.manager.asUnreadMarkState
+import cn.coolbet.orbit.model.domain.GenerateMenuItems
 import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.domain.UnreadMark
-import cn.coolbet.orbit.ui.kit.DropdownMenuDivider
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObCard
-import cn.coolbet.orbit.ui.kit.ObDropdownMenuItem
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.kit.SystemBarStyleModern
@@ -51,7 +51,10 @@ object ProfileScreen: Screen {
         val autoRead by Env.settings.autoRead.asState()
         val rootFolderId by Env.settings.rootFolder.asState()
 
+        var showOpenContentWithMenus by remember { mutableStateOf(false) }
+        var showUnreadMarkMenus by remember { mutableStateOf(false) }
         var showFolderPicker by remember { mutableStateOf(false) }
+
         FolderPickerSheet (
             show = showFolderPicker,
             onDismiss = {
@@ -64,38 +67,6 @@ object ProfileScreen: Screen {
                 showFolderPicker = false
             }
         )
-
-        val unreadMarkMenus: @Composable (onClose: () -> Unit) -> Unit = { onClose ->
-            UnreadMark.entries.forEachIndexed { index, mark ->
-                ObDropdownMenuItem(
-                    text = mark.value, trailingIcon = mark.trailingIconRes,
-                    leadingIcon = if (unreadMark == mark) R.drawable.check else null,
-                    onClick = {
-                        Env.settings.unreadMark.value = mark.value
-                        onClose()
-                    }
-                )
-                if (index < UnreadMark.entries.lastIndex) {
-                    DropdownMenuDivider()
-                }
-            }
-        }
-
-        val openContentMenus: @Composable (onClose: () -> Unit) -> Unit = { onClose ->
-            OpenContentWith.entries.forEachIndexed { index, with ->
-                ObDropdownMenuItem(
-                    text = with.value,
-                    leadingIcon = if (openContentWith == with) R.drawable.check else null,
-                    onClick = {
-                        Env.settings.openContentWith.value = with.value
-                        onClose()
-                    }
-                )
-                if (index < OpenContentWith.entries.lastIndex) {
-                    DropdownMenuDivider()
-                }
-            }
-        }
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
         Scaffold (
@@ -119,13 +90,28 @@ object ProfileScreen: Screen {
                         ListTileChevronUpDown(
                             title = "未读标记", icon = R.drawable.unread_dashed,
                             trailing = unreadMark.value,
-                            menuContent = unreadMarkMenus
+                            showMenu = showUnreadMarkMenus,
+                            menuContent = {
+                                UnreadMark.GenerateMenuItems(unreadMark) { mark ->
+                                    Env.settings.unreadMark.value = mark.value
+                                    showUnreadMarkMenus = false
+                                }
+                            }
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileChevronUpDown(
                             title = "默认打开方式", icon = R.drawable.page,
                             trailing = openContentWith.value,
-                            menuContent = openContentMenus
+                            showMenu = showOpenContentWithMenus,
+                            menuContent = {
+                                OpenContentWith.GenerateMenuItems(
+                                    selectedValue = openContentWith,
+                                    filterValue = OpenContentWith.Default
+                                ) { with ->
+                                    Env.settings.openContentWith.value = with.value
+                                    showOpenContentWithMenus = false
+                                }
+                            }
                         )
                         SpacerDivider(start = 52.dp, end = 12.dp)
                         ListTileSwitch(
@@ -139,9 +125,7 @@ object ProfileScreen: Screen {
                         ListTileChevronUpDown(
                             title = "根文件夹", icon = R.drawable.folder_1,
                             trailing = state.rootFolder.title,
-                            onClick = {
-                                showFolderPicker = true
-                            }
+                            modifier = Modifier.click{ showFolderPicker = true },
                         )
                     }
                 }

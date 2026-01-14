@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
 import kotlinx.coroutines.delay
@@ -38,26 +39,21 @@ import kotlinx.coroutines.delay
 @SuppressLint("RememberReturnType")
 @Composable
 fun ListTileChevronUpDown(
-    title: String, trailing: String, icon: Int,
-    menuContent: @Composable (onClose: () -> Unit) -> Unit = {},
-    onClick: (() -> Unit)? = null
+    modifier: Modifier = Modifier,
+    title: String,
+    trailing: String,
+    icon: Int,
+    menuContent: @Composable () -> Unit = {},
+    showMenu: Boolean = false
 ) {
-    val expandedState = remember { MutableTransitionState(false) }
-    val closeMenu = { expandedState.targetState = false }
-    val finalOnClick: (() -> Unit) = onClick ?: {
-        expandedState.targetState = !expandedState.targetState
-    }
-
+    val expandedState = remember { MutableTransitionState(showMenu) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(ObTheme.colors.primaryContainer)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = finalOnClick
-            ),
+            .click { expandedState.targetState = !expandedState.targetState }
+            .then(modifier),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(16.dp))
@@ -101,10 +97,9 @@ fun ListTileChevronUpDown(
 
             ObDropdownMenu(
                 expandedState = expandedState,
-                onDismissRequest = closeMenu,
             ) {
                 Column {
-                    menuContent(closeMenu)
+                    menuContent()
                 }
             }
         }

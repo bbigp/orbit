@@ -20,27 +20,6 @@ data class User(
 
 }
 
-
-enum class UnreadMark(val value: String, @DrawableRes val trailingIconRes: Int) {
-    @SerializedName("None") NONE("None", R.drawable.ban),
-    @SerializedName("Dot") DOT("Dot", R.drawable.dot_m),
-    @SerializedName("Number") NUMBER("Number", R.drawable.notification_num),
-    ;
-    companion object {
-        fun fromValue(value: String?): UnreadMark =
-            UnreadMark.entries.find { it.value == value } ?: NUMBER
-    }
-}
-
-enum class OpenContentWith(val value: String) {
-    @SerializedName("ReaderView") READER_VIEW("内置阅读器"),
-    @SerializedName("InAppBrowser") IN_APP_BROWSER("应用内浏览器"),
-    @SerializedName("SystemBrowser") SYSTEM_BROWSER("系统浏览器");
-    companion object {
-        fun fromValue(value: String?): OpenContentWith =
-            OpenContentWith.entries.find { it.value == value } ?: READER_VIEW
-    }
-}
 //val customGson = GsonBuilder()
 //    // 注册适配器，让 Gson 知道如何处理 UnreadMark 类型
 //    .registerTypeAdapter(UnreadMark::class.java, UnreadMarkAdapter())
