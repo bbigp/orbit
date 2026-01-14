@@ -6,8 +6,7 @@ import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.SearchDao
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
-import cn.coolbet.orbit.manager.ListDetailState
-import cn.coolbet.orbit.manager.NavigatorState
+import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.SearchRecord
@@ -25,7 +24,7 @@ class SearchEntriesScreenModel @AssistedInject constructor(
     private val searchDao: SearchDao,
     private val entryManager: EntryManager,
     private val session: Session,
-    private val navigatorState: NavigatorState,
+    val coordinator: ListDetailCoordinator,
     private val eventBus: EventBus,
 ): ScreenModel {
 
@@ -36,11 +35,10 @@ class SearchEntriesScreenModel @AssistedInject constructor(
 
     private val mutableState = MutableStateFlow(SearchState())
     val state = mutableState.asStateFlow()
-    val entriesState = navigatorState.state
 
     init {
         loadSearchList()
-        navigatorState.saveState()
+        coordinator.captureSnapshot()
     }
 
     fun loadSearchList() {
@@ -67,12 +65,12 @@ class SearchEntriesScreenModel @AssistedInject constructor(
                 it.copy(histories = it.histories.plus(trimWord))
             }
 
-            navigatorState.initData(metaId = meta.metaId, search = trimWord)
+            coordinator.initData(metaId = meta.metaId, search = trimWord)
         }
     }
 
     fun nextPage() {
-        navigatorState.loadMore(screenModelScope)
+        coordinator.loadMore(screenModelScope)
     }
 
     fun deleteHistories() {
@@ -80,14 +78,6 @@ class SearchEntriesScreenModel @AssistedInject constructor(
             searchDao.deleteAll(metaId = meta.metaId.toString())
             mutableState.update { it.copy(histories = emptySet()) }
         }
-    }
-
-    fun clearSearchResult() {
-        navigatorState.internalState.update { ListDetailState() }
-    }
-
-    fun dispose() {
-        navigatorState.restoreState()
     }
 
 }

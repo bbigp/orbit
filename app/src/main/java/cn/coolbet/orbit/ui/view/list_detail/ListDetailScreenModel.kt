@@ -9,7 +9,7 @@ import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
-import cn.coolbet.orbit.manager.NavigatorState
+import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.MetaId
@@ -20,8 +20,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListDetailScreenModel @AssistedInject constructor(
@@ -30,7 +28,7 @@ class ListDetailScreenModel @AssistedInject constructor(
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
     private val ldSettingsDao: LDSettingsDao,
-    private val navigatorState: NavigatorState,
+    val coordinator: ListDetailCoordinator
 ): ScreenModel {
 
     @AssistedFactory
@@ -38,7 +36,6 @@ class ListDetailScreenModel @AssistedInject constructor(
         fun create(metaId: MetaId): ListDetailScreenModel
     }
 
-    val state = navigatorState.state
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
     init {
@@ -66,20 +63,20 @@ class ListDetailScreenModel @AssistedInject constructor(
                 autoReaderView = autoReaderView,
             )
             if (unreadOnly != null) {
-                navigatorState.initData(metaId = metaId, settings = updated)
+                coordinator.initData(metaId = metaId, settings = updated)
             } else {
-                navigatorState.internalState.update { it.copy(settings = updated) }
+                coordinator.update { it.copy(settings = updated) }
             }
         }
     }
 
 
     fun loadInitialData() {
-        navigatorState.initData(scope = screenModelScope, metaId = metaId)
+        coordinator.initData(scope = screenModelScope, metaId = metaId)
     }
 
     fun nextPage() {
-        navigatorState.loadMore(scope = screenModelScope)
+        coordinator.loadMore(scope = screenModelScope)
     }
 
     fun toggleReadStatus(entry: Entry) {
@@ -90,11 +87,6 @@ class ListDetailScreenModel @AssistedInject constructor(
             entry.feedId,
             entry.feed.folderId
         ))
-    }
-
-    fun unfreeze() {
-        Log.i("entries", "unfreeze")
-        navigatorState.unfreeze()
     }
 
 }

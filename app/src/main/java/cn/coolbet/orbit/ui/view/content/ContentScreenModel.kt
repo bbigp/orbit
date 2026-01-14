@@ -3,19 +3,17 @@ package cn.coolbet.orbit.ui.view.content
 import android.util.Log
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.EventBus
 import cn.coolbet.orbit.manager.Evt
+import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.manager.LocalDataManager
-import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.manager.total
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,20 +26,20 @@ class ContentScreenModel @Inject constructor(
     private val localDataManager: LocalDataManager,
     private val session: Session,
     private val eventBus: EventBus,
-    private val navigatorState: NavigatorState,
+    val coordinator: ListDetailCoordinator,
     private val entryManager: EntryManager,
 ): ScreenModel {
 
     private val mutableState = MutableStateFlow(ContentState())
     val state: StateFlow<ContentState> = mutableState.asStateFlow()
-    val entryStateValue = navigatorState.state.value
 
     fun loadData(entry: Entry) {
         screenModelScope.launch {
-            val index = entryStateValue.items.indexOfFirst { it.id == entry.id }
-            if (index != -1 && index == entryStateValue.total() - 1 && entryStateValue.hasMore) { //最后一个 加载数据
-                navigatorState.loadMore()
-                Log.i("nextEntry", "数据加载完成, 当前 $index  总共: ${entryStateValue.total()} ")
+            val raw = coordinator.state.value
+            val index = raw.items.indexOfFirst { it.id == entry.id }
+            if (index != -1 && index == raw.total() - 1 && raw.hasMore) { //最后一个 加载数据
+                coordinator.loadMore()
+                Log.i("nextEntry", "数据加载完成, 当前 $index  总共: ${raw.total()} ")
             }
             Log.i("entry-load-data", "entry index: $index")
             mutableState.update {
@@ -79,11 +77,12 @@ class ContentScreenModel @Inject constructor(
 
     fun nextEntry(): Entry? {
         val currentIndex = state.value.index
-        val total = entryStateValue.total()
+        val raw = coordinator.state.value
+        val total = raw.total()
         Log.i("nextEntry", "当前 $currentIndex  总共: $total ")
         if (total == 0 || currentIndex < 0) return null
         if (currentIndex == total - 1) return null//最后一个元素
-        return entryStateValue.items[currentIndex + 1]
+        return raw.items[currentIndex + 1]
     }
 
     fun startLoading() {
@@ -95,8 +94,9 @@ class ContentScreenModel @Inject constructor(
             return
         }
         screenModelScope.launch {
+            val raw = coordinator.state.value
             entryDao.updateReadingModeData(readableContent, leadImageURL, summary, id)
-            val entry = entryStateValue.items.find { it.id == id }
+            val entry = raw.items.find { it.id == id }
             if (entry == null) {
                 return@launch
             }

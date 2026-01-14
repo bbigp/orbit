@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
@@ -32,7 +31,6 @@ import cn.coolbet.orbit.model.domain.User
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
-import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.ProgressIndicator
 import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
@@ -58,9 +56,6 @@ object HomeScreen: Screen {
         val lazyListState = rememberLazyListState()
         val isScrolling by remember {
             derivedStateOf { lazyListState.isScrollInProgress }
-        }
-        LaunchedEffect(Unit) {
-            model.clearListDetailPage()
         }
 
         Scaffold (

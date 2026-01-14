@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.view.list_detail
 
 import android.annotation.SuppressLint
 import android.os.Parcelable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +21,6 @@ import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -33,10 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
@@ -53,9 +53,9 @@ import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.theme.Black04
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
 import cn.coolbet.orbit.ui.view.list_detail.item.EntryTopTile
@@ -83,7 +83,7 @@ data class ListDetailScreen(
         val model = getScreenModel<ListDetailScreenModel, ListDetailScreenModel.Factory> { factory ->
             factory.create(metaId)
         }
-        val state by model.state.collectAsState()
+        val state by model.coordinator.state.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()
         val unreadCountMap by unreadState
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
@@ -113,14 +113,21 @@ data class ListDetailScreen(
                 }
             }
         }
+        val navigator = LocalNavigator.current
+        val onBack: () -> Unit = {
+            model.coordinator.clear()
+            navigator?.pop()
+        }
+
+        BackHandler(onBack = onBack)
 
         LaunchedEffect(Unit) {
-            model.unfreeze()
+            model.coordinator.unfreeze()
         }
 
         InfiniteScrollHandler(
             listState = listState,
-            stateFlow = model.state,
+            stateFlow = model.coordinator.state,
             onLoadMore = {
                 model.nextPage()
             }
@@ -139,7 +146,13 @@ data class ListDetailScreen(
 
         Scaffold(
             topBar = {
-                ObBackTopAppBar(
+                ObTopAppbar(
+                    navigationIcon = {
+                        ObIcon(
+                            id = R.drawable.arrow_left,
+                            modifier = Modifier.clickable(onClick = onBack)
+                        )
+                    },
                     title = {
                         Row(
                             modifier = Modifier.graphicsLayer {

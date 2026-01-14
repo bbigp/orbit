@@ -5,7 +5,6 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.Env
-import cn.coolbet.orbit.manager.NavigatorState
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
@@ -23,7 +22,6 @@ import javax.inject.Inject
 class HomeScreenModel @Inject constructor(
     cacheStore: CacheStore,
     session: Session,
-    private val navigatorState: NavigatorState
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(HomeScreenState())
@@ -63,10 +61,6 @@ class HomeScreenModel @Inject constructor(
     override fun onDispose() {
         Log.d("HomeScreenModel", "ScreenModel disposed.")
         // super.onDispose()
-    }
-
-    fun clearListDetailPage() {
-        navigatorState.dispose()
     }
 
 }

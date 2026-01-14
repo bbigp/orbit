@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
@@ -40,15 +38,15 @@ data class SearchEntriesScreen(
             factory.create(meta)
         }
         val state by model.state.collectAsState()
-        val entryState by model.entriesState.collectAsState()
+        val ldState by model.coordinator.state.collectAsState()
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val listState = rememberLazyListState()
         val navigator = LocalNavigator.current
 
         val onBack: () -> Unit = {
-            model.dispose()
             focusManager.clearFocus()
+            model.coordinator.restoreSnapshot()
             navigator?.pop()
         }
 
@@ -62,7 +60,7 @@ data class SearchEntriesScreen(
 
         InfiniteScrollHandler(
             listState = listState,
-            stateFlow = model.entriesState,
+            stateFlow = model.coordinator.state,
             onLoadMore = {
                 model.nextPage()
             }
@@ -83,7 +81,7 @@ data class SearchEntriesScreen(
                     },
                     onValueChange = { v ->
                         if (v == "") {
-                            model.clearSearchResult()
+                            model.coordinator.reset()
                             focusRequester.requestFocus()
                         } else {
                             model.input(v)
@@ -100,9 +98,9 @@ data class SearchEntriesScreen(
             }
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (entryState.page == 0) {
+                if (ldState.page == 0) {
                     if (state.histories.isEmpty()) {
-                        NoSearch("Search in ${entryState.meta.title}")
+                        NoSearch("Search in ${ldState.meta.title}")
                     } else {
                         SearchList(
                             state.histories,
@@ -111,8 +109,8 @@ data class SearchEntriesScreen(
                         )
                     }
                 } else {
-                    if (entryState.items.isNotEmpty()) {
-                        SearchResult(entryState, listState)
+                    if (ldState.items.isNotEmpty()) {
+                        SearchResult(ldState, listState)
                     } else {
                         NoSearch(hint = "No result found")
                     }

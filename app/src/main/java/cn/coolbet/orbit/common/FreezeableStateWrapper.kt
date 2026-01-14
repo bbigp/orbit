@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.*
  * 一个支持“视觉锁定”的状态持有器
  * 当调用 [freeze] 后，暴露给 UI 的 [state] 将不再更新，直到调用 [unfreeze]
  */
-class FreezeableStateHolder<T>(
+class FreezeableStateWrapper<T>(
     private val scope: CoroutineScope,
     initialValue: T
 ) {
     // 真实的数据源，始终反映最新状态
     private val _internalState = MutableStateFlow(initialValue)
-    val rawState: T get() = _internalState.value
+    val value: T get() = _internalState.value
 
     // 锁定信号
     private val isFrozen = MutableStateFlow(false)
@@ -45,13 +45,8 @@ class FreezeableStateHolder<T>(
         _internalState.value = value
     }
 
-    /**
-     * 锁定 UI 并同步恢复底层数据
-     * 适用于：从 B 页面回退 A 页面时，不希望 B 页面视觉上发生闪烁
-     */
-    fun freezeAndRestore(snapshot: T) {
-        isFrozen.value = true      // 1. 立即拦截 UI 更新
-        _internalState.value = snapshot // 2. 静默恢复后台数据
+    fun freeze() {
+        isFrozen.value = true
     }
 
     /**

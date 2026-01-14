@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                         context.applicationContext,
                         AppEntryPoint::class.java
                     )
-                    point.navigatorState()
+                    point.ldCoordinator()
                 }
                 Navigator(screen = initialScreen) { navigator ->
                     OrbitRouter()
