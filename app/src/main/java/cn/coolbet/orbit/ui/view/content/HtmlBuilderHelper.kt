@@ -51,7 +51,7 @@ class HtmlBuilderHelper {
                     <script>${templateHelperScript()}</script>
                 </head>
                 <body data-theme="$theme">
-                    <div id="br-article" class="active"></div>
+                    <div id="br-article-root" class="active"></div>
                 </body>
                 </html>
             """.trimIndent()
@@ -155,6 +155,7 @@ class HtmlBuilderHelper {
               
               function setInnerHTMLWithScripts(html) {
                 var container = document.getElementById('br-article-root');
+                console.log('payload')
                 if (!container) { return; }
                 container.innerHTML = html || '';
                 var scripts = container.querySelectorAll('script');
@@ -219,6 +220,7 @@ class HtmlBuilderHelper {
               }
         
               window.__brewRenderArticle = function(payload) {
+                console.log(payload)
                 if (!payload) { return; }
                 updateHeadContent(payload.head);
                 if (payload.theme) {

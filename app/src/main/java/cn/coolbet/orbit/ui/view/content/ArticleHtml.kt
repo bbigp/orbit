@@ -3,6 +3,7 @@ package cn.coolbet.orbit.ui.view.content
 import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
+import android.text.Html
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,25 +51,23 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
 //            HtmlBuilderHelper.html()
 //        )
 //    }
-    val htmlData = remember(state.readerView, entry.content, entry.readableContent,) {
-        HtmlBuilderHelper.articleHtmlData(
-            entry.title, entry.author,
-            if (state.readerView) entry.readableContent else entry.content,
-        )
-    }
-    val cssOption = remember(fontSize, fontFamily) { HtmlBuilderHelper.cssOption(fontSize, fontFamily) }
 
-    val payload = remember(htmlData, cssOption) {
-        Gson().toJson(ArticlePayload(
-            body = htmlData.body,
-            theme = "light",
-            head = htmlData.head,
-            cssOptionString = cssOption
-        ))
-    }
+    val htmlData: HtmlData by rememberUpdatedState(HtmlBuilderHelper.articleHtmlData(
+        entry.title, entry.author,
+        if (state.readerView) entry.readableContent else entry.content,
+    ))
+    val cssOption by rememberUpdatedState(HtmlBuilderHelper.cssOption(fontSize, fontFamily))
+
+    val payload by rememberUpdatedState(Gson().toJson(ArticlePayload(
+        body = htmlData.body,
+        theme = "light",
+        head = htmlData.head,
+        cssOptionString = cssOption
+    )))
 
     var webView: WebView? by remember { mutableStateOf(null) }
     var webViewHeight by remember { mutableStateOf(1.dp) }
+    var isInjected by remember { mutableStateOf(false) }
 
     val webAppInterface = remember {
         WebAppInterface(
@@ -75,7 +75,15 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 webViewHeight = height.dp + 30.dp
             },
             onEvent = { event ->
-
+                when(event) {
+                    "windowOnloadHandler" -> {
+                        if (!isInjected) {
+                            webView?.evaluateJavascript("__brewRenderArticle($payload)", null)
+                            isInjected = true
+                        }
+                    }
+                    else -> {}
+                }
             }
         )
     }
@@ -192,7 +200,7 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 // 强制 WebView 视图对齐到顶部 (清除任何残留的微小负位移)
                 webView.scrollTo(0, 0)
             }
-            webView.evaluateJavascript("__brewRenderArticle($payload)", null)
+//            webView.evaluateJavascript("__brewRenderArticle($payload)", null)
         }
     )
 }
