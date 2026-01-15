@@ -74,9 +74,9 @@ class HtmlBuilderHelper {
               }
               
               var previousHeadNodes = [];
-              var warmupReadyPosted = false;
-              var warmupModeEnabled = false;
-              var warmupObserverStarted = false;
+              var warmupReadyPosted = false; //预热message是否已经post
+              var warmupModeEnabled = false; //预热模式
+              var warmupObserverStarted = false; //预热观察器开启
         
               function notifyWarmupReady() {
                 if (warmupReadyPosted) { return; }
