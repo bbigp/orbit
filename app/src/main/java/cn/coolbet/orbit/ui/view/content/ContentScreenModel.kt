@@ -45,9 +45,8 @@ class ContentScreenModel @Inject constructor(
             mutableState.update {
                 ContentState(
                     entry = entry,
-                    readerView = entry.readableContent.isNotEmpty(),
-                    readingModeEnabled = entry.readableContent.isEmpty() && true,
-                    isLoadingReadableContent = false,
+                    readerModeOpened = entry.readableContent.isNotEmpty(),
+                    shouldLoadReadableContent = false,
                     index = index
                 )
             }
@@ -55,13 +54,12 @@ class ContentScreenModel @Inject constructor(
         }
     }
 
-    fun changeDisplayMode(){
+    fun toggleReaderMode(){
         mutableState.update {
-            if (!it.readerView && it.entry.readableContent.isEmpty()) {
-                it.copy(readerView = true, isLoadingReadableContent = true)
-            } else {
-                it.copy(readerView = !it.readerView)
-            }
+            it.copy(
+                readerModeOpened = !it.readerModeOpened,
+                shouldLoadReadableContent = it.entry.readableContent.isEmpty()
+            )
         }
     }
 
@@ -85,9 +83,6 @@ class ContentScreenModel @Inject constructor(
         return raw.items[currentIndex + 1]
     }
 
-    fun startLoading() {
-        mutableState.update { it.copy(isLoadingReadableContent = true) }
-    }
 
     fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String, id: Long) {
         if (readableContent == "<div></div>") {
@@ -109,10 +104,7 @@ class ContentScreenModel @Inject constructor(
                     return@update it
                 }
                 it.copy(
-                    isLoadingReadableContent = false,
                     entry = newEntry,
-                    readerView = newEntry.readableContent.isNotEmpty(),
-                    readingModeEnabled = false
                 )
             }
             eventBus.post(Evt.EntryUpdated(newEntry))

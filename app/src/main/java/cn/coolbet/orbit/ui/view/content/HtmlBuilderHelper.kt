@@ -1,18 +1,21 @@
 package cn.coolbet.orbit.ui.view.content
 
 
-class HtmlData(
-    val head: String,
-    val body: String
+data class ArticlePayload(
+    val head: String? = "",
+    val body: String? = "",
+    val theme: String? = "light",
+    val cssOptionString: String? = ""
 )
 
 class HtmlBuilderHelper {
 
     companion object {
 
-        fun cssOption(fontSize: Int, fontFamily: String): String {
+        fun rootStyle(fontSize: Int, fontFamily: String): String {
 //            --line-height-multiplier: \(lineHeight);
             return """
+                <style>
                 :root {
                     --font-size-base: ${fontSize}px;
                     font-size: ${fontSize}px;
@@ -21,12 +24,12 @@ class HtmlBuilderHelper {
                     --font-family-code: ${fontFamily};
                     font-family: ${fontFamily};
                 }
+                </style>
             """.trimIndent()
         }
 
-        fun articleHtmlData(title: String, author: String, content: String): HtmlData {
-            return HtmlData(
-                head = """
+        fun htmlHead(title: String, author: String): String {
+            return """
                     <title>$title</title>
                     <meta name="author" content="$author">
                     <style>
@@ -52,13 +55,15 @@ class HtmlBuilderHelper {
                        margin-top: 0;
                     }
                     </style>
-                """.trimIndent(),
-                body = """
+                """.trimIndent()
+        }
+
+        fun htmlBody(content: String): String {
+            return """
                     <div id="br-article" class="active">
                       <div class="br-content">$content</div>
                     </div>
                 """.trimIndent()
-            )
         }
 
         fun html(theme: String = "light"): String {
@@ -70,7 +75,7 @@ class HtmlBuilderHelper {
                     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
                     <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
                     <style id="br-root-style"></style>
-                    <script>${templateHelperScript()}</script>
+                    <script>${htmlJs}</script>
                 </head>
                 <body data-theme="$theme">
                     <div id="br-article-root"></div>
@@ -80,8 +85,7 @@ class HtmlBuilderHelper {
         }
 
 
-        fun templateHelperScript(): String {
-            return """
+        private val htmlJs: String = """
             (function() {
               // 适配 Android 的消息发送逻辑
               function postMessage(name, payload) {
@@ -138,11 +142,12 @@ class HtmlBuilderHelper {
                   parser.innerHTML = styleHTML;
                   var newStyle = parser.querySelector('style');
                   var existing = document.getElementById('br-root-style');
+                  console.log(parser)
+                  console.log(existing)
                   if (newStyle) {
                     newStyle.id = 'br-root-style';
                     if (existing) {
-                      // 使用兼容性更好的 replaceChild 替换旧样式
-                      existing.parentNode.replaceChild(newStyle, existing);
+                      existing.replaceWith(newStyle);
                     } else {
                       document.head.appendChild(newStyle);
                     }
@@ -278,7 +283,5 @@ class HtmlBuilderHelper {
               });
             })();
             """.trimIndent()
-        }
-
     }
 }

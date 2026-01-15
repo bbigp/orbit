@@ -38,7 +38,7 @@ data class ContentScreen(
         }
 
         CompositionLocalProvider(
-            LocalChangeReaderView provides model::changeDisplayMode,
+            LocalToggleReaderMode provides model::toggleReaderMode,
             LocalChangeStarred provides model::changeStarred,
             LocalNextEntry provides model::nextEntry,
         ) {
@@ -54,31 +54,31 @@ data class ContentScreen(
                         .fillMaxSize()
                 ) {
                     val entry = state.entry
-                    if (state.readingModeEnabled && !state.isLoadingReadableContent) {
-                        LaunchedEffect(entry.url) {
-                            model.startLoading()
-                        }
-                    }
-
-                    if (state.isLoadingReadableContent) {
-                        ReaderView(
-                            key = state.entry.id,
-                            url = state.entry.url,
-                            onContentExtracted = { extracted, id ->
-                                model.updateReadableContent(
-                                    extracted.content ?: "",
-                                    extracted.leadImageUrl ?: "",
-                                    extracted.excerpt ?: "",
-                                    id
-                                )
-                            }
-                        )
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            LoadMoreIndicator()
-                        }
-                    } else {
+//                    if (state.readingModeEnabled && !state.isLoadingReadableContent) {
+//                        LaunchedEffect(entry.url) {
+//                            model.startLoading()
+//                        }
+//                    }
+//
+//                    if (state.isLoadingReadableContent) {
+//                        ReaderView(
+//                            key = state.entry.id,
+//                            url = state.entry.url,
+//                            onContentExtracted = { extracted, id ->
+//                                model.updateReadableContent(
+//                                    extracted.content ?: "",
+//                                    extracted.leadImageUrl ?: "",
+//                                    extracted.excerpt ?: "",
+//                                    id
+//                                )
+//                            }
+//                        )
+//                        Box(modifier = Modifier.fillMaxSize()) {
+//                            LoadMoreIndicator()
+//                        }
+//                    } else {
                         ArticleContent(state)
-                    }
+//                    }
                 }
             }
         }

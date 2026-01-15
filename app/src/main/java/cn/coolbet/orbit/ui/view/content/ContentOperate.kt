@@ -43,7 +43,7 @@ fun ContentOperate(
     state: ContentState,
     modifier: Modifier = Modifier
 ) {
-    val changeReaderView = LocalChangeReaderView.current
+    val toggleReaderMode = LocalToggleReaderMode.current
     val changeStarred = LocalChangeStarred.current
     val nextEntry = LocalNextEntry.current
     val expandedState = remember { MutableTransitionState(false) }
@@ -82,8 +82,8 @@ fun ContentOperate(
                 }
             )
             ObIcon(
-                id = if (state.readerView) R.drawable.book else R.drawable.page,
-                modifier = Modifier.clickable { changeReaderView() }
+                id = if (state.readerModeOpened) R.drawable.book else R.drawable.page,
+                modifier = Modifier.clickable { toggleReaderMode()  }
             )
             ObIcon(
                 id = R.drawable.chevron_down,

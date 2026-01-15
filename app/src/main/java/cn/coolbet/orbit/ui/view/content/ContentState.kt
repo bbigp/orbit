@@ -6,13 +6,12 @@ import cn.coolbet.orbit.model.domain.Entry
 
 data class ContentState(
     val entry: Entry = Entry.EMPTY,
-    val readingModeEnabled: Boolean = false,
-    val readerView: Boolean = false,
-    val isLoadingReadableContent: Boolean = false,
+    val readerModeOpened: Boolean = false,
+    val shouldLoadReadableContent: Boolean = false,
     val index: Int = 0,
 )
 
-val LocalChangeReaderView = compositionLocalOf<ConsumerUnit> {
+val LocalToggleReaderMode = compositionLocalOf<ConsumerUnit> {
     error("No function provided")
 }
 val LocalChangeStarred = compositionLocalOf<ConsumerUnit> {
