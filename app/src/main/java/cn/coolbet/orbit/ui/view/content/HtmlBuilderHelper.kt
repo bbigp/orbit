@@ -29,7 +29,29 @@ class HtmlBuilderHelper {
                 head = """
                     <title>$title</title>
                     <meta name="author" content="$author">
-                    $articleCss
+                    <style>
+                    body {
+                      padding: 0 16px;
+                      margin: 0;
+                    }
+                    
+                    #br-skeleton, #br-article {
+                       display: none;
+                    }
+                    #br-skeleton.active, #br-article.active {
+                       display: block;
+                    }
+                    
+                    .br-content {
+                       overflow: hidden;
+                    }
+                    .br-content > p:empty {
+                       display: none;
+                    }
+                    .br-content *:first-child {
+                       margin-top: 0;
+                    }
+                    </style>
                 """.trimIndent(),
                 body = """
                     <div id="br-article" class="active">
@@ -51,7 +73,7 @@ class HtmlBuilderHelper {
                     <script>${templateHelperScript()}</script>
                 </head>
                 <body data-theme="$theme">
-                    <div id="br-article-root" class="active"></div>
+                    <div id="br-article-root"></div>
                 </body>
                 </html>
             """.trimIndent()
@@ -73,7 +95,6 @@ class HtmlBuilderHelper {
                 }
               }
               
-              var previousHeadNodes = [];
               var warmupReadyPosted = false; //预热message是否已经post
               var warmupModeEnabled = false; //预热模式
               var warmupObserverStarted = false; //预热观察器开启
@@ -84,6 +105,7 @@ class HtmlBuilderHelper {
                 postMessage('warmupReadyHandler');
               }
         
+              //预热加载字体
               function setupWarmupObserver() {
                 if (!warmupModeEnabled || warmupObserverStarted) { return; }
                 warmupObserverStarted = true;
@@ -130,6 +152,7 @@ class HtmlBuilderHelper {
                 }
               }
               
+              var previousHeadNodes = [];
               function updateHeadContent(headHTML) {
                 previousHeadNodes.forEach(function(node) {
                   if (node.parentNode) {
@@ -155,7 +178,6 @@ class HtmlBuilderHelper {
               
               function setInnerHTMLWithScripts(html) {
                 var container = document.getElementById('br-article-root');
-                console.log('payload')
                 if (!container) { return; }
                 container.innerHTML = html || '';
                 var scripts = container.querySelectorAll('script');
@@ -258,30 +280,5 @@ class HtmlBuilderHelper {
             """.trimIndent()
         }
 
-        val articleCss: String = """
-            <style>
-            body {
-              padding: 0 16px;
-              margin: 0;
-            }
-            
-            #br-skeleton, #br-article {
-               display: none;
-            }
-            #br-skeleton.active, #br-article.active {
-               display: block;
-            }
-            
-            .br-content {
-               overflow: hidden;
-            }
-            .br-content > p:empty {
-               display: none;
-            }
-            .br-content *:first-child {
-               margin-top: 0;
-            }
-            </style>
-        """.trimIndent()
     }
 }
