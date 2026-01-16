@@ -117,6 +117,9 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
             }
         },
         update = { webView ->
+            if (scrollState.value > 40) { // 强制 WebView 视图对齐到顶部 (清除任何残留的微小负位移)
+                webView.scrollTo(0, 0)
+            }
         }
     )
 }

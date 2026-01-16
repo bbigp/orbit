@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import cn.coolbet.orbit.ui.view.content.extractor.ExtractedContent
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import java.io.IOException
@@ -135,16 +136,6 @@ class ContentExtractorBridge(
 }
 private val gson = Gson()
 
-data class ExtractedContent(
-    val author: String? = "",
-    val content: String? = "",
-    @SerializedName("date_published") val datePublished: String? = "",
-    val domain: String? = "",
-    val excerpt: String? = "",
-    @SerializedName("lead_image_url") val leadImageUrl: String? = "",
-    val title: String? = "",
-    val url: String? = ""
-)
 
 fun readAssetFile(context: Context, fileName: String): String {
     return try {
