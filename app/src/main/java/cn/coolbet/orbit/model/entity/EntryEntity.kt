@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
+import cn.coolbet.orbit.model.domain.ReaderPageState
 import java.util.Date
 
 @Entity(tableName = "entries")
@@ -28,6 +29,7 @@ data class EntryEntity(
     @ColumnInfo(name = "summary", defaultValue = "") val summary: String = "",
     @ColumnInfo(name = "readable_content", defaultValue = "") val readableContent: String = "",
     @ColumnInfo(name = "lead_image_url", defaultValue = "") val leadImageURL: String = "",
+    @ColumnInfo(name = "reader_page_state", defaultValue = "Idle") val readerPageState: ReaderPageState = ReaderPageState.Idle,
 )
 
 
@@ -37,5 +39,6 @@ fun EntryEntity.to(): Entry {
         title = title, url = url, publishedAt = publishedAt, content = content, author = author,
         starred = starred, readingTime = readingTime, tags = tags.split(","), createdAt = createdAt, changedAt = createdAt,
         summary = summary, readableContent = readableContent, leadImageURL = leadImageURL,
+        readerPageState = readerPageState
     )
 }

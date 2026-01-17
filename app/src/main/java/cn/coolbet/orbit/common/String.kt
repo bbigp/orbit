@@ -6,7 +6,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.core.text.HtmlCompat
 import cn.coolbet.orbit.ui.theme.Blue
+import com.google.gson.Gson
 import org.jsoup.Jsoup
+
+
+
+val String.asJsString: String
+    get() = Gson().toJson(this)
 
 
 /**

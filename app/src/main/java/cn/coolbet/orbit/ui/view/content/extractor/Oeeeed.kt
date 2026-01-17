@@ -1,14 +1,24 @@
 package cn.coolbet.orbit.ui.view.content.extractor
 
 import android.content.Context
-import android.net.Uri
+import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
-import org.json.JSONObject
-import java.net.URL
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 enum class Extractor { Mercury, Readability }
 
-class Oeeeed(val context: Context) {
+@Singleton
+class Oeeeed @Inject constructor(@ApplicationContext private val context: Context) {
+
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .build()
 
     /**
      * 预热提取器
@@ -18,37 +28,29 @@ class Oeeeed(val context: Context) {
             Extractor.Mercury -> MercuryExtractor.shared(context = context).warmUp()
             else -> ""
         }
+        Log.i("oeeeed", "---")
     }
 
     /**
      * 核心提取方法：使用挂起函数 (suspend)
      */
-    suspend fun extractArticleContent(
+    private suspend fun extractArticleContent(
         url: String,
         html: String,
         extractor: Extractor = Extractor.Mercury
     ): ExtractedContent = withContext(Dispatchers.Main) {
-        // 使用 suspendCancellableCoroutine 替代 withCheckedThrowingContinuation
-        suspendCancellableCoroutine { continuation ->
-            val callback = { contentOpt: ExtractedContent? ->
-                if (contentOpt != null) {
-                    continuation.resume(contentOpt) { /* 取消时的清理逻辑 */ }
-                } else {
-                    continuation.resumeWithException(ExtractionError.FailedToExtract)
-                }
-            }
-
-            when (extractor) {
-                Extractor.Mercury -> MercuryExtractor.shared(context = context).extract(html, url, callback)
-                else -> ""
-            }
+        val result = when (extractor) {
+            Extractor.Mercury -> MercuryExtractor.shared(context = context).extract(url = url, html = html)
+            else -> null
         }
+        return@withContext result ?: throw ExtractionError.FailedToExtract
     }
 
     /**
      * 获取并提取内容：组合异步操作
      */
     suspend fun fetchAndExtractContent(
+        requestId: Long,
         url: String,
         extractor: Extractor = Extractor.Mercury
     ): ReadableDoc = withContext(Dispatchers.IO) {
@@ -56,50 +58,57 @@ class Oeeeed(val context: Context) {
         withContext(Dispatchers.Main) { warmup(extractor) }
 
         // 2. HTTP 请求 (类似于 URLSession.data)
-        // 这里建议使用你的 OkHttpClient 或 Ktor
-        val response = try {
-            URL(url).readText() // 简单演示，生产环境建议用 OkHttp
-        } catch (e: Exception) {
-            throw ExtractionError.NetworkError(e)
+        var baseURL: String = url
+        val html = runCatching {
+            val request = Request.Builder().url(url)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...") // 建议带上 UA 减少被封几率
+                .build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw ExtractionError.NetworkError(Exception("HTTP ${response.code}"))
+                baseURL = response.request.url.toString()
+                response.body?.string() ?: throw ExtractionError.DataIsNotString
+            }
+        }.getOrElse { e ->
+            when(e) {
+                is CancellationException -> throw e
+                is ExtractionError -> throw e
+                else -> throw ExtractionError.NetworkError(e)
+            }
         }
-
-        val html = response
-        val baseURL = url // 实际应从 response 获取
 
         // 3. 异步提取内容
-        val content = extractArticleContent(baseURL, html, extractor)
+        val extracted = extractArticleContent(baseURL, html, extractor)
 
         // 4. 并行或顺序提取元数据 (async 可以并发执行)
-        val extractedMetadata = try {
-            SiteMetadata.extractMetadata(html, baseURL)
-        } catch (e: Exception) {
-            SiteMetadata(url)
-        }
+//        val extractedMetadata = try {
+//            SiteMetadata.extractMetadata(html, baseURL)
+//        } catch (e: Exception) {
+//            SiteMetadata(url)
+//        }
+        val metadata = SiteMetadata()
 
         // 5. 构造结果对象
         return@withContext ReadableDoc(
-            extracted = content,
-            insertHeroImage = null,
-            metadata = extractedMetadata,
-            date = content.datePublished
-        ) ?: throw ExtractionError.MissingExtractionData
-    }
-
-    // 定义相关的枚举和异常
-
-
-    sealed class ExtractionError : Exception() {
-        object FailedToExtract : ExtractionError()
-        object DataIsNotString : ExtractionError()
-        object MissingExtractionData : ExtractionError()
-        data class NetworkError(val cause: Throwable) : ExtractionError()
+            metadata = metadata,
+            extracted = extracted,
+            url = url,
+            requestId = requestId
+        )
     }
 }
 
-// 数据类定义
-data class ReadableDoc(
-    val extracted: ExtractedContent,
-    val insertHeroImage: String?,
-    val metadata: SiteMetadata,
-    val date: String?
-)
+sealed class ExtractionError : Exception() {
+    object FailedToExtract : ExtractionError() {
+        private fun readResolve(): Any = FailedToExtract
+    }
+
+    object DataIsNotString : ExtractionError() {
+        private fun readResolve(): Any = DataIsNotString
+    }
+
+    object MissingExtractionData : ExtractionError() {
+        private fun readResolve(): Any = MissingExtractionData
+    }
+
+    data class NetworkError(override val cause: Throwable) : ExtractionError()
+}

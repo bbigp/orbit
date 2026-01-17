@@ -29,6 +29,7 @@ data class Entry(
     val summary: String = "",
     val readableContent: String = "",
     val leadImageURL: String = "",
+    val readerPageState: ReaderPageState = ReaderPageState.Idle,
 
     val feed: Feed = Feed.EMPTY,
     val medias: List<Media> = emptyList(),

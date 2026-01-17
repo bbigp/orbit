@@ -2,15 +2,19 @@ package cn.coolbet.orbit.ui.view.content.extractor
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import cn.coolbet.orbit.common.asJsString
 import cn.coolbet.orbit.common.readAssetText
 import com.google.gson.Gson
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 
 
@@ -30,6 +34,24 @@ class MercuryExtractor private constructor(val context: Context){
     private val webView = WebView(context.applicationContext)
     private val isReady = CompletableDeferred<Unit>()
     private val gson = Gson()
+    private var activeContinuation: CancellableContinuation<ExtractedContent?>? = null
+    private val mutex = Mutex()
+    private val bridge = MercuryBridge { name, payload ->
+        when(name) {
+            "success" -> {
+                Log.i("Oeeeed", "Successfully extracted")
+                val content = runCatching { gson.fromJson(payload, ExtractedContent::class.java) }.getOrNull()
+                //content, content.extractPlainText.count >= 200  字数大于200
+                activeContinuation?.resume(content)
+
+            }
+            else -> {
+                Log.i("Oeeeed", "Failed to extract")
+                activeContinuation?.resume(null)
+            }
+        }
+        activeContinuation = null
+    }
 
     private inner class MercuryBridge(private val onResult: (String, String) -> Unit) {
         @JavascriptInterface
@@ -44,67 +66,68 @@ class MercuryExtractor private constructor(val context: Context){
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initializeJS() {
+        Log.i("Oeeeed", "Initializing...")
         val mercuryJs = context.readAssetText("js/mercury.web.js")
         webView.settings.javaScriptEnabled = true
+        webView.settings.allowFileAccess = true
+        webView.addJavascriptInterface(bridge, "AndroidBridge")
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 if (!isReady.isCompleted) {
+                    Log.i("Oeeeed", "Ready")
                     isReady.complete(Unit)
                 }
             }
         }
 
+//        <script type="text/javascript" src="file:///android_asset/js/mercury.web.js"></script>
         val html = """
             <!DOCTYPE html>
             <html lang="en">
-            <head></head>
+            <head>
+            <script>$mercuryJs</script>
+            </head>
             <body>
-                <script>$mercuryJs</script>
                 <script>alert('ok')</script>
             </body>
             </html>
         """.trimIndent()
-        webView.loadData(html, "text/html", "UTF-8")
+        webView.loadDataWithBaseURL("file:///android_asset/",html, "text/html", "UTF-8", null)
+        Log.i("oeeeed", "warmup---")
     }
 
 
-    suspend fun extract(url: String, html: String): ExtractedContent? = withContext(Dispatchers.Main) {
-        isReady.await()
-        return@withContext suspendCancellableCoroutine { continuation ->
-            val bridge = MercuryBridge { name, payload ->
-                when(name) {
-                    "success" -> {
-                        val content = gson.fromJson(payload, ExtractedContent::class.java)
-                        //content, content.extractPlainText.count >= 200  字数大于200
-                        continuation.resume(content)
-                    }
-                    else -> {
-                        continuation.resume(null)
+    suspend fun extract(url: String, html: String): ExtractedContent? {
+        return mutex.withLock {
+            try {
+                withTimeoutOrNull(15000) {
+                    isReady.await()
+                    suspendCancellableCoroutine { continuation ->
+                        activeContinuation = continuation
+
+                        val script = """
+                            (async function() {
+                                try {
+                                    const result = await Mercury.parse(${url.asJsString}, {html: ${html.asJsString}});
+                                    console.log(result);
+                                    window.AndroidBridge.postMessage("success", JSON.stringify(result));
+                                } catch(e) {
+                                    console.log(e);
+                                    window.AndroidBridge.postMessage("failure", 0);
+                                } 
+                            })();
+                        """.trimIndent()
+                        webView.evaluateJavascript(script, null)
+                        continuation.invokeOnCancellation {
+                            activeContinuation = null
+                        }
                     }
                 }
+            } finally {
+                activeContinuation = null
             }
-            webView.addJavascriptInterface(bridge, "AndroidBridge")
 
-            val script = """
-                (async function() {
-                    try {
-                        const result = await Mercury.parse($url, {html: $html});
-                        window.AndroidBridge.postMessage("success", JSON.stringify(result));
-                    } catch(e) {
-                        window.AndroidBridge.postMessage("failure", 0);
-                    } 
-                })();
-            """.trimIndent()
-            webView.evaluateJavascript(script, null)
         }
     }
 }
-
-//class MyApp : Application() {
-//    override fun onCreate() {
-//        super.onCreate()
-//        // 预热单例，加载 WebView 和 JS 库
-//        MercuryExtractor.getInstance(this)
-//    }
-//}

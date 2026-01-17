@@ -14,6 +14,8 @@ import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.manager.total
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
+import cn.coolbet.orbit.model.domain.ReaderPageState
+import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +30,7 @@ class ContentScreenModel @Inject constructor(
     private val eventBus: EventBus,
     val coordinator: ListDetailCoordinator,
     private val entryManager: EntryManager,
+    private val oeeeed: Oeeeed,
 ): ScreenModel {
 
     private val mutableState = MutableStateFlow(ContentState())
@@ -46,7 +49,6 @@ class ContentScreenModel @Inject constructor(
                 ContentState(
                     entry = entry,
                     readerModeOpened = entry.readableContent.isNotEmpty(),
-                    shouldLoadReadableContent = false,
                     index = index
                 )
             }
@@ -55,11 +57,40 @@ class ContentScreenModel @Inject constructor(
     }
 
     fun toggleReaderMode(){
+        val opened = !mutableState.value.readerModeOpened
         mutableState.update {
             it.copy(
-                readerModeOpened = !it.readerModeOpened,
-                shouldLoadReadableContent = it.entry.readableContent.isEmpty()
+                readerModeOpened = opened,
+                entry = it.entry.copy(
+                    readerPageState = if (opened && it.entry.readerPageState == ReaderPageState.Idle) ReaderPageState.Fetching else it.entry.readerPageState,
+                ),
             )
+        }
+        val v = state.value
+        if (v.entry.readerPageState == ReaderPageState.Fetching) {
+            screenModelScope.launch {
+                runCatching {
+                    val readableDoc = oeeeed.fetchAndExtractContent(v.entry.id, v.entry.url)
+                    entryDao.updateReadingModeData(
+                        readableDoc.extracted.content,
+                        readableDoc.extracted.leadImageUrl,
+                        readableDoc.extracted.excerpt ?: "",
+                        readableDoc.requestId
+                    )
+                    val raw = coordinator.state.value
+                    val entry = raw.items.find { it.id == readableDoc.requestId }
+                    if (entry == null) {
+                        return@launch
+                    }
+                    val newEntry = entry.copy(
+                        readableContent = readableDoc.extracted.content,
+                        leadImageURL = readableDoc.extracted.leadImageUrl,
+                        summary = readableDoc.extracted.excerpt ?: ""
+                    )
+                    mutableState.update { it.copy(entry = newEntry) }
+                    eventBus.post(Evt.EntryUpdated(newEntry))
+                }.getOrNull()
+            }
         }
     }
 
@@ -83,33 +114,6 @@ class ContentScreenModel @Inject constructor(
         return raw.items[currentIndex + 1]
     }
 
-
-    fun updateReadableContent(readableContent: String, leadImageURL: String, summary: String, id: Long) {
-        if (readableContent == "<div></div>") {
-            return
-        }
-        screenModelScope.launch {
-            val raw = coordinator.state.value
-            entryDao.updateReadingModeData(readableContent, leadImageURL, summary, id)
-            val entry = raw.items.find { it.id == id }
-            if (entry == null) {
-                return@launch
-            }
-            val newEntry = entry.copy(
-                readableContent = readableContent, leadImageURL = leadImageURL,
-                summary = summary
-            )
-            mutableState.update {
-                if (it.entry.id != id) {
-                    return@update it
-                }
-                it.copy(
-                    entry = newEntry,
-                )
-            }
-            eventBus.post(Evt.EntryUpdated(newEntry))
-        }
-    }
 
     fun autoRead() {
         if (!Env.settings.autoRead.value) {

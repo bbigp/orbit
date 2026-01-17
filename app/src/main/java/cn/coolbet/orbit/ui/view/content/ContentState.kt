@@ -7,7 +7,6 @@ import cn.coolbet.orbit.model.domain.Entry
 data class ContentState(
     val entry: Entry = Entry.EMPTY,
     val readerModeOpened: Boolean = false,
-    val shouldLoadReadableContent: Boolean = false,
     val index: Int = 0,
 )
 

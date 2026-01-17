@@ -9,6 +9,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import cn.coolbet.orbit.model.domain.EntryStatusConverter
+import cn.coolbet.orbit.model.domain.ReaderPageStateConverters
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.FeedEntity
 import cn.coolbet.orbit.model.entity.FolderEntity
@@ -38,6 +39,7 @@ private const val DATABASE_NAME = "orbit_db"
 @TypeConverters(value = [
     EntryStatusConverter::class,
     LDSettingsConverters::class,
+    ReaderPageStateConverters::class,
 ])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun feedDao(): FeedDao
