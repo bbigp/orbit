@@ -16,12 +16,14 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.ReaderPageState
 import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 class ContentScreenModel @Inject constructor(
     private val entryDao: EntryDao,
@@ -31,6 +33,7 @@ class ContentScreenModel @Inject constructor(
     val coordinator: ListDetailCoordinator,
     private val entryManager: EntryManager,
     private val oeeeed: Oeeeed,
+    private val appScope: CoroutineScope
 ): ScreenModel {
 
     private val mutableState = MutableStateFlow(ContentState())
@@ -68,13 +71,16 @@ class ContentScreenModel @Inject constructor(
         }
         val v = state.value
         if (v.entry.readerPageState == ReaderPageState.Fetching) {
-            screenModelScope.launch {
+            appScope.launch {
+                val id = v.entry.id
+                val url = v.entry.url
                 runCatching {
-                    val readableDoc = oeeeed.fetchAndExtractContent(v.entry.id, v.entry.url)
+                    val readableDoc = oeeeed.fetchAndExtractContent(id, url)
                     entryDao.updateReadingModeData(
                         readableDoc.extracted.content,
                         readableDoc.extracted.leadImageUrl,
                         readableDoc.extracted.excerpt ?: "",
+                        ReaderPageState.Success,
                         readableDoc.requestId
                     )
                     val raw = coordinator.state.value
@@ -85,11 +91,23 @@ class ContentScreenModel @Inject constructor(
                     val newEntry = entry.copy(
                         readableContent = readableDoc.extracted.content,
                         leadImageURL = readableDoc.extracted.leadImageUrl,
-                        summary = readableDoc.extracted.excerpt ?: ""
+                        summary = readableDoc.extracted.excerpt ?: "",
+                        readerPageState = ReaderPageState.Success,
                     )
                     mutableState.update { it.copy(entry = newEntry) }
                     eventBus.post(Evt.EntryUpdated(newEntry))
-                }.getOrNull()
+                }.onFailure { e ->
+                    if (e is CancellationException) return@onFailure
+                    entryDao.updateReadingModeData("", "", "",
+                        ReaderPageState.Failure, id
+                    )
+                    mutableState.update {
+                        it.copy(
+                            entry = it.entry.copy(readerPageState = ReaderPageState.Failure)
+                        )
+                    }
+                    eventBus.post(Evt.EntryUpdated(mutableState.value.entry))
+                }
             }
         }
     }

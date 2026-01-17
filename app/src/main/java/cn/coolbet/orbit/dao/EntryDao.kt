@@ -18,6 +18,7 @@ import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.domain.Media
 import cn.coolbet.orbit.model.domain.Meta
+import cn.coolbet.orbit.model.domain.ReaderPageState
 import cn.coolbet.orbit.model.domain.UnreadCount
 import cn.coolbet.orbit.model.entity.EntryEntity
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
@@ -118,10 +119,13 @@ abstract class EntryDao(protected val db: AppDatabase) {
         update entries set 
             readable_content = :readable, 
             lead_image_url = :leadImageURL,
-            summary = :summary
+            summary = :summary,
+            reader_page_state = :readerPageState
         where id = :id
     """)
-    abstract suspend fun updateReadingModeData(readable: String, leadImageURL: String, summary: String,
+    abstract suspend fun updateReadingModeData(
+        readable: String, leadImageURL: String, summary: String,
+        readerPageState: ReaderPageState,
         id: Long
     )
 
