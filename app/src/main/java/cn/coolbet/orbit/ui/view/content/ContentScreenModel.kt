@@ -33,11 +33,19 @@ class ContentScreenModel @Inject constructor(
     val coordinator: ListDetailCoordinator,
     private val entryManager: EntryManager,
     private val oeeeed: Oeeeed,
-    private val appScope: CoroutineScope
+    private val appScope: CoroutineScope,
 ): ScreenModel {
 
     private val mutableState = MutableStateFlow(ContentState())
     val state: StateFlow<ContentState> = mutableState.asStateFlow()
+
+    init {
+        eventBus.subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
+            if (state.value.entry.id == event.entry.id) {
+                mutableState.update { it.copy(entry = event.entry) }
+            }
+        }
+    }
 
     fun loadData(entry: Entry) {
         screenModelScope.launch {
@@ -72,41 +80,31 @@ class ContentScreenModel @Inject constructor(
         val v = state.value
         if (v.entry.readerPageState == ReaderPageState.Fetching) {
             appScope.launch {
-                val id = v.entry.id
-                val url = v.entry.url
+                val entry = state.value.entry
                 runCatching {
-                    val readableDoc = oeeeed.fetchAndExtractContent(id, url)
+                    val readableDoc = oeeeed.fetchAndExtractContent(entry.url)
                     entryDao.updateReadingModeData(
                         readableDoc.extracted.content,
                         readableDoc.extracted.leadImageUrl,
                         readableDoc.extracted.excerpt ?: "",
                         ReaderPageState.Success,
-                        readableDoc.requestId
+                        entry.id
                     )
-                    val raw = coordinator.state.value
-                    val entry = raw.items.find { it.id == readableDoc.requestId }
-                    if (entry == null) {
-                        return@launch
-                    }
                     val newEntry = entry.copy(
                         readableContent = readableDoc.extracted.content,
                         leadImageURL = readableDoc.extracted.leadImageUrl,
                         summary = readableDoc.extracted.excerpt ?: "",
                         readerPageState = ReaderPageState.Success,
                     )
-                    mutableState.update { it.copy(entry = newEntry) }
                     eventBus.post(Evt.EntryUpdated(newEntry))
                 }.onFailure { e ->
                     if (e is CancellationException) return@onFailure
                     entryDao.updateReadingModeData("", "", "",
-                        ReaderPageState.Failure, id
+                        ReaderPageState.Failure, entry.id
                     )
-                    mutableState.update {
-                        it.copy(
-                            entry = it.entry.copy(readerPageState = ReaderPageState.Failure)
-                        )
-                    }
-                    eventBus.post(Evt.EntryUpdated(mutableState.value.entry))
+                    eventBus.post(Evt.EntryUpdated(entry.copy(
+                        readerPageState = ReaderPageState.Failure
+                    )))
                 }
             }
         }

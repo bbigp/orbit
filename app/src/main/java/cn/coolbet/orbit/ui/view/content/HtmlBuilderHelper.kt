@@ -206,6 +206,17 @@ class HtmlBuilderHelper {
               var articleHeightObserver = null;
               var articleHeightFrame = null;
               var lastArticleHeight = null;
+              
+              function resetArticleHeightState() {
+                if (articleHeightObserver) {
+                  articleHeightObserver.disconnect();
+                }
+                if (articleHeightFrame) {
+                  cancelAnimationFrame(articleHeightFrame);
+                }
+                articleHeightFrame = null;
+                lastArticleHeight = null;
+              }
         
               function notifyArticleHeight() {
                 try {
@@ -245,10 +256,15 @@ class HtmlBuilderHelper {
                 articleHeightObserver.observe(article);
                 notifyArticleHeight();
               }
+              
+              window.__brewResetState = function() {
+                resetArticleHeightState();
+              };
         
               window.__brewRenderArticle = function(payload) {
                 console.log(payload)
                 if (!payload) { return; }
+                resetArticleHeightState();
                 updateHeadContent(payload.head);
                 if (payload.theme) {
                   document.body.setAttribute('data-theme', payload.theme);

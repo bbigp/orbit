@@ -38,6 +38,7 @@ class ListDetailCoordinator @Inject constructor(
 
     fun initData(scope: CoroutineScope, metaId: MetaId, settings: LDSettings? = null, search: String = "") {
         scope.launch { initData(metaId = metaId, settings = settings, search = search) }
+        //搜索页面一定是在列表页面之后的，2个页面公用一份数据管理类，所以只在列表页面建立监听就可以了
         if (search.isEmpty()) {
             eventBus.subscribe<Evt.EntryUpdated>(scope) { event ->
                     modifyEntries(event.entry.id) { event.entry }

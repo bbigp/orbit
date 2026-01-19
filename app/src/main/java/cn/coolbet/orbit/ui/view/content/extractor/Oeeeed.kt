@@ -4,8 +4,11 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,6 +17,11 @@ enum class Extractor { Mercury, Readability }
 
 @Singleton
 class Oeeeed @Inject constructor(@ApplicationContext private val context: Context) {
+
+    // 使用 Deferred 存储正在运行的任务，这样并发请求同一个 URL 时可以“挂起等待”同一个结果
+    private val activeRequests = ConcurrentHashMap<String, Deferred<ReadableDoc>>()
+    // 用于保护 Map 操作的锁（虽然 ConcurrentHashMap 线程安全，但 检查+写入 需要原子性）
+    private val mapMutex = Mutex()
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -50,7 +58,24 @@ class Oeeeed @Inject constructor(@ApplicationContext private val context: Contex
      * 获取并提取内容：组合异步操作
      */
     suspend fun fetchAndExtractContent(
-        requestId: Long,
+        url: String,
+        extractor: Extractor = Extractor.Mercury
+    ): ReadableDoc {
+        // 1. 尝试获取或创建新任务
+        val deferred = mapMutex.withLock {
+            activeRequests[url] ?: CoroutineScope(Dispatchers.IO).async {
+                try {
+                    performFetchAndExtract(url, extractor)
+                } finally {
+                    activeRequests.remove(url)
+                }
+            }.also { activeRequests[url] = it }
+        }
+        // 2. 等待结果（如果任务已在运行，这里会挂起直到第一个请求完成）
+        return deferred.await()
+    }
+
+    private suspend fun performFetchAndExtract(
         url: String,
         extractor: Extractor = Extractor.Mercury
     ): ReadableDoc = withContext(Dispatchers.IO) {
@@ -92,23 +117,6 @@ class Oeeeed @Inject constructor(@ApplicationContext private val context: Contex
             metadata = metadata,
             extracted = extracted,
             url = url,
-            requestId = requestId
         )
     }
-}
-
-sealed class ExtractionError : Exception() {
-    object FailedToExtract : ExtractionError() {
-        private fun readResolve(): Any = FailedToExtract
-    }
-
-    object DataIsNotString : ExtractionError() {
-        private fun readResolve(): Any = DataIsNotString
-    }
-
-    object MissingExtractionData : ExtractionError() {
-        private fun readResolve(): Any = MissingExtractionData
-    }
-
-    data class NetworkError(override val cause: Throwable) : ExtractionError()
 }

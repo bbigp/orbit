@@ -6,7 +6,6 @@ data class ReadableDoc(
     val metadata: SiteMetadata = SiteMetadata(),
     val extracted: ExtractedContent = ExtractedContent(),
     val url: String,
-    val requestId: Long
 )
 
 data class SiteMetadata(
