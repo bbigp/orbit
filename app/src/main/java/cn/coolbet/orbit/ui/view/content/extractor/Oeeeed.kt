@@ -36,7 +36,6 @@ class Oeeeed @Inject constructor(@ApplicationContext private val context: Contex
             Extractor.Mercury -> MercuryExtractor.shared(context = context).warmUp()
             else -> ""
         }
-        Log.i("oeeeed", "---")
     }
 
     /**

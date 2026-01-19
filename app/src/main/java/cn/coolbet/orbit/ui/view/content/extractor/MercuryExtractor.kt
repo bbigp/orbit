@@ -66,6 +66,7 @@ class MercuryExtractor private constructor(val context: Context){
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initializeJS() {
+        if (isReady.isCompleted) return
         Log.i("Oeeeed", "Initializing...")
         val mercuryJs = context.readAssetText("js/mercury.web.js")
         webView.settings.javaScriptEnabled = true

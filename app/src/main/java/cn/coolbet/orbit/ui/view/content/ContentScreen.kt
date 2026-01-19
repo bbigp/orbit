@@ -97,21 +97,7 @@ data class ContentScreen(
                             ArticleMeta(entry, modifier = Modifier.padding(horizontal = 16.dp))
                             ArticleHtml(state, scrollState)
                             NoMoreIndicator(height = 40.dp)
-                            if (entry.url.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                    ObIconTextButton(
-                                        content = "View Website",
-                                        icon = R.drawable.out_o,
-                                        sizes = OButtonDefaults.mediumPadded.copy(horizontalPadding = 32.dp),
-                                        colors = OButtonDefaults.secondary,
-                                        iconOnRight = true,
-                                        onClick = { openURL(context, entry.url.toUri()) }
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
+                            ViewWebsite(entry.url)
                             Spacer(modifier = Modifier.height(48.dp))
                         }
                         Box(modifier = Modifier.background(Color.Transparent).wrapContentSize()) {

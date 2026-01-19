@@ -7,8 +7,11 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import cn.coolbet.orbit.manager.Env
 import com.google.gson.Gson
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
@@ -112,6 +117,49 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
                 settings.loadsImagesAutomatically = true
                 settings.allowContentAccess = true
                 settings.allowFileAccess = true
+                this.webViewClient = object : WebViewClient() {
+                    override fun shouldInterceptRequest(
+                        view: WebView?,
+                        request: WebResourceRequest?
+                    ): WebResourceResponse? {
+                        val url = request?.url ?: return null
+                        val urlString = url.toString()
+                        if (urlString.startsWith("file://")) return null
+
+                        val accept = request.requestHeaders["Accept"] ?: ""
+                        val isImageRequest = accept.contains("image/") ||
+                                urlString.contains(".jpg") ||
+                                urlString.contains(".png") ||
+                                urlString.contains(".webp")
+                        if (isImageRequest) {
+                            try {
+                                val connection = URL(urlString).openConnection() as HttpURLConnection
+                                connection.requestMethod = "GET"
+                                connection.connectTimeout = 5000
+                                connection.readTimeout = 5000
+
+                                val host = URL(urlString).host
+                                connection.setRequestProperty("Referer", "https://$host/")
+
+                                //复制原始请求的其他 Header（如 User-Agent, Cookie 等）
+                                request.requestHeaders.forEach { (key, value) ->
+                                    connection.setRequestProperty(key, value)
+                                }
+
+                                val contentType = connection.contentType ?: "image/*"
+                                return WebResourceResponse(
+                                    contentType.split(";")[0], // 只要 MIME 类型部分
+                                    connection.contentEncoding,
+                                    connection.inputStream
+                                )
+                            } catch (e: Exception) {
+                                Log.e("WebView", "图片拦截失败: $urlString", e)
+                                return null
+                            }
+                        }
+                        return super.shouldInterceptRequest(view, request)
+                    }
+                }
                 addJavascriptInterface(webAppInterface, "AndroidBridge")
                 loadDataWithBaseURL("file:///android_asset/", HtmlBuilderHelper.html(), "text/html", "UTF-8", null)
             }
