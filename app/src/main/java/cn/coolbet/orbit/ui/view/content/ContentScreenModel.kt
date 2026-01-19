@@ -73,7 +73,11 @@ class ContentScreenModel @Inject constructor(
             it.copy(
                 readerModeOpened = opened,
                 entry = it.entry.copy(
-                    readerPageState = if (opened && it.entry.readerPageState == ReaderPageState.Idle) ReaderPageState.Fetching else it.entry.readerPageState,
+                    readerPageState =
+                        if (opened && it.entry.readerPageState == ReaderPageState.Idle)
+                            ReaderPageState.Fetching
+                        else
+                            it.entry.readerPageState,
                 ),
             )
         }
