@@ -75,7 +75,7 @@ fun EntriesSkeleton() {
 }
 
 @Composable
-fun EntryTopTileSkeleton() {
+fun LDHeaderSkeleton() {
     Column(modifier = Modifier.padding(horizontal = 14.dp)) {
         Spacer(modifier = Modifier.height(8.dp).fillMaxWidth())
         Text("All", style = AppTypography.M28.copy(color = Skeleton))

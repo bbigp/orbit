@@ -90,7 +90,7 @@ fun ContentOperate(
                 modifier = Modifier.clickable {
                     val entry = nextEntry()
                     if (entry == null)return@clickable
-                    NavigatorBus.replace(Route.Entry(entry))
+                    NavigatorBus.replace(Route.Entry(entry, state.settings))
                 }
             )
             Box{

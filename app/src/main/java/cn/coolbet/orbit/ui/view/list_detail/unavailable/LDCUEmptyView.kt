@@ -1,8 +1,10 @@
 package cn.coolbet.orbit.ui.view.list_detail.unavailable
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -21,18 +23,22 @@ import cn.coolbet.orbit.ui.theme.AppTypography
 @Preview(showBackground = true)
 @Composable
 fun LDCUEmptyView() {
-    Column(
-        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Image(
-            painter = painterResource(id = R.drawable.list_graph),
-            contentDescription = "",
-            contentScale = ContentScale.Fit,
-        )
-        Text("No content yet", maxLines = 1, style = AppTypography.M15B25)
-        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Image(
+                painter = painterResource(id = R.drawable.list_graph),
+                contentDescription = "",
+                contentScale = ContentScale.Fit,
+            )
+            Text("No content yet", maxLines = 1, style = AppTypography.M15B25)
+            Spacer(modifier = Modifier.height(24.dp))
 
 //        ObIconTextButton(
 //            "Add Feed Now",
@@ -41,5 +47,6 @@ fun LDCUEmptyView() {
 //            sizes = OButtonDefaults.mediumPadded
 //        )
 //        Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }

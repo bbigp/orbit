@@ -15,6 +15,7 @@ import cn.coolbet.orbit.manager.total
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.ReaderPageState
+import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ class ContentScreenModel @Inject constructor(
         }
     }
 
-    fun loadData(entry: Entry) {
+    fun loadData(entry: Entry, settings: LDSettings) {
         screenModelScope.launch {
             val raw = coordinator.state.value
             val index = raw.items.indexOfFirst { it.id == entry.id }
@@ -56,12 +57,28 @@ class ContentScreenModel @Inject constructor(
                 Log.i("nextEntry", "数据加载完成, 当前 $index  总共: ${raw.total()} ")
             }
             Log.i("entry-load-data", "entry index: $index")
-            mutableState.update {
-                ContentState(
+            if (settings.autoReaderView) {
+                val newEntry = entry.copy(
+                    readerPageState =
+                        if (entry.readerPageState == ReaderPageState.Idle)
+                            ReaderPageState.Fetching
+                        else
+                            entry.readerPageState
+                )
+                mutableState.update { ContentState(
+                    entry = newEntry,
+                    readerModeOpened = newEntry.readerPageState != ReaderPageState.Failure,
+                    index = index,
+                    settings = settings,
+                ) }
+                readerView(state.value.entry)
+            } else {
+                mutableState.update { ContentState(
                     entry = entry,
                     readerModeOpened = entry.readableContent.isNotEmpty(),
-                    index = index
-                )
+                    index = index,
+                    settings = settings,
+                ) }
             }
             autoRead()
         }
@@ -81,35 +98,36 @@ class ContentScreenModel @Inject constructor(
                 ),
             )
         }
-        val v = state.value
-        if (v.entry.readerPageState == ReaderPageState.Fetching) {
-            appScope.launch {
-                val entry = state.value.entry
-                runCatching {
-                    val readableDoc = oeeeed.fetchAndExtractContent(entry.url)
-                    entryDao.updateReadingModeData(
-                        readableDoc.extracted.content,
-                        readableDoc.extracted.leadImageUrl,
-                        readableDoc.extracted.excerpt ?: "",
-                        ReaderPageState.Success,
-                        entry.id
-                    )
-                    val newEntry = entry.copy(
-                        readableContent = readableDoc.extracted.content,
-                        leadImageURL = readableDoc.extracted.leadImageUrl,
-                        summary = readableDoc.extracted.excerpt ?: "",
-                        readerPageState = ReaderPageState.Success,
-                    )
-                    eventBus.post(Evt.EntryUpdated(newEntry))
-                }.onFailure { e ->
-                    if (e is CancellationException) return@onFailure
-                    entryDao.updateReadingModeData("", "", "",
-                        ReaderPageState.Failure, entry.id
-                    )
-                    eventBus.post(Evt.EntryUpdated(entry.copy(
-                        readerPageState = ReaderPageState.Failure
-                    )))
-                }
+        readerView(state.value.entry)
+    }
+
+    private fun readerView(entry: Entry) {
+        if (entry.readerPageState != ReaderPageState.Fetching) return
+        appScope.launch {
+            runCatching {
+                val readableDoc = oeeeed.fetchAndExtractContent(entry.url)
+                entryDao.updateReadingModeData(
+                    readableDoc.extracted.content,
+                    readableDoc.extracted.leadImageUrl,
+                    readableDoc.extracted.excerpt ?: "",
+                    ReaderPageState.Success,
+                    entry.id
+                )
+                val newEntry = entry.copy(
+                    readableContent = readableDoc.extracted.content,
+                    leadImageURL = readableDoc.extracted.leadImageUrl,
+                    summary = readableDoc.extracted.excerpt ?: "",
+                    readerPageState = ReaderPageState.Success,
+                )
+                eventBus.post(Evt.EntryUpdated(newEntry))
+            }.onFailure { e ->
+                if (e is CancellationException) return@onFailure
+                entryDao.updateReadingModeData("", "", "",
+                    ReaderPageState.Failure, entry.id
+                )
+                eventBus.post(Evt.EntryUpdated(entry.copy(
+                    readerPageState = ReaderPageState.Failure
+                )))
             }
         }
     }

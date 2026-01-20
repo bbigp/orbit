@@ -97,8 +97,8 @@ class ListDetailCoordinator @Inject constructor(
 
     suspend fun initData(metaId: MetaId, settings: LDSettings? = null, search: String = "") {
         val value = state.value
-        if (value.isRefreshing) return
-        update { it.copy(isRefreshing = true) }
+        if (value.state == LoadingState.Idle || value.isRefreshing) return
+        update { it.copy(isRefreshing = true, state = LoadingState.Loading) }
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -173,8 +173,16 @@ data class ListDetailState(
     override val isLoadingMore: Boolean = false,
     val settings: LDSettings = LDSettings.defaultSettings,
     val search: String = "",
+    val state: LoadingState = LoadingState.Idle,
 ): ILoadingState
 
 fun ListDetailState.total(): Int {
     return this.items.size
+}
+
+sealed class LoadingState {
+    object Idle : LoadingState()
+    object Loading : LoadingState()
+    object Loaded : LoadingState()
+    object Empty : LoadingState()
 }

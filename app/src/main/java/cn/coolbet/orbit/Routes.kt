@@ -8,6 +8,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreen
 import cn.coolbet.orbit.ui.view.content.ContentScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
@@ -33,8 +34,8 @@ data class Route(val screen: Screen) {
         fun SearchEntries(meta: Meta) = Route(
             screen = SearchEntriesScreen(meta)
         )
-        fun Entry(entry: Entry) = Route(
-            screen = ContentScreen(entry)
+        fun Entry(entry: Entry, settings: LDSettings) = Route(
+            screen = ContentScreen(entry, settings)
         )
     }
 }

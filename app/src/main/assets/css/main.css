@@ -69,7 +69,7 @@
     --bgSecondary: rgba(255, 255, 255, 0.06);
     --bgTertiary: rgba(255, 255, 255, 0.1);
     --borderThin: rgba(255, 255, 255, 0.16);
-    --borderStong: rgba(255, 255, 255, 0.2);
+    --borderStrong: rgba(255, 255, 255, 0.2);
   }
 }
 @media (prefers-color-scheme: light) {
@@ -81,7 +81,7 @@
     --bgSecondary: rgba(0, 0, 0, 0.04);
     --bgTertiary: rgba(0, 0, 0, 0.08);
     --borderThin: rgba(0, 0, 0, 0.12);
-    --borderStong: rgba(0, 0, 0, 0.16);
+    --borderStrong: rgba(0, 0, 0, 0.16);
   }
 }
 
@@ -213,15 +213,25 @@ a:active {
 
 /* === Blockquotes === */
 blockquote {
+  position: relative;
   font-size: 1rem;
   line-height: var(--line-height-multiplier);
   font-weight: var(--font-weight-normal);
   letter-spacing: var(--tracking-normal);
-  border-left: 4px solid var(--borderStong);
   padding-left: 1.5rem;
   margin: 1.5rem 0;
-  border-radius: 2px;
   quotes: '“' '”';
+}
+
+blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--borderStrong);
+  border-radius: 2px;
 }
 
 blockquote p::before {
@@ -242,6 +252,12 @@ video {
   border: 0.5px solid var(--borderThin);
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
+}
+
+iframe {
+  border-radius: 12px;
+  border: 0.5px solid var(--borderStrong, rgba(0, 0, 0, 0.16));
+  width: 100%;
 }
 
 img.error {

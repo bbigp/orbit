@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.view.list_detail
 
 import androidx.compose.runtime.compositionLocalOf
 import cn.coolbet.orbit.manager.ListDetailState
+import cn.coolbet.orbit.manager.LoadingState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
@@ -19,7 +20,8 @@ fun ListDetailState.addItems(data: List<Entry>, reset: Boolean = false, meta: Me
             page = 1,
             hasMore = newHasMore,
             isRefreshing = false,
-            meta = meta ?: this.meta
+            meta = meta ?: this.meta,
+            state = if (data.isEmpty()) LoadingState.Empty else LoadingState.Loaded
         )
     } else {
         this.copy(
@@ -27,7 +29,18 @@ fun ListDetailState.addItems(data: List<Entry>, reset: Boolean = false, meta: Me
             page = this.page + 1,
             hasMore = newHasMore,
             isLoadingMore = false,
-            meta = meta ?: this.meta
+            meta = meta ?: this.meta,
         )
     }
+}
+
+val LocalListDetailActions = compositionLocalOf<ListDetailActions> {
+    error("No function provided")
+}
+
+interface ListDetailActions {
+    fun onRefresh()
+    fun loadMore()
+    fun toggleRead(entry: Entry)
+    fun onBack()
 }

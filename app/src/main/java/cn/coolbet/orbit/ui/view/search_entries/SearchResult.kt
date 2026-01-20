@@ -41,7 +41,7 @@ fun SearchResult(
             LDMagazine(
                 item,
                 modifier = Modifier.clickable{
-                    NavigatorBus.push(Route.Entry(entry = item))
+                    NavigatorBus.push(Route.Entry(entry = item, state.settings))
                 }
             )
             SpacerDivider(start = 16.dp, end = 16.dp)
