@@ -96,7 +96,7 @@ data class ListDetailScreen(
         val navigator = LocalNavigator.current
         val actions = remember(model) {
             object : ListDetailActions {
-                override fun onRefresh() = model.loadInitialData()
+                override fun onRefresh() = model.refresh()
                 override fun loadMore() = model.nextPage()
                 override fun toggleRead(entry: Entry) = model.toggleReadStatus(entry)
                 override fun onBack() {

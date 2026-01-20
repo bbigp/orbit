@@ -10,7 +10,6 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.update
 import cn.coolbet.orbit.model.entity.LDSettings
-import cn.coolbet.orbit.ui.view.list_detail.addItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +36,7 @@ class ListDetailCoordinator @Inject constructor(
     private var previousState: ListDetailState? = null
 
     fun initData(scope: CoroutineScope, metaId: MetaId, settings: LDSettings? = null, search: String = "") {
+        update { it.copy(state = LoadingState.Loading) }
         scope.launch { initData(metaId = metaId, settings = settings, search = search) }
         //搜索页面一定是在列表页面之后的，2个页面公用一份数据管理类，所以只在列表页面建立监听就可以了
         if (search.isEmpty()) {
@@ -47,6 +47,12 @@ class ListDetailCoordinator @Inject constructor(
                     modifyEntries(event.entryId) { it.copy(status = event.status) }
                 }
         }
+    }
+
+    fun refresh(scope: CoroutineScope) {
+        val value = state.value
+        update { it.copy(items = emptyList()) }
+        scope.launch { initData(metaId = value.meta.metaId, settings = value.settings, search = value.search) }
     }
 
     fun loadMore(scope: CoroutineScope) {
@@ -97,8 +103,8 @@ class ListDetailCoordinator @Inject constructor(
 
     suspend fun initData(metaId: MetaId, settings: LDSettings? = null, search: String = "") {
         val value = state.value
-        if (value.state == LoadingState.Idle || value.isRefreshing) return
-        update { it.copy(isRefreshing = true, state = LoadingState.Loading) }
+        if (value.isRefreshing) return
+        update { it.copy(isRefreshing = true) }
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -116,11 +122,17 @@ class ListDetailCoordinator @Inject constructor(
                 size = value.size
             )
             update {
-                it.copy(settings = ldSettings, search = search)
-                    .addItems(newData, reset = true, meta)
+                it.copy(
+                    settings = ldSettings, search = search,
+                    items = newData,
+                    page = 1, hasMore = newData.size >= it.size,
+                    meta = meta,
+                    state = if (newData.isEmpty()) LoadingState.Empty else LoadingState.Loaded,
+                    isRefreshing = false
+                )
             }
         } catch (e: Exception) {
-            update { it.copy(isRefreshing = false) }
+            update { it.copy(isRefreshing = false, state = LoadingState.Error("Post fetch error", e)) }
         }
     }
 
@@ -139,7 +151,14 @@ class ListDetailCoordinator @Inject constructor(
                 size = state.value.size
             )
             delay(200)
-            update { it.addItems(newData) }
+            update {
+                it.copy(
+                    items = it.items + newData,
+                    page = it.page + 1, hasMore = newData.size >= it.size,
+                    isLoadingMore = false,
+                    state = LoadingState.Loaded
+                )
+            }
         } catch (e: Exception) {
             update { it.copy(isLoadingMore = false) }
             Log.e("BasePagingScreenModel", "加载数据出错.", e)
@@ -185,4 +204,8 @@ sealed class LoadingState {
     object Loading : LoadingState()
     object Loaded : LoadingState()
     object Empty : LoadingState()
+    data class Error(
+        val message: String,
+        val throwable: Throwable? = null
+    ) : LoadingState()
 }

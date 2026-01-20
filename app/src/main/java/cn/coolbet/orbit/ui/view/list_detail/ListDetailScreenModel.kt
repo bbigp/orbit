@@ -40,7 +40,7 @@ class ListDetailScreenModel @AssistedInject constructor(
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 
     init {
-        loadInitialData()
+        coordinator.initData(scope = screenModelScope, metaId = metaId)
     }
 
 
@@ -74,8 +74,8 @@ class ListDetailScreenModel @AssistedInject constructor(
     }
 
 
-    fun loadInitialData() {
-        coordinator.initData(scope = screenModelScope, metaId = metaId)
+    fun refresh() {
+        coordinator.refresh(scope = screenModelScope)
     }
 
     fun nextPage() {

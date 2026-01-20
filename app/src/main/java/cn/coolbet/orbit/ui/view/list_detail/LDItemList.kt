@@ -76,10 +76,12 @@ fun LDItemList(
             }
             SpacerDivider(start = 16.dp, end = 16.dp)
         }
-        if (state.hasMore) {
-            item(key = "loadMoreIndicator") { LoadMoreIndicator() }
-        } else {
-            item(key = "noMoreIndicator") { NoMoreIndicator() }
+        if (!state.isRefreshing) {
+            if (state.hasMore) {
+                item(key = "loadMoreIndicator") { LoadMoreIndicator() }
+            } else {
+                item(key = "noMoreIndicator") { NoMoreIndicator() }
+            }
         }
     }
 }
