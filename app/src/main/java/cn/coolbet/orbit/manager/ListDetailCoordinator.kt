@@ -10,6 +10,7 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.update
 import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.ui.view.list_detail.LDItemListState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -183,17 +184,17 @@ class ListDetailCoordinator @Inject constructor(
 }
 
 data class ListDetailState(
-    val meta: Meta = Feed.EMPTY,
+    override val meta: Meta = Feed.EMPTY,
     val items: List<Entry> = emptyList(),
     val page: Int = 1,
     val size: Int = 20,
     override val hasMore: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
-    val settings: LDSettings = LDSettings.defaultSettings,
+    override val settings: LDSettings = LDSettings.defaultSettings,
     val search: String = "",
     val state: LoadingState = LoadingState.Idle,
-): ILoadingState
+): ILoadingState, LDItemListState
 
 fun ListDetailState.total(): Int {
     return this.items.size

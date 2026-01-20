@@ -1,8 +1,10 @@
 package cn.coolbet.orbit.ui.view.list_detail
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,6 +60,7 @@ data class ListDetailScreen(
     val metaId: MetaId,
 ): Screen, Parcelable {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("FrequentlyChangingValue")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -65,34 +68,14 @@ data class ListDetailScreen(
         val model = getScreenModel<ListDetailScreenModel, ListDetailScreenModel.Factory> { factory ->
             factory.create(metaId)
         }
+        val groupedItems by model.groupedItemsFlow.collectAsState()
         val state by model.coordinator.state.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()
         val unreadCountMap by unreadState
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
         val listState = rememberLazyListState()
         var showBottomSheet by remember { mutableStateOf(false) }
-        val density = LocalDensity.current
-        val flyDistancePx = with(density) { 80.dp.toPx() }
-        val progress by remember {
-            derivedStateOf {
-                val firstIndex = listState.firstVisibleItemIndex
-                val firstOffset = listState.firstVisibleItemScrollOffset
-
-                when {
-                    firstIndex <= 1 && firstOffset <= 0 -> 0f
-                    firstIndex > 1 -> 1f
-                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
-
-                    //因为第一项是 RefreshIndicatorItem 所以listState.firstVisibleItemIndex 必须从1开始算
-//                    // 明确：如果是第 0 项且位移为 0，进度必须是 0
-//                    firstIndex == 0 && firstOffset <= 0 -> 0f
-//                    // 如果已经滚过第一项了，进度必须是 1
-//                    firstIndex > 0 -> 1f
-//                    // 在第一项内部滚动时的计算
-//                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
-                }
-            }
-        }
+        val progressProvider = listState.calculateProgress(80.dp)
         val navigator = LocalNavigator.current
         val actions = remember(model) {
             object : ListDetailActions {
@@ -142,9 +125,7 @@ data class ListDetailScreen(
                     },
                     title = {
                         Row(
-                            modifier = Modifier.graphicsLayer {
-                                alpha = progress
-                            },
+                            modifier = Modifier.graphicsLayer { alpha = progressProvider() },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
@@ -171,15 +152,11 @@ data class ListDetailScreen(
                         ObIconGroup {
                             ObIcon(
                                 R.drawable.search,
-                                modifier = Modifier.clickable {
-                                    NavigatorBus.push(Route.SearchEntries(state.meta))
-                                },
+                                modifier = Modifier.clickable { NavigatorBus.push(Route.SearchEntries(state.meta)) },
                             )
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable {
-                                    showBottomSheet = true
-                                },
+                                modifier = Modifier.clickable { showBottomSheet = true },
                             )
                         }
                     }
@@ -199,7 +176,12 @@ data class ListDetailScreen(
                             LocalListDetailActions provides actions,
                             LocalUnreadState provides unreadState,
                         ) {
-                            LDItemList(state, listState, progress)
+                            LDItemList(
+                                listState = listState,
+                                progress = progressProvider,
+                                state = state,
+                                groupedData = groupedItems
+                            )
                         }
                     }
                 }

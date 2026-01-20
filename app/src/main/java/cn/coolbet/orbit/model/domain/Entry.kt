@@ -1,12 +1,18 @@
 package cn.coolbet.orbit.model.domain
 
+import android.os.Build
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import cn.coolbet.orbit.common.HTMLProcessingHelper
 import cn.coolbet.orbit.common.hasHtmlTags
 import cn.coolbet.orbit.common.splitHtml
 import kotlinx.parcelize.Parcelize
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Parcelize
 data class Entry(
@@ -72,6 +78,31 @@ data class Entry(
 
     val showReadMore: Boolean get() = segments.sumOf { it.length } + title.length >= 240
 }
+
+val Entry.dateLabel: String
+    @RequiresApi(Build.VERSION_CODES.O)
+    get() {
+        if (publishedAt <= 0) return "Unknown"
+
+        val zone = ZoneId.systemDefault()
+        val now = LocalDate.now(zone)
+        val targetDate = Instant.ofEpochMilli(publishedAt)
+            .atZone(zone)
+            .toLocalDate()
+
+        return when {
+            targetDate == now -> "Today"
+            targetDate == now.minusDays(1) -> "Yesterday"
+            targetDate.year == now.year -> {
+                // 同一年显示：01月20日
+                targetDate.format(DateTimeFormatter.ofPattern("MMdd"))
+            }
+            else -> {
+                // 不同年显示：2025年01月20日
+                targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+            }
+        }
+    }
 
 
 

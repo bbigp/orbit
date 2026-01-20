@@ -1,6 +1,8 @@
 package cn.coolbet.orbit.ui.view.list_detail
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.hilt.ScreenModelFactory
@@ -14,13 +16,19 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.EntryStatus
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.OpenContentWith
+import cn.coolbet.orbit.model.domain.dateLabel
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSort
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ListDetailScreenModel @AssistedInject constructor(
@@ -42,6 +50,17 @@ class ListDetailScreenModel @AssistedInject constructor(
     init {
         coordinator.initData(scope = screenModelScope, metaId = metaId)
     }
+
+    private val itemsFlow = coordinator.state.map { it.items }.distinctUntilChanged()
+    private val settingsFlow = coordinator.state.map { it.settings }.distinctUntilChanged()
+    @RequiresApi(Build.VERSION_CODES.O)
+    val groupedItemsFlow = combine(itemsFlow, settingsFlow) { items, settings ->
+        if (settings.showGroupTitle) {
+            items.groupBy { it.dateLabel }
+        } else {
+            mapOf("" to items)
+        }
+    }.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
 
     fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {
