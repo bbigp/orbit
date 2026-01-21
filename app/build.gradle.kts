@@ -96,6 +96,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-transitions:${voyagerVersion}")
     implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:${voyagerVersion}")
 
     val koin_version = "3.5.0"
     implementation("io.insert-koin:koin-android:${koin_version}")

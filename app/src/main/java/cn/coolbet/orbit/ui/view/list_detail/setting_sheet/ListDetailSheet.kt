@@ -104,8 +104,11 @@ fun ListDetailSettingSheet(
             AnimatedContent(
                 targetState = currentPage,
                 transitionSpec = {
-                    (slideInHorizontally { width -> width } + fadeIn())
-                        .togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                    if (targetState == SheetPage.FeedSetting) {
+                        (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                    } else {
+                        (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(slideOutHorizontally { width -> width } + fadeOut())
+                    }
                 },
                 label = "SheetContentAnimation"
             ) { targetPage ->

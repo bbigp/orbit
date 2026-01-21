@@ -3,8 +3,11 @@ package cn.coolbet.orbit.ui.view.list_detail.item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -27,28 +30,31 @@ fun LDGroupTitle(
     modifier: Modifier = Modifier,
     date: String
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth().background(Color.White),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Box(
-            modifier = Modifier.size(16.dp).padding(start = 2.dp),
-            contentAlignment = Alignment.Center
+    Column(modifier = Modifier.background(Color.White).fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(14.dp))
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
         ) {
-            Image(
-                modifier = Modifier.size(6.dp),
-                painter = painterResource(id = R.drawable.rectangle),
-                contentDescription = "",
-                contentScale = ContentScale.None,
-                colorFilter = ColorFilter.tint(Black50),
-            )
+            Box(
+                modifier = Modifier.size(16.dp).padding(start = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    modifier = Modifier.padding(top = 4.dp).size(6.dp),
+                    painter = painterResource(id = R.drawable.rectangle),
+                    contentDescription = "",
+                    contentScale = ContentScale.None,
+                    colorFilter = ColorFilter.tint(Black50),
+                )
+            }
+            Text(date, maxLines = 1, style = AppTypography.M13B50)
         }
-        Text(date, maxLines = 1, style = AppTypography.M13B50)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewLDGroupTitle(){
-    LDGroupTitle(date = "Today")
+    LDGroupTitle(date = "Yesterday")
 }

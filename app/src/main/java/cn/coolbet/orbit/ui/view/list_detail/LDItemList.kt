@@ -82,7 +82,7 @@ fun LDItemList(
         groupedData.forEach { (date, entries) ->
             if (state.settings.showGroupTitle && date.isNotEmpty()) {
                 stickyHeader(key = date) {
-                    LDGroupTitle(modifier = Modifier.padding(top = 14.dp), date = date)
+                    LDGroupTitle(date = date)
                 }
             }
 

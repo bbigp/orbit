@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
@@ -39,6 +40,7 @@ import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.LoadingState
 import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
@@ -50,6 +52,7 @@ import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.ListDetailSettingSheet
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
+import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.EditFeedScreen
 import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import kotlinx.parcelize.Parcelize
 
@@ -105,6 +108,8 @@ data class ListDetailScreen(
             )
         }
 
+        val sheetNavigator = LocalBottomSheetNavigator.current
+
         Scaffold(
             topBar = {
                 ObTopAppbar(
@@ -147,7 +152,10 @@ data class ListDetailScreen(
                             )
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable { showBottomSheet = true },
+                                modifier = Modifier.clickable {
+                                    sheetNavigator.show(EditFeedScreen(feed = state.meta as Feed))
+//                                    showBottomSheet = true
+                                                              },
                             )
                         }
                     }
