@@ -1,10 +1,7 @@
 package cn.coolbet.orbit.ui.view.list_detail
 
 import androidx.compose.runtime.compositionLocalOf
-import cn.coolbet.orbit.manager.ListDetailState
-import cn.coolbet.orbit.manager.LoadingState
 import cn.coolbet.orbit.model.domain.Entry
-import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.entity.LDSettingKey
 
