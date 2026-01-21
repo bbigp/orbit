@@ -1,5 +1,11 @@
 package cn.coolbet.orbit.ui.view.list_detail.setting_sheet
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -62,6 +68,9 @@ import cn.coolbet.orbit.ui.view.FeedIcon
 import cn.coolbet.orbit.ui.view.FeedIconDefaults
 import cn.coolbet.orbit.ui.view.list_detail.LocalChangeLDSettings
 
+enum class SheetPage {
+    ListDetailSetting, FeedSetting
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +81,8 @@ fun ListDetailSettingSheet(
     onDismiss: () -> Unit,
 ){
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val changeLDSettings = LocalChangeLDSettings.current
+
+    var currentPage by remember { mutableStateOf(SheetPage.ListDetailSetting) }
     LaunchedEffect(showBottomSheet) {
         if (showBottomSheet) {
             sheetState.show()
@@ -91,67 +101,94 @@ fun ListDetailSettingSheet(
                 DragHandle()
             },
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 8.dp, bottom = 21.dp)
-                    .fillMaxWidth()
-            ) {
-                if (meta is Feed) {
-                    ListCard(meta)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Text("View", maxLines = 1, style = AppTypography.M15B25,
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                DisplayModePicker(
-                    metaId = meta.metaId,
-                    displayMode = settings.displayMode
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-//                Text("Sort by", maxLines = 1, style = AppTypography.M15B25,
-//                    modifier = Modifier.padding(horizontal = 20.dp)
-//                )
-//                Spacer(modifier = Modifier.height(6.dp))
-                //排序
-//                Spacer(modifier = Modifier.height(16.dp))
-
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    ObCard {
-                        ListTileSwitch(
-                            title = "Unread Only", icon = R.drawable.eyes,
-                            checked = settings.unreadOnly,
-                            onCheckedChange = { v->
-                                changeLDSettings(meta.metaId, LDSettingKey.UnreadOnly, v)
-                            }
-                        )
-                        ListTileSwitch(
-                            title = "Automatic Reader View", icon = R.drawable.book,
-                            checked = settings.autoReaderView,
-                            onCheckedChange = { v->
-                                changeLDSettings(meta.metaId, LDSettingKey.AutoReaderView, v)
-                            }
-                        )
-                        SpacerDivider(start = 52.dp, end = 12.dp)
-                        ListTileSwitch(
-                            title = "Group by Date", icon = R.drawable.list_label,
-                            checked = settings.showGroupTitle,
-                            onCheckedChange = { v->
-                                changeLDSettings(meta.metaId, LDSettingKey.ShowGroupTitle, v)
-                            }
+            AnimatedContent(
+                targetState = currentPage,
+                transitionSpec = {
+                    (slideInHorizontally { width -> width } + fadeIn())
+                        .togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                },
+                label = "SheetContentAnimation"
+            ) { targetPage ->
+                when(targetPage) {
+                    SheetPage.ListDetailSetting -> {
+                        ListDetailSettingSheetContent(
+                            meta, settings,
+                            onNavigateToFeedSetting = { currentPage = SheetPage.FeedSetting }
                         )
                     }
+                    else -> { FeedSettingSheetContent(feed = meta as Feed, onBack = { currentPage = SheetPage.ListDetailSetting }) }
                 }
             }
         }
     }
 
+}
+
+@Composable
+fun ListDetailSettingSheetContent(
+    meta: Meta,
+    settings: LDSettings,
+    onNavigateToFeedSetting: () -> Unit
+) {
+    val changeLDSettings = LocalChangeLDSettings.current
+    Column(
+        modifier = Modifier
+            .padding(top = 8.dp, bottom = 21.dp)
+            .fillMaxWidth()
+    ) {
+        if (meta is Feed) {
+            EditFeedView(meta, onNavigateToFeedSetting)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        Text("View", maxLines = 1, style = AppTypography.M15B25,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        DisplayModePicker(
+            metaId = meta.metaId,
+            displayMode = settings.displayMode
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+//                Text("Sort by", maxLines = 1, style = AppTypography.M15B25,
+//                    modifier = Modifier.padding(horizontal = 20.dp)
+//                )
+//                Spacer(modifier = Modifier.height(6.dp))
+        //排序
+//                Spacer(modifier = Modifier.height(16.dp))
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            ObCard {
+                ListTileSwitch(
+                    title = "Unread Only", icon = R.drawable.eyes,
+                    checked = settings.unreadOnly,
+                    onCheckedChange = { v->
+                        changeLDSettings(meta.metaId, LDSettingKey.UnreadOnly, v)
+                    }
+                )
+                ListTileSwitch(
+                    title = "Automatic Reader View", icon = R.drawable.book,
+                    checked = settings.autoReaderView,
+                    onCheckedChange = { v->
+                        changeLDSettings(meta.metaId, LDSettingKey.AutoReaderView, v)
+                    }
+                )
+                SpacerDivider(start = 52.dp, end = 12.dp)
+                ListTileSwitch(
+                    title = "Group by Date", icon = R.drawable.list_label,
+                    checked = settings.showGroupTitle,
+                    onCheckedChange = { v->
+                        changeLDSettings(meta.metaId, LDSettingKey.ShowGroupTitle, v)
+                    }
+                )
+            }
+        }
+    }
 }
 
 
@@ -160,14 +197,15 @@ fun ListDetailSettingSheet(
 fun PreviewListCard() {
     val meta = Feed.EMPTY.copy(title = "少数派 - sspai", feedURL = "htts://sspai.com/feed")
     Column {
-        ListCard(meta)
+        EditFeedView(meta)
     }
 }
 
 
 @Composable
-fun ListCard(
-    meta: Meta
+fun EditFeedView(
+    meta: Meta,
+    onNavigateToFeedSetting: () -> Unit = {}
 ) {
     val context = LocalContext.current
     Column (
@@ -212,7 +250,8 @@ fun ListCard(
             Box(
                 modifier = Modifier.height(48.dp).width(60.dp)
                     .background(Black04, shape = RoundedCornerShape(12.dp))
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(RoundedCornerShape(12.dp))
+                    .click(onClick = onNavigateToFeedSetting),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
