@@ -16,8 +16,6 @@ val LocalListDetailActions = compositionLocalOf<ListDetailActions> {
 }
 
 interface ListDetailActions {
-    fun onRefresh()
-    fun loadMore()
     fun toggleRead(entry: Entry)
     fun onBack()
 }

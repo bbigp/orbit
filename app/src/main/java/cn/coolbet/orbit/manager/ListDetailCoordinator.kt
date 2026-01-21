@@ -10,6 +10,7 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.update
 import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.ui.kit.ListLoadMoreState
 import cn.coolbet.orbit.ui.view.list_detail.LDItemListState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -194,7 +195,7 @@ data class ListDetailState(
     override val settings: LDSettings = LDSettings.defaultSettings,
     val search: String = "",
     val state: LoadingState = LoadingState.Idle,
-): ILoadingState, LDItemListState
+): ILoadingState, LDItemListState, ListLoadMoreState
 
 fun ListDetailState.total(): Int {
     return this.items.size

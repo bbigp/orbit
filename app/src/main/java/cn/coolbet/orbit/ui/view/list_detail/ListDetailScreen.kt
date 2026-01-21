@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -21,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getScreenModel
@@ -44,10 +41,11 @@ import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
-import cn.coolbet.orbit.ui.kit.InfiniteScrollHandler
+import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.ListDetailSettingSheet
@@ -73,14 +71,14 @@ data class ListDetailScreen(
         val unreadState = model.unreadMapState.collectAsState()
         val unreadCountMap by unreadState
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
-        val listState = rememberLazyListState()
         var showBottomSheet by remember { mutableStateOf(false) }
-        val progressProvider = listState.calculateProgress(80.dp)
+        val scrollState = rememberListScrollState(
+            onRefresh = { model.refresh() },
+            onLoadMore = { model.nextPage() }
+        )
         val navigator = LocalNavigator.current
         val actions = remember(model) {
             object : ListDetailActions {
-                override fun onRefresh() = model.refresh()
-                override fun loadMore() = model.nextPage()
                 override fun toggleRead(entry: Entry) = model.toggleReadStatus(entry)
                 override fun onBack() {
                     model.coordinator.clear()
@@ -94,14 +92,7 @@ data class ListDetailScreen(
         LaunchedEffect(Unit) {
             model.coordinator.unfreeze()
         }
-
-        InfiniteScrollHandler(
-            listState = listState,
-            stateFlow = model.coordinator.state,
-            onLoadMore = {
-                model.nextPage()
-            }
-        )
+        ListLoadMoreHandler(scrollState, state)
 
         CompositionLocalProvider(
             LocalChangeLDSettings provides model::changeLDSettings,
@@ -125,7 +116,7 @@ data class ListDetailScreen(
                     },
                     title = {
                         Row(
-                            modifier = Modifier.graphicsLayer { alpha = progressProvider() },
+                            modifier = Modifier.graphicsLayer { alpha = scrollState.progress },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
@@ -177,8 +168,7 @@ data class ListDetailScreen(
                             LocalUnreadState provides unreadState,
                         ) {
                             LDItemList(
-                                listState = listState,
-                                progress = progressProvider,
+                                scrollState = scrollState,
                                 state = state,
                                 groupedData = groupedItems
                             )

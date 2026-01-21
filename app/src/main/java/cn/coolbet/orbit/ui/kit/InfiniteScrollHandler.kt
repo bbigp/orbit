@@ -9,6 +9,46 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import cn.coolbet.orbit.common.ILoadingState
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+
+interface ListLoadMoreState {
+    val hasMore: Boolean
+    val isLoadingMore: Boolean
+    val isRefreshing: Boolean
+}
+
+@Composable
+fun ListLoadMoreHandler(
+    scrollState: ListScrollState,
+    state: ListLoadMoreState,
+    enabled: Boolean = true,
+    buffer: Int = 4
+) {
+    if (!enabled) return
+    // 使用 rememberUpdatedState 确保 Lambda 内部始终能拿到最新的 onLoadMore 引用
+    val currentOnLoadMore by rememberUpdatedState(scrollState.onLoadMore)
+
+    LaunchedEffect(scrollState.listState) {
+        snapshotFlow {
+            val layoutInfo = scrollState.listState.layoutInfo
+            val totalItemsCount = layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+
+            // 将你的逻辑封装进 flow 的发射条件中
+            val canTriggerPositionally = totalItemsCount > 0 &&
+                    (totalItemsCount - (lastVisibleItemIndex + 1) <= buffer)
+
+            // 只有当位置满足，且业务状态允许时，才返回 true
+            canTriggerPositionally && state.hasMore && !state.isLoadingMore && !state.isRefreshing
+        }
+            .distinctUntilChanged() // 只有状态从 false 变为 true 时才触发
+            .filter { it }           // 只处理为 true 的情况
+            .collect {
+                currentOnLoadMore()
+            }
+    }
+}
 
 @Composable
 fun InfiniteScrollHandler(
