@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail.item
+package cn.coolbet.orbit.ui.view.listdetail.component.item
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

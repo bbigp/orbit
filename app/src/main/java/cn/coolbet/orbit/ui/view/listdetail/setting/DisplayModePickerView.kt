@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail.setting_sheet
+package cn.coolbet.orbit.ui.view.listdetail.setting
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,11 +27,11 @@ import cn.coolbet.orbit.ui.kit.ObtTextOnlyView
 import cn.coolbet.orbit.ui.kit.ObtThreadView
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black95
-import cn.coolbet.orbit.ui.view.list_detail.LocalChangeLDSettings
+import cn.coolbet.orbit.ui.view.listdetail.LocalChangeLDSettings
 
 
 @Composable
-fun DisplayModePicker(
+fun DisplayModePickerView(
     metaId: MetaId,
     displayMode: DisplayMode = DisplayMode.Magazine
 ){
@@ -131,6 +131,6 @@ private fun DisplayModeItem(
 fun PreviewDisplayModeItem() {
     Column {
         DisplayModeItem()
-        DisplayModePicker(metaId = MetaId("", 0))
+        DisplayModePickerView(metaId = MetaId("", 0))
     }
 }

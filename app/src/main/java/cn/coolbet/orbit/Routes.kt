@@ -9,7 +9,7 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.entity.LDSettings
-import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreen
+import cn.coolbet.orbit.ui.view.listdetail.ListDetailScreen
 import cn.coolbet.orbit.ui.view.content.ContentScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen

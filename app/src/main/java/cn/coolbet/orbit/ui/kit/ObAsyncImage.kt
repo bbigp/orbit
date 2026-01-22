@@ -8,7 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.ui.view.list_detail.item.pulsatingShimmer
+import cn.coolbet.orbit.ui.view.listdetail.component.item.pulsatingShimmer
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
 import coil3.network.NetworkHeaders

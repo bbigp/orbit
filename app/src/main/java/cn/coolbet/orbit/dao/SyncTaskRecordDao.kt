@@ -4,18 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
-import cn.coolbet.orbit.model.domain.Feed
-import cn.coolbet.orbit.model.domain.Folder
-import cn.coolbet.orbit.model.domain.Media
-import cn.coolbet.orbit.model.entity.FolderEntity
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
-import cn.coolbet.orbit.remote.EntryApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.util.Date
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Dao
 abstract class SyncTaskRecordDao {

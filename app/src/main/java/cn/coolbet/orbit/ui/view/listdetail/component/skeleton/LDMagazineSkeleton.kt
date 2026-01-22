@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail.skeleton
+package cn.coolbet.orbit.ui.view.listdetail.component.skeleton
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

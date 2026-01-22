@@ -20,7 +20,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -34,6 +33,7 @@ import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.ProgressIndicator
 import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
+import org.koin.androidx.compose.koinViewModel
 
 val LocalExpandFolder = compositionLocalOf { { _: Long -> } }
 val LocalListIsScrolling = compositionLocalOf { false }
@@ -50,7 +50,7 @@ object HomeScreen: Screen {
         val unreadState = model.unreadMapState.collectAsState()
         val userState = model.userState.collectAsState()
 
-        val syncViewModel: SyncViewModel = hiltViewModel()
+        val syncViewModel: SyncViewModel = koinViewModel()
         val isSyncing by syncViewModel.isSyncing.collectAsStateWithLifecycle()
 
         val lazyListState = rememberLazyListState()

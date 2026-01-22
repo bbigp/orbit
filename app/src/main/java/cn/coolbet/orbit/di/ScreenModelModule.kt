@@ -1,10 +1,13 @@
 package cn.coolbet.orbit.di
 
+import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
-import cn.coolbet.orbit.ui.view.list_detail.ListDetailScreenModel
+import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.ui.view.listdetail.ListDetailScreenModel
 import cn.coolbet.orbit.ui.view.content.ContentScreenModel
 import cn.coolbet.orbit.ui.view.home.HomeScreenModel
+import cn.coolbet.orbit.ui.view.listdetail.setting.ListDetailSettingScreenModel
 import cn.coolbet.orbit.ui.view.login.LoginScreenModel
 import cn.coolbet.orbit.ui.view.profile.ProfileScreenModel
 import cn.coolbet.orbit.ui.view.search_entries.SearchEntriesScreenModel
@@ -36,6 +39,14 @@ val screenModelModule = module {
             session = get(),
             coordinator = get(),
             eventBus = get()
+        )
+    }
+    factory { (feed: Feed, settings: LDSettings) ->
+        ListDetailSettingScreenModel(
+            feed, settings,
+            ldSettingsDao = get(),
+            coordinator = get(),
+            cacheStore = get()
         )
     }
 }

@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail
+package cn.coolbet.orbit.ui.view.listdetail
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -21,9 +21,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -50,10 +48,11 @@ import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
-import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.ListDetailSettingSheet
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
-import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.EditFeedScreen
-import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
+import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
+import cn.coolbet.orbit.ui.view.listdetail.component.skeleton.LDSkeletonList
+import cn.coolbet.orbit.ui.view.listdetail.component.item.unavailable.LDCUEmptyView
+import cn.coolbet.orbit.ui.view.listdetail.setting.ListDetailSettingScreen
 import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
 
@@ -73,7 +72,6 @@ data class ListDetailScreen(
         val unreadState = model.unreadMapState.collectAsState()
         val unreadCountMap by unreadState
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
-        var showBottomSheet by remember { mutableStateOf(false) }
         val scrollState = rememberListScrollState(
             onRefresh = { model.refresh() },
             onLoadMore = { model.nextPage() }
@@ -95,17 +93,6 @@ data class ListDetailScreen(
             model.coordinator.unfreeze()
         }
         ListLoadMoreHandler(scrollState, state)
-
-        CompositionLocalProvider(
-            LocalChangeLDSettings provides model::changeLDSettings,
-        ) {
-            ListDetailSettingSheet(
-                meta = state.meta,
-                settings = state.settings,
-                showBottomSheet = showBottomSheet,
-                onDismiss = { showBottomSheet = false }
-            )
-        }
 
         val sheetNavigator = LocalBottomSheetNavigator.current
 
@@ -152,9 +139,10 @@ data class ListDetailScreen(
                             ObIcon(
                                 R.drawable.more,
                                 modifier = Modifier.clickable {
-                                    sheetNavigator.show(EditFeedScreen(feed = state.meta as Feed))
-//                                    showBottomSheet = true
-                                                              },
+                                    sheetNavigator.show(
+                                        ListDetailSettingScreen(state.meta as Feed, state.settings)
+                                    )
+                                },
                             )
                         }
                     }

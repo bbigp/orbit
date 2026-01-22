@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail
+package cn.coolbet.orbit.ui.view.listdetail.component.skeleton
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -7,8 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.ui.kit.SpacerDivider
-import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDHeaderSkeleton
-import cn.coolbet.orbit.ui.view.list_detail.skeleton.LDMagazineSkeleton
 
 
 @Composable

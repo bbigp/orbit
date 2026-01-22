@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail.swipable
+package cn.coolbet.orbit.ui.view.listdetail.component
 
 import android.annotation.SuppressLint
 import android.util.Log

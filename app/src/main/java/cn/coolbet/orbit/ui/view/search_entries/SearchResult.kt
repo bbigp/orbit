@@ -19,7 +19,7 @@ import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
+import cn.coolbet.orbit.ui.view.listdetail.component.item.LDMagazine
 
 @Composable
 fun SearchResult(

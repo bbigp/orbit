@@ -22,7 +22,7 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
-import cn.coolbet.orbit.ui.view.list_detail.item.pulsatingShimmer
+import cn.coolbet.orbit.ui.view.listdetail.component.item.pulsatingShimmer
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
 import coil3.network.NetworkHeaders

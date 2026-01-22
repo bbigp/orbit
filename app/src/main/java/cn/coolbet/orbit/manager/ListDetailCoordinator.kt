@@ -11,7 +11,7 @@ import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.update
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.ListLoadMoreState
-import cn.coolbet.orbit.ui.view.list_detail.LDItemListState
+import cn.coolbet.orbit.ui.view.listdetail.component.LDItemListState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

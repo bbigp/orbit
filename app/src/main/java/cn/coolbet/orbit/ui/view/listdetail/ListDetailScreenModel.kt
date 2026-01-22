@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail
+package cn.coolbet.orbit.ui.view.listdetail
 
 import android.os.Build
 import android.util.Log
@@ -52,36 +52,6 @@ class ListDetailScreenModel(
             mapOf("" to items)
         }
     }.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
-
-
-    fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {
-        var unreadOnly: Boolean? = null
-        var sortOrder: LDSort? = null
-        var showGroupTitle: Boolean? = null
-        var displayMode: DisplayMode? = null
-        var autoReaderView: Boolean? = null
-        var openContentWith: OpenContentWith? = null
-        when(key) {
-            LDSettingKey.UnreadOnly -> unreadOnly = value as Boolean
-            LDSettingKey.SortOrder -> sortOrder = value as LDSort
-            LDSettingKey.ShowGroupTitle -> showGroupTitle = value as Boolean
-            LDSettingKey.DisPlayMode -> displayMode = value as DisplayMode
-            LDSettingKey.AutoReaderView -> autoReaderView = value as Boolean
-            LDSettingKey.OpenContentWith -> openContentWith = value as OpenContentWith
-        }
-        screenModelScope.launch {
-            val updated = ldSettingsDao.update(
-                metaId, sortOrder = sortOrder, unreadOnly = unreadOnly,
-                showGroupTitle = showGroupTitle, displayMode = displayMode,
-                autoReaderView = autoReaderView, openContentWith = openContentWith
-            )
-            if (unreadOnly != null) {
-                coordinator.initData(metaId = metaId, settings = updated)
-            } else {
-                coordinator.update { it.copy(settings = updated) }
-            }
-        }
-    }
 
 
     fun refresh() {

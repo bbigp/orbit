@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.list_detail
+package cn.coolbet.orbit.ui.view.listdetail
 
 import androidx.compose.runtime.compositionLocalOf
 import cn.coolbet.orbit.model.domain.Entry
