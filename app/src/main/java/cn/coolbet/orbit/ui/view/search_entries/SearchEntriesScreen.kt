@@ -20,7 +20,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Meta
@@ -29,6 +29,7 @@ import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextFieldAppbar
 import kotlinx.parcelize.Parcelize
+import org.koin.core.parameter.parametersOf
 
 @Parcelize
 data class SearchEntriesScreen(
@@ -37,9 +38,7 @@ data class SearchEntriesScreen(
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<SearchEntriesScreenModel, SearchEntriesScreenModel.Factory> { factory ->
-            factory.create(meta)
-        }
+        val model = koinScreenModel<SearchEntriesScreenModel> { parametersOf(meta) }
         val state by model.state.collectAsState()
         val ldState by model.coordinator.state.collectAsState()
         val focusRequester = remember { FocusRequester() }

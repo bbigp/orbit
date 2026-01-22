@@ -17,14 +17,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * 协调器
  */
-@Singleton
-class ListDetailCoordinator @Inject constructor(
+class ListDetailCoordinator(
     val cacheStore: CacheStore,
     val ldSettingsDao: LDSettingsDao,
     val entryManager: EntryManager,

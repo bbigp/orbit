@@ -5,12 +5,8 @@ import cn.coolbet.orbit.dao.MediaDao
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
-import cn.coolbet.orbit.ui.view.list_detail.item.LDMagazine
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class EntryManager @Inject constructor(
+class EntryManager(
     private val entryDao: EntryDao,
     private val mediaDao: MediaDao,
     private val cacheStore: CacheStore,

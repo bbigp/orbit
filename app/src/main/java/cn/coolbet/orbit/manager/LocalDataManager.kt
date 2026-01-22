@@ -2,11 +2,8 @@ package cn.coolbet.orbit.manager
 
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.model.domain.EntryStatus
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class LocalDataManager @Inject constructor(
+class LocalDataManager(
     private val entryDao: EntryDao,
 ){
 

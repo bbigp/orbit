@@ -4,7 +4,6 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
-import cn.coolbet.orbit.di.App
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.remote.miniflux.MiniLoginApi
 import cn.coolbet.orbit.remote.miniflux.to
@@ -14,10 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
-import javax.inject.Inject
 
-class LoginScreenModel @Inject constructor(
-    @App private val retrofit: Retrofit,
+class LoginScreenModel(
+    retrofit: Retrofit,
     private val session: Session,
 ): ScreenModel {
     private val _state = MutableStateFlow(LoginState())

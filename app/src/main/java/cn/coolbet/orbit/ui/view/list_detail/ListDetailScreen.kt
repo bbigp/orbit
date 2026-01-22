@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cn.coolbet.orbit.NavigatorBus
@@ -55,6 +55,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.list_detail.setting_sheet.EditFeedScreen
 import cn.coolbet.orbit.ui.view.list_detail.unavailable.LDCUEmptyView
 import kotlinx.parcelize.Parcelize
+import org.koin.core.parameter.parametersOf
 
 @Parcelize
 data class ListDetailScreen(
@@ -66,9 +67,7 @@ data class ListDetailScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val model = getScreenModel<ListDetailScreenModel, ListDetailScreenModel.Factory> { factory ->
-            factory.create(metaId)
-        }
+        val model = koinScreenModel<ListDetailScreenModel> { parametersOf(metaId) }
         val groupedItems by model.groupedItemsFlow.collectAsState()
         val state by model.coordinator.state.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()

@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Flow	Cold Stream（冷流）	Coroutines	异步数据流的基础。用于处理一次性数据序列（如 API 响应）或事件流（如点击事件）。
@@ -31,8 +29,7 @@ import javax.inject.Singleton
  * State	Interface	Compose	Compose 运行时可追踪的状态接口。当它的 .value 属性被读取时，Compose 会记录下来，并在值改变时触发依赖它的 Composable 重组。
  * by	Kotlin Delegate	Kotlin	属性委托关键字。在 Compose 中，用于简化对 State<T> 值的访问。
  */
-@Singleton
-class CacheStore @Inject constructor(
+class CacheStore(
     private val feedDao: FeedDao,
     private val folderDao: FolderDao,
     private val entryDao: EntryDao,

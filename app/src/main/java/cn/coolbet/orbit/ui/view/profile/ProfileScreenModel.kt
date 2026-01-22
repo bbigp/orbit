@@ -18,10 +18,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProfileScreenModel @Inject constructor(
+class ProfileScreenModel(
     private val store: CacheStore,
     private val session: Session,
 ): ScreenModel {

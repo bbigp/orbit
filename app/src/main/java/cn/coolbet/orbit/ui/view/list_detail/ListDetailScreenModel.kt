@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.LDSettingsDao
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
@@ -20,9 +19,6 @@ import cn.coolbet.orbit.model.domain.dateLabel
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSort
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -31,19 +27,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ListDetailScreenModel @AssistedInject constructor(
-    @Assisted private val metaId: MetaId,
+class ListDetailScreenModel(
+    private val metaId: MetaId,
     private val entryManager: EntryManager,
     private val cacheStore: CacheStore,
     private val eventBus: EventBus,
     private val ldSettingsDao: LDSettingsDao,
     val coordinator: ListDetailCoordinator
 ): ScreenModel {
-
-    @AssistedFactory
-    interface Factory: ScreenModelFactory {
-        fun create(metaId: MetaId): ListDetailScreenModel
-    }
 
     val unreadMapState: StateFlow<Map<String, Int>> = cacheStore.unreadMapState
 

@@ -23,7 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
@@ -45,7 +45,7 @@ object HomeScreen: Screen {
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<HomeScreenModel>()
+        val model = koinScreenModel<HomeScreenModel>()
         val state by model.uiState.collectAsState()
         val unreadState = model.unreadMapState.collectAsState()
         val userState = model.userState.collectAsState()

@@ -17,9 +17,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
-class HomeScreenModel @Inject constructor(
+class HomeScreenModel(
     cacheStore: CacheStore,
     session: Session,
 ) : ScreenModel {

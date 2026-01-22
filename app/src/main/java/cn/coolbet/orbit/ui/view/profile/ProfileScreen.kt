@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.manager.Env
@@ -43,7 +43,7 @@ object ProfileScreen: Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val model = getScreenModel<ProfileScreenModel>()
+        val model = koinScreenModel<ProfileScreenModel>()
         val state by model.state.collectAsState()
         val folders by model.folders.collectAsState()
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()

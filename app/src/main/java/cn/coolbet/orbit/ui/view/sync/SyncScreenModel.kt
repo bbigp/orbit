@@ -5,9 +5,8 @@ import cn.coolbet.orbit.common.IPagingScreenModel
 import cn.coolbet.orbit.common.PageState
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
-import javax.inject.Inject
 
-class SyncScreenModel @Inject constructor(
+class SyncScreenModel(
     private val syncTaskRecordDao: SyncTaskRecordDao,
 ): IPagingScreenModel<SyncTaskRecord>(
     initialState = PageState()

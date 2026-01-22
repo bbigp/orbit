@@ -51,7 +51,7 @@ fun FeedSettingSheetContent(
     feed: Feed,
     onBack: () -> Unit,
 ) {
-    Column(modifier = Modifier.background(Color.Red)) {
+    Column {
         DragHandle()
         SheetTopBar(title = "Edit Feed", onBack = onBack)
         Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {

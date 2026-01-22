@@ -3,17 +3,11 @@ package cn.coolbet.orbit.manager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import cn.coolbet.orbit.model.domain.OpenContentWith
-import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.model.domain.User
 import com.google.gson.Gson
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class Preference @Inject constructor(
-    @ApplicationContext private val context: Context,
+class Preference(
+    context: Context,
     private val gson: Gson,
 ){
 

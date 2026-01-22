@@ -8,7 +8,6 @@ import android.os.Build
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -21,17 +20,14 @@ import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import cn.coolbet.orbit.remote.EntryApi
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 
 
 const val IGNORE_TIME_KEY = "ignore_last_sync_time"
 const val FULL_RESYNC_KEY = "full_resync"
 
-@HiltWorker
-class SyncWorker @AssistedInject constructor(
-    @Assisted appContext: Context,
-    @Assisted workerParams: WorkerParameters,
+class SyncWorker(
+    appContext: Context,
+    workerParams: WorkerParameters,
     private val dao: SyncTaskRecordDao,
     private val entryApi: EntryApi,
     private val preference: Preference,

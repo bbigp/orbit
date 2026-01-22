@@ -2,7 +2,6 @@ package cn.coolbet.orbit.ui.view.search_entries
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import cafe.adriel.voyager.hilt.ScreenModelFactory
 import cn.coolbet.orbit.dao.SearchDao
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
@@ -10,28 +9,20 @@ import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.SearchRecord
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchEntriesScreenModel @AssistedInject constructor(
-    @Assisted val meta: Meta,
+class SearchEntriesScreenModel(
+    val meta: Meta,
     private val searchDao: SearchDao,
     private val entryManager: EntryManager,
     private val session: Session,
     val coordinator: ListDetailCoordinator,
     private val eventBus: EventBus,
 ): ScreenModel {
-
-    @AssistedFactory
-    interface Factory: ScreenModelFactory {
-        fun create(meta: Meta): SearchEntriesScreenModel
-    }
 
     private val mutableState = MutableStateFlow(SearchState())
     val state = mutableState.asStateFlow()

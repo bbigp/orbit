@@ -1,8 +1,6 @@
 package cn.coolbet.orbit.ui.view.content.extractor
 
 import android.content.Context
-import android.util.Log
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -10,13 +8,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
 enum class Extractor { Mercury, Readability }
 
-@Singleton
-class Oeeeed @Inject constructor(@ApplicationContext private val context: Context) {
+class Oeeeed(private val context: Context) {
 
     // 使用 Deferred 存储正在运行的任务，这样并发请求同一个 URL 时可以“挂起等待”同一个结果
     private val activeRequests = ConcurrentHashMap<String, Deferred<ReadableDoc>>()

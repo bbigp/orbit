@@ -23,10 +23,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class ContentScreenModel @Inject constructor(
+class ContentScreenModel(
     private val entryDao: EntryDao,
     private val localDataManager: LocalDataManager,
     private val session: Session,

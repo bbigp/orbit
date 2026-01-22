@@ -27,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.asColorState
 import cn.coolbet.orbit.model.domain.Entry
@@ -45,7 +45,7 @@ data class ContentScreen(
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<ContentScreenModel>()
+        val model = koinScreenModel<ContentScreenModel>()
         val state by model.state.collectAsState()
         val bgColor by Env.settings.articleBgColor.asColorState()
         val scrollState = rememberScrollState()

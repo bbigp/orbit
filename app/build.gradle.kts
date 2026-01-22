@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt") // 启用 Kotlin 注解处理器
-    id("com.google.dagger.hilt.android") // Hilt 插件
+//    id("com.google.dagger.hilt.android") // Hilt 插件
     id("kotlin-parcelize")
 }
 
@@ -77,13 +77,13 @@ dependencies {
 
 
     // Hilt 核心依赖
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    kapt("com.google.dagger:hilt-compiler:2.51.1")// Hilt 注解处理器 (需要使用 kapt)
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")// 针对 Compose Navigation 的集成 (您之前使用了 Compose)
-    kapt("androidx.hilt:hilt-compiler:1.2.0")// 如果您需要在 Activity/Fragment 中使用 Hilt，可能还需要以下依赖：
-    kapt("com.google.dagger:hilt-compiler:2.51.1") // Hilt 编译器的 KSP 版本也需要检查，通常它也会使用匹配的 KSP 版本
-    implementation("androidx.hilt:hilt-work:1.2.0")
+//    implementation("com.google.dagger:hilt-android:2.51.1")
+//    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+//    kapt("com.google.dagger:hilt-compiler:2.51.1")// Hilt 注解处理器 (需要使用 kapt)
+//    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")// 针对 Compose Navigation 的集成 (您之前使用了 Compose)
+//    kapt("androidx.hilt:hilt-compiler:1.2.0")// 如果您需要在 Activity/Fragment 中使用 Hilt，可能还需要以下依赖：
+//    kapt("com.google.dagger:hilt-compiler:2.51.1") // Hilt 编译器的 KSP 版本也需要检查，通常它也会使用匹配的 KSP 版本
+//    implementation("androidx.hilt:hilt-work:1.2.0")
 
     // Room 核心库和 KTX (协程支持)
     val roomVersion = "2.8.0" // 稳定版本，兼容 Kotlin 2.0.x

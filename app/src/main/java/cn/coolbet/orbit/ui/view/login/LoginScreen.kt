@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.hilt.getScreenModel
+import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObTextField
@@ -30,7 +30,7 @@ object LoginScreen: Screen {
 
     @Composable
     override fun Content() {
-        val model = getScreenModel<LoginScreenModel>()
+        val model = koinScreenModel<LoginScreenModel>()
         val state by model.state.collectAsState()
 
         Scaffold(
