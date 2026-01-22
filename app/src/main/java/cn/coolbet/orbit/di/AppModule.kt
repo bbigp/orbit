@@ -13,11 +13,13 @@ import cn.coolbet.orbit.remote.EntryApi
 import cn.coolbet.orbit.remote.FolderApi
 import cn.coolbet.orbit.remote.miniflux.FeedApi
 import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
+import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
@@ -50,6 +52,14 @@ val appModule = module {
 
 val workerModule = module {
     workerOf(::SyncWorker)
+}
+
+val viewModelModule = module {
+    // 方案 A：极致简洁（推荐）
+    viewModelOf(::SyncViewModel)
+
+    // 方案 B：显式声明（如果你需要对参数做特殊处理）
+    // viewModel { SyncViewModel(get(), get(), get()) }
 }
 
 //@Module

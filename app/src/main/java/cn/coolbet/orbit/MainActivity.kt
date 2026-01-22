@@ -6,16 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.bottomSheet.BottomSheetNavigator
 import cafe.adriel.voyager.transitions.SlideTransition
-import cn.coolbet.orbit.di.AppEntryPoint
 import cn.coolbet.orbit.manager.Preference
 import cn.coolbet.orbit.ui.kit.ObToast
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
@@ -25,14 +21,13 @@ import cn.coolbet.orbit.ui.view.home.HomeScreen
 import cn.coolbet.orbit.ui.view.login.LoginScreen
 import cn.coolbet.orbit.ui.view.syncer.SyncViewModel
 import cn.coolbet.orbit.ui.view.syncer.Syncer
-import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.EntryPointAccessors
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.component.KoinComponent
 
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), KoinComponent {
 
-    @Inject lateinit var preference: Preference
+    private val preference: Preference by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 //        installSplashScreen()
@@ -43,16 +38,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             SystemBarAppearance(dark = isSystemInDarkTheme())
             OrbitTheme {
-                val syncViewModel: SyncViewModel = hiltViewModel()
+                val syncViewModel: SyncViewModel = koinViewModel()
                 val initialScreen: Screen = if (!preference.userProfile().isEmpty) HomeScreen else LoginScreen
-                val context = LocalContext.current
-                val navigatorState = remember {
-                    val point = EntryPointAccessors.fromApplication(
-                        context.applicationContext,
-                        AppEntryPoint::class.java
-                    )
-                    point.ldCoordinator()
-                }
+
                 BottomSheetNavigator(
                     sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                     sheetBackgroundColor = ObTheme.colors.secondaryContainer,

@@ -11,6 +11,7 @@ import cn.coolbet.orbit.di.appModule
 import cn.coolbet.orbit.di.networkModule
 import cn.coolbet.orbit.di.roomModule
 import cn.coolbet.orbit.di.screenModelModule
+import cn.coolbet.orbit.di.viewModelModule
 import cn.coolbet.orbit.di.workerModule
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.Session
@@ -41,7 +42,7 @@ class OrbitApp : Application(), SingletonImageLoader.Factory, Configuration.Prov
             workManagerFactory()
             modules(
                 appModule, networkModule, screenModelModule, roomModule,
-                workerModule, minifluxModule
+                workerModule, minifluxModule, viewModelModule
             )
 
             val session = getKoin().get<Session>()

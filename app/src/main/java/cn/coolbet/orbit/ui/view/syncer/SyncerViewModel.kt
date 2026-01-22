@@ -12,18 +12,15 @@ import androidx.work.WorkManager
 import cn.coolbet.orbit.dao.SyncTaskRecordDao
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.manager.SyncWorker
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 private const val SYNC_WORK_TAG = "data_sync_on_home_entry_tag"
 
-@HiltViewModel
-class SyncViewModel @Inject constructor(
+class SyncViewModel(
     private val session: Session,
     private val workManager: WorkManager,
     private val syncTaskRecordDao: SyncTaskRecordDao,
