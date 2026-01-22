@@ -41,16 +41,16 @@ import cn.coolbet.orbit.ui.view.FeedIconDefaults
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewEditFeedView() {
+fun PreviewFeedInfoCardView() {
     val meta = Feed.EMPTY.copy(title = "少数派 - sspai", feedURL = "htts://sspai.com/feed")
     Column {
-        EditFeedCardView(meta)
+        FeedInfoCardView(meta)
     }
 }
 
 
 @Composable
-fun EditFeedCardView(
+fun FeedInfoCardView(
     meta: Meta,
     onNavigateToEditFeed: () -> Unit = {}
 ) {

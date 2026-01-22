@@ -13,7 +13,6 @@ data class EditFeedScreen(
 
     @Composable
     override fun Content() {
-        EditFeedView(feed, {})
     }
 
 }

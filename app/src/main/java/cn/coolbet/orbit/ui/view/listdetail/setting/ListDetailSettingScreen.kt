@@ -18,23 +18,20 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.model.domain.Feed
-import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.DragHandle
-import cn.coolbet.orbit.ui.view.feed.EditFeedView
+import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
+import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import cn.coolbet.orbit.ui.view.listdetail.LocalChangeLDSettings
 import kotlinx.parcelize.Parcelize
-import org.koin.core.parameter.parametersOf
 
 @Parcelize
-data class ListDetailSettingScreen(
-    val feed: Feed,
-    val settings: LDSettings
-): Screen, Parcelable {
+object ListDetailSettingScreen: Screen, Parcelable {
+    private fun readResolve(): Any = ListDetailSettingScreen
 
     @Composable
     override fun Content() {
-        val model = koinScreenModel<ListDetailSettingScreenModel> { parametersOf(feed, settings) }
-        val state by model.state.collectAsState()
+        val model = koinScreenModel<ListDetailSettingScreenModel>()
+        val state by model.coordinator.state.collectAsState()
         var currentPage by remember { mutableStateOf(Page.LDSetting) }
 
         Column {
@@ -53,21 +50,24 @@ data class ListDetailSettingScreen(
                 when(targetPage) {
                     Page.LDSetting -> {
                         CompositionLocalProvider(LocalChangeLDSettings provides model::changeLDSettings) {
-                            LDSettingView(
-                                meta = state.feed,
+                            LDSettingSheet(
+                                meta = state.meta,
                                 settings = state.settings,
                                 onNavigateToEditFeed = { currentPage = Page.EditFeed }
                             )
                         }
                     }
                     Page.EditFeed -> {
-                        EditFeedView(
-                            feed = state.feed,
-                            onBack = { currentPage = Page.LDSetting }
+                        EditFeedSheet(
+                            feed = state.meta as Feed,
+                            onBack = { currentPage = Page.LDSetting },
+                            onNavigateToFolderPicker = { currentPage = Page.FolderPicker }
                         )
                     }
                     Page.FolderPicker -> {
-
+                        FolderPickerSheet(
+                            onBack = { currentPage = Page.EditFeed },
+                        )
                     }
                 }
             }

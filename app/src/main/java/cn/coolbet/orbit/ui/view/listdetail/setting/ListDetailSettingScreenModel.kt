@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.listdetail.setting
 
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.dao.LDSettingsDao
@@ -12,21 +13,15 @@ import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.model.entity.LDSort
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
 class ListDetailSettingScreenModel(
-    feed: Feed,
-    settings: LDSettings,
     private val ldSettingsDao: LDSettingsDao,
-    private val coordinator: ListDetailCoordinator,
-    private val cacheStore: CacheStore,
-): StateScreenModel<ListDetailSettingState>(ListDetailSettingState(feed, settings)) {
-
-    init {
-        mutableState.update { it.copy(feed = feed.copy(folder = cacheStore.folder(feed.folderId))) }
-    }
+    val coordinator: ListDetailCoordinator,
+): ScreenModel {
 
     fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {
         var unreadOnly: Boolean? = null

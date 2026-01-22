@@ -23,7 +23,7 @@ import cn.coolbet.orbit.ui.view.listdetail.LocalChangeLDSettings
 
 
 @Composable
-fun LDSettingView(
+fun LDSettingSheet(
     meta: Meta,
     settings: LDSettings,
     onNavigateToEditFeed: () -> Unit
@@ -35,7 +35,7 @@ fun LDSettingView(
             .fillMaxWidth()
     ) {
         if (meta is Feed) {
-            EditFeedCardView(meta, onNavigateToEditFeed)
+            FeedInfoCardView(meta, onNavigateToEditFeed)
             Spacer(modifier = Modifier.height(12.dp))
         }
 

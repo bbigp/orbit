@@ -21,7 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.androidx.workmanager.dsl.workerOf
-import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 //class MainActivity : ComponentActivity() {
@@ -35,18 +35,18 @@ val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.IO) }
 
 
-    factoryOf(::CacheStore)
-    factoryOf(::EntryManager)
+    singleOf(::CacheStore)
+    singleOf(::EntryManager)
     single { EventBus() }
-    factoryOf(::ListDetailCoordinator)
-    factoryOf(::LocalDataManager)
+    singleOf(::ListDetailCoordinator)
+    singleOf(::LocalDataManager)
     single { Preference(androidContext(), get()) }
-    factoryOf(::Session)
+    singleOf(::Session)
     single { Oeeeed(androidContext()) }
 
-    factoryOf(::EntryApi)
-    factoryOf(::FeedApi)
-    factoryOf(::FolderApi)
+    singleOf(::EntryApi)
+    singleOf(::FeedApi)
+    singleOf(::FolderApi)
 
 }
 
@@ -61,30 +61,3 @@ val viewModelModule = module {
     // 方案 B：显式声明（如果你需要对参数做特殊处理）
     // viewModel { SyncViewModel(get(), get(), get()) }
 }
-
-//@Module
-//@InstallIn(SingletonComponent::class)
-//object AppModule {
-//
-//    @Provides
-//    @Singleton
-//    fun provideGson(): Gson {
-//        return GsonBuilder()
-////            .registerTypeAdapter(
-////                UnreadMark::class.java,
-////                UnreadMarkAdapter(UnreadMark::class.java, UnreadMark.NUMBER)
-////            )
-//            .create()
-//    }
-//
-//    @Provides
-//    @Singleton
-//    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
-//        return WorkManager.getInstance(context)
-//    }
-//
-//    @Provides
-//    @Singleton
-//    fun provideAppScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-//
-//}

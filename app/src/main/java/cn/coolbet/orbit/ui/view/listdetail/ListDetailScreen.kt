@@ -38,7 +38,6 @@ import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.LoadingState
 import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
-import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
@@ -51,7 +50,7 @@ import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
 import cn.coolbet.orbit.ui.view.listdetail.component.skeleton.LDSkeletonList
-import cn.coolbet.orbit.ui.view.listdetail.component.item.unavailable.LDCUEmptyView
+import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.listdetail.setting.ListDetailSettingScreen
 import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
@@ -138,11 +137,7 @@ data class ListDetailScreen(
                             )
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable {
-                                    sheetNavigator.show(
-                                        ListDetailSettingScreen(state.meta as Feed, state.settings)
-                                    )
-                                },
+                                modifier = Modifier.clickable { sheetNavigator.show(ListDetailSettingScreen) },
                             )
                         }
                     }

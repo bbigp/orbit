@@ -98,7 +98,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-hilt:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-bottom-sheet-navigator:${voyagerVersion}")
 
-    val koin_version = "3.5.0"
+    val koin_version = "3.5.3"
     implementation("io.insert-koin:koin-android:${koin_version}")
     implementation("io.insert-koin:koin-androidx-compose:${koin_version}")
     implementation("cafe.adriel.voyager:voyager-koin:${voyagerVersion}")

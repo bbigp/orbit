@@ -105,7 +105,7 @@ class CacheStore(
             }
             val feeds = feedDao.getFeeds()
             val folders = folderDao.getFolders()
-            _feeds.value = feeds
+            _feeds.value = associateFolderWithFeed(feeds, folders)
             _folders.value = associateFeedsWithFolders(feeds, folders)
 
 
@@ -135,6 +135,16 @@ class CacheStore(
         clearCache()
     }
 
+    fun associateFolderWithFeed(
+        feeds: List<Feed>,
+        folders: List<Folder>
+    ): List<Feed> {
+        val folderMap: Map<Long, Folder> = folders.associateBy { it.id }
+        return feeds
+            .asSequence()
+            .map { it.copy(folder = folderMap[it.folderId] ?: Folder.EMPTY) }
+            .toList()
+    }
 
     fun associateFeedsWithFolders(
         feeds: List<Feed>,
