@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,7 +35,7 @@ fun EditFeedSheet(
     onBack: () -> Unit = {},
     onNavigateToFolderPicker: () -> Unit = {}
 ) {
-    var folderId by remember { mutableStateOf(feed.folderId) }
+    var folderId by remember { mutableLongStateOf(feed.folderId) }
     var feedTitle by remember { mutableStateOf(feed.title) }
     val isModified by remember(folderId, feedTitle) {
         derivedStateOf { feed.folderId != folderId || feed.title != feedTitle }

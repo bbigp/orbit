@@ -55,18 +55,6 @@ object ProfileScreen: Screen {
         var showUnreadMarkMenus by remember { mutableStateOf(false) }
         var showFolderPicker by remember { mutableStateOf(false) }
 
-        FolderPickerSheet (
-            show = showFolderPicker,
-            onDismiss = {
-                showFolderPicker = false
-            },
-            folders = folders,
-            selectedValue = rootFolderId,
-            onValueChange = { id ->
-                Env.settings.rootFolder.value = id
-                showFolderPicker = false
-            }
-        )
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
         Scaffold (

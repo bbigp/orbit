@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 class ListDetailSettingScreenModel(
     private val ldSettingsDao: LDSettingsDao,
     val coordinator: ListDetailCoordinator,
+    val cacheStore: CacheStore
 ): ScreenModel {
 
     fun changeLDSettings(metaId: MetaId, key: LDSettingKey, value: Any) {

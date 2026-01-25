@@ -19,6 +19,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.DragHandle
+import cn.coolbet.orbit.ui.view.feed.EditFeedScreenModel
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import cn.coolbet.orbit.ui.view.listdetail.LocalChangeLDSettings
@@ -31,7 +32,9 @@ object ListDetailSettingScreen: Screen, Parcelable {
     @Composable
     override fun Content() {
         val model = koinScreenModel<ListDetailSettingScreenModel>()
+        val editFeedModel = koinScreenModel<EditFeedScreenModel>()
         val state by model.coordinator.state.collectAsState()
+        val folders by model.cacheStore.foldersState.collectAsState()
         var currentPage by remember { mutableStateOf(Page.LDSetting) }
 
         Column {
@@ -66,6 +69,11 @@ object ListDetailSettingScreen: Screen, Parcelable {
                     }
                     Page.FolderPicker -> {
                         FolderPickerSheet(
+                            folders = folders,
+                            selectedValue = (state.meta as Feed).folderId,
+                            onValueChange = { folderId ->
+                                editFeedModel.submit(folderId, state.meta.id)
+                            },
                             onBack = { currentPage = Page.EditFeed },
                         )
                     }
