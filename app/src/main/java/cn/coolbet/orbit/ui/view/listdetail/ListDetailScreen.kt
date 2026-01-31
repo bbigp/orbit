@@ -85,6 +85,7 @@ data class ListDetailScreen(
                 }
             }
         }
+        val sheetNavigator = LocalBottomSheetNavigator.current
 
         BackHandler(onBack = { actions.onBack() })
 
@@ -92,8 +93,6 @@ data class ListDetailScreen(
             model.coordinator.unfreeze()
         }
         ListLoadMoreHandler(scrollState, state)
-
-        val sheetNavigator = LocalBottomSheetNavigator.current
 
         Scaffold(
             topBar = {

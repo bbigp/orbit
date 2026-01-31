@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObCard
@@ -32,13 +33,14 @@ import cn.coolbet.orbit.ui.kit.SheetTopBar
 @Composable
 fun EditFeedSheet(
     feed: Feed,
+    feedFolder: Folder,
     onBack: () -> Unit = {},
     onNavigateToFolderPicker: () -> Unit = {}
 ) {
-    var folderId by remember { mutableLongStateOf(feed.folderId) }
+    var folder by remember { mutableStateOf(feedFolder) }
     var feedTitle by remember { mutableStateOf(feed.title) }
-    val isModified by remember(folderId, feedTitle) {
-        derivedStateOf { feed.folderId != folderId || feed.title != feedTitle }
+    val isModified by remember(folder.id, feedTitle) {
+        derivedStateOf { feed.folderId != folder.id || feed.title != feedTitle }
     }
     Column {
         SheetTopBar(title = "Edit Feed", onBack = onBack)
@@ -59,7 +61,7 @@ fun EditFeedSheet(
             ObCard {
                 ListTileChevronUpDown(
                     title = "文件夹", icon = R.drawable.folder_1,
-                    trailing = feed.folder.title,
+                    trailing = folder.title,
                     modifier = Modifier.click{ onNavigateToFolderPicker() },
                 )
             }
@@ -77,5 +79,5 @@ fun EditFeedSheet(
 @Preview(showBackground = true)
 @Composable
 fun PreviewEditFeedSheet() {
-    EditFeedSheet(feed = Feed.EMPTY.copy(title = "少数派", feedURL = "https://sspai.com/feed")) { }
+    EditFeedSheet(feed = Feed.EMPTY.copy(title = "少数派", feedURL = "https://sspai.com/feed"), Folder.EMPTY) { }
 }
