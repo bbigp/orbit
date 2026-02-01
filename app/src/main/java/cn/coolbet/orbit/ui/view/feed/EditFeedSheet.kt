@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -17,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
+import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
@@ -26,21 +28,55 @@ import cn.coolbet.orbit.ui.kit.ObIconTextButton
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
+import cn.coolbet.orbit.ui.kit.Pop
+import cn.coolbet.orbit.ui.kit.Push
 import cn.coolbet.orbit.ui.kit.SheetTopBar
+import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 
+
+fun startEditFeedFlow(
+    feed: Feed = Feed.EMPTY,
+    cacheStore: CacheStore,
+    push: Push,
+    pop: Pop
+) {
+
+    push {
+        var currentFolder by remember { mutableStateOf(feed.folder) }
+        EditFeedSheet(
+            feed = feed, category = currentFolder,
+            onBack = pop,
+            onNavigateToFolderPicker = {
+                push {
+                    val folders by cacheStore.foldersState.collectAsState()
+                    FolderPickerSheet(
+                        folders = folders,
+                        selectedValue = currentFolder.id,
+                        onValueChange = { id ->
+                            currentFolder = cacheStore.folder(id)
+                            pop()
+                        },
+                        onBack = pop
+                    )
+                }
+            }
+        )
+        currentFolder.let { }
+    }
+
+}
 
 
 @Composable
 fun EditFeedSheet(
     feed: Feed,
-    feedFolder: Folder,
+    category: Folder,
     onBack: () -> Unit = {},
     onNavigateToFolderPicker: () -> Unit = {}
 ) {
-    var folder by remember { mutableStateOf(feedFolder) }
     var feedTitle by remember { mutableStateOf(feed.title) }
-    val isModified by remember(folder.id, feedTitle) {
-        derivedStateOf { feed.folderId != folder.id || feed.title != feedTitle }
+    val isModified by remember(category.id, feedTitle) {
+        derivedStateOf { feed.folderId != category.id || feed.title != feedTitle }
     }
     Column {
         SheetTopBar(title = "Edit Feed", onBack = onBack)
@@ -61,7 +97,7 @@ fun EditFeedSheet(
             ObCard {
                 ListTileChevronUpDown(
                     title = "文件夹", icon = R.drawable.folder_1,
-                    trailing = folder.title,
+                    trailing = category.title,
                     modifier = Modifier.click{ onNavigateToFolderPicker() },
                 )
             }

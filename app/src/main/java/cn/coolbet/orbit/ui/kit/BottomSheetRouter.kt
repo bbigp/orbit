@@ -17,22 +17,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 enum class NavDir { Forward, Backward }
+typealias Push = (@Composable () -> Unit) -> Unit
+typealias Pop = () -> Unit
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun BottomSheetRouter(
-    initialPage: @Composable (push: ( @Composable () -> Unit) -> Unit, pop: () -> Unit) -> Unit
+    initialPage: @Composable (push: Push, pop: Pop) -> Unit
 ) {
     // 栈里直接存的是 @Composable 函数（即页面本身）
     val stack = remember { mutableStateListOf<@Composable () -> Unit>() }
     var direction by remember { mutableStateOf(NavDir.Forward) }
 
     // 统一定义 Push 和 Pop 逻辑，方便内部递归调用
-    val push: (@Composable () -> Unit) -> Unit = { newPage ->
+    val push: Push = { newPage ->
         direction = NavDir.Forward
         stack.add(newPage)
     }
-    val pop: () -> Unit = {
+    val pop: Pop = {
         if (stack.size > 1) {
             direction = NavDir.Backward
             stack.removeAt(stack.size - 1)

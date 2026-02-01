@@ -45,10 +45,9 @@ class ListDetailSettingScreenModel(
                 showGroupTitle = showGroupTitle, displayMode = displayMode,
                 autoReaderView = autoReaderView, openContentWith = openContentWith
             )
+            coordinator.update { it.copy(settings = updated) }
             if (unreadOnly != null) {
                 coordinator.initData(metaId = metaId, settings = updated)
-            } else {
-                coordinator.update { it.copy(settings = updated) }
             }
         }
     }
