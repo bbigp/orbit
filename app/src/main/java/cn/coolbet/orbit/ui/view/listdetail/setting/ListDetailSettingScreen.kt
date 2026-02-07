@@ -22,6 +22,7 @@ import cn.coolbet.orbit.ui.kit.Pop
 import cn.coolbet.orbit.ui.kit.Push
 import cn.coolbet.orbit.ui.view.feed.EditFeedScreenModel
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
+import cn.coolbet.orbit.ui.view.feed.EditFeedVideModel
 import cn.coolbet.orbit.ui.view.feed.startEditFeedFlow
 import cn.coolbet.orbit.ui.view.folder.FolderPicker
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
@@ -38,7 +39,7 @@ object ListDetailSettingScreen: Screen, Parcelable {
         val model = koinScreenModel<ListDetailSettingScreenModel>()
         val editFeedModel = koinScreenModel<EditFeedScreenModel>()
         val state by model.coordinator.state.collectAsState()
-
+        val vm = remember { EditFeedVideModel(state.meta as Feed, model.cacheStore) }
 
         CompositionLocalProvider(
             LocalChangeLDSettings provides model::changeLDSettings
@@ -51,6 +52,7 @@ object ListDetailSettingScreen: Screen, Parcelable {
                         settings = state.settings,
                         onNavigateToEditFeed = {
                             startEditFeedFlow(
+                                vm,
                                 feed = state.meta as Feed,
                                 cacheStore = model.cacheStore,
                                 push = push,

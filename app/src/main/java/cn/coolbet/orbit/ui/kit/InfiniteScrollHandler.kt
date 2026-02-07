@@ -29,7 +29,7 @@ fun ListLoadMoreHandler(
     // 使用 rememberUpdatedState 确保 Lambda 内部始终能拿到最新的 onLoadMore 引用
     val currentOnLoadMore by rememberUpdatedState(scrollState.onLoadMore)
 
-    LaunchedEffect(scrollState.listState) {
+    LaunchedEffect(scrollState.listState, state) {
         snapshotFlow {
             val layoutInfo = scrollState.listState.layoutInfo
             val totalItemsCount = layoutInfo.totalItemsCount

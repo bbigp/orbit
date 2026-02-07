@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.feed
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,13 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.manager.CacheStore
@@ -34,7 +35,15 @@ import cn.coolbet.orbit.ui.kit.SheetTopBar
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 
 
+class EditFeedVideModel(
+    initialFeed: Feed,
+    private val cacheStore: CacheStore,
+): ViewModel() {
+    var currentFolder by mutableStateOf(initialFeed.folder)
+}
+
 fun startEditFeedFlow(
+    vm: EditFeedVideModel,
     feed: Feed = Feed.EMPTY,
     cacheStore: CacheStore,
     push: Push,
@@ -42,18 +51,19 @@ fun startEditFeedFlow(
 ) {
 
     push {
-        var currentFolder by remember { mutableStateOf(feed.folder) }
+
         EditFeedSheet(
-            feed = feed, category = currentFolder,
+            feed = feed,
+            category = vm.currentFolder,
             onBack = pop,
             onNavigateToFolderPicker = {
                 push {
                     val folders by cacheStore.foldersState.collectAsState()
                     FolderPickerSheet(
                         folders = folders,
-                        selectedValue = currentFolder.id,
+                        selectedValue = vm.currentFolder.id,
                         onValueChange = { id ->
-                            currentFolder = cacheStore.folder(id)
+                            vm.currentFolder = cacheStore.folder(id) // 修改状态
                             pop()
                         },
                         onBack = pop
@@ -61,7 +71,6 @@ fun startEditFeedFlow(
                 }
             }
         )
-        currentFolder.let { }
     }
 
 }
@@ -74,6 +83,7 @@ fun EditFeedSheet(
     onBack: () -> Unit = {},
     onNavigateToFolderPicker: () -> Unit = {}
 ) {
+    android.util.Log.d("EditFeedSheet", "EditFeedSheet recomposing, category.title: ${category.title}")
     var feedTitle by remember { mutableStateOf(feed.title) }
     val isModified by remember(category.id, feedTitle) {
         derivedStateOf { feed.folderId != category.id || feed.title != feedTitle }
@@ -90,7 +100,8 @@ fun EditFeedSheet(
         Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)) {
             ObTextField(
                 sizes = ObTextFieldDefaults.large,
-                value = feed.title
+                value = feedTitle,
+                onValueChange = { feedTitle = it },
             )
         }
         Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)) {
