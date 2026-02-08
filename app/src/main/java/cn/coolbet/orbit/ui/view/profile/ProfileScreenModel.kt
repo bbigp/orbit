@@ -21,14 +21,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileScreenModel(
-    private val store: CacheStore,
+    val cacheStore: CacheStore,
     private val session: Session,
 ): ScreenModel {
 
     private val _state = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
 
-    val folders = store.foldersState
 
     init {
         combine(session.state, Env.settings.rootFolder.state) { user, rootFolderId ->
@@ -39,7 +38,7 @@ class ProfileScreenModel(
             _state.update {
                 it.copy(
                     isLoading = false, user = user,
-                    rootFolder = store.folder(rootFolderId)
+                    rootFolder = cacheStore.folder(rootFolderId)
                 )
             }
         }.launchIn(screenModelScope)
@@ -52,7 +51,7 @@ class ProfileScreenModel(
 
     fun deleteLocalData() {
         screenModelScope.launch {
-            store.deleteLocalData()
+            cacheStore.deleteLocalData()
         }
     }
 }

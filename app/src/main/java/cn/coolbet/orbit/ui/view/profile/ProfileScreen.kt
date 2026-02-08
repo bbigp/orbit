@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
@@ -27,6 +26,9 @@ import cn.coolbet.orbit.model.domain.GenerateMenuItems
 import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
+import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
+import cn.coolbet.orbit.ui.kit.showSheet
+import cafe.adriel.voyager.core.screen.Screen
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObBackTopAppBar
@@ -45,7 +47,7 @@ object ProfileScreen: Screen {
     override fun Content() {
         val model = koinScreenModel<ProfileScreenModel>()
         val state by model.state.collectAsState()
-        val folders by model.folders.collectAsState()
+        val folders by model.cacheStore.foldersState.collectAsState()
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
         val openContentWith by Env.settings.openContentWith.asOpenContentState()
         val autoRead by Env.settings.autoRead.asState()
@@ -53,7 +55,7 @@ object ProfileScreen: Screen {
 
         var showOpenContentWithMenus by remember { mutableStateOf(false) }
         var showUnreadMarkMenus by remember { mutableStateOf(false) }
-        var showFolderPicker by remember { mutableStateOf(false) }
+        val sheetNavigator = LocalBottomSheetNavigator.current
 
 
         SystemBarStyleModern(statusBarColor = ObTheme.colors.secondaryContainer, isLightStatusBars = false)
@@ -113,7 +115,19 @@ object ProfileScreen: Screen {
                         ListTileChevronUpDown(
                             title = "根文件夹", icon = R.drawable.folder_1,
                             trailing = state.rootFolder.title,
-                            modifier = Modifier.click{ showFolderPicker = true },
+                            modifier = Modifier.click{
+                                sheetNavigator.showSheet {
+                                    FolderPickerSheet(
+                                        folders = folders,
+                                        selectedValue = rootFolderId,
+                                        onValueChange = { id ->
+                                            Env.settings.rootFolder.value = id
+                                            sheetNavigator.pop()
+                                        },
+                                        onBack = { sheetNavigator.pop() }
+                                    )
+                                }
+                            },
                         )
                     }
                 }
