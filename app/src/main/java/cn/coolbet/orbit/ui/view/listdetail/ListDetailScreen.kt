@@ -40,6 +40,7 @@ import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
+import cn.coolbet.orbit.ui.kit.FlowNavigatorScreen
 import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
@@ -136,7 +137,9 @@ data class ListDetailScreen(
                             )
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable { sheetNavigator.show(ListDetailSettingScreen) },
+                                modifier = Modifier.clickable { sheetNavigator.show(
+                                    FlowNavigatorScreen(ListDetailSettingScreen)
+                                ) },
                             )
                         }
                     }

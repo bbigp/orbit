@@ -47,7 +47,7 @@ val screenModelModule = module {
     factoryOf(::ListDetailSettingScreenModel)
     factory { (state: EditFeedState, content: EditFeedContent) ->
         EditFeedScreenModel(
-            state, content
+            state, content, get()
         )
     }
     factory { (feed: Feed) ->

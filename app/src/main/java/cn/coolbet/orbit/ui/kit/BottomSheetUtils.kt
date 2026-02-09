@@ -33,3 +33,22 @@ fun BottomSheetNavigator?.showSheet(
         }
     })
 }
+
+
+fun BottomSheetNavigator?.showFlow(
+    showDragHandle: Boolean = true,
+    dragContent: (@Composable () -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
+    this?.show(object : Screen {
+        @Composable
+        override fun Content() {
+            Column {
+                if (showDragHandle) {
+                    if (dragContent != null) dragContent() else DragHandle()
+                }
+                content()
+            }
+        }
+    })
+}

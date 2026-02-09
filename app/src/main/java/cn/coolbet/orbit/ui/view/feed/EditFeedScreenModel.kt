@@ -2,6 +2,7 @@ package cn.coolbet.orbit.ui.view.feed
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import cn.coolbet.orbit.manager.CacheStore
 import kotlinx.coroutines.launch
 
 /**
@@ -10,7 +11,8 @@ import kotlinx.coroutines.launch
  */
 class EditFeedScreenModel(
     val state: EditFeedState,
-    val content: EditFeedContent
+    val content: EditFeedContent,
+    val cacheStore: CacheStore,
 ) : ScreenModel {
 
     fun applyChanges() {

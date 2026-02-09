@@ -116,16 +116,16 @@ object ProfileScreen: Screen {
                             title = "根文件夹", icon = R.drawable.folder_1,
                             trailing = state.rootFolder.title,
                             modifier = Modifier.click{
-                                sheetNavigator.showSheet {
-                                    FolderPickerSheet(
-                                        folders = folders,
-                                        selectedValue = rootFolderId,
-                                        onValueChange = { id ->
-                                            Env.settings.rootFolder.value = id
-                                            sheetNavigator.pop()
-                                        },
-                                        onBack = { sheetNavigator.pop() }
-                                    )
+                                sheetNavigator.showSheet(showDragHandle = false) {
+//                                    FolderPickerSheet(
+//                                        folders = folders,
+//                                        selectedValue = rootFolderId,
+//                                        onValueChange = { id ->
+//                                            Env.settings.rootFolder.value = id
+//                                            sheetNavigator.pop()
+//                                        },
+//                                        onBack = { sheetNavigator.pop() }
+//                                    )
                                 }
                             },
                         )

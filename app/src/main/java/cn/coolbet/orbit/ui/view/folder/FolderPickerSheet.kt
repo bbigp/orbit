@@ -6,23 +6,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.model.domain.Folder
+import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.SheetTopBar
 
-@Composable
-fun FolderPickerSheet(
-    folders: List<Folder> = emptyList(),
-    selectedValue: Long = 0,
-    onValueChange: (Long) -> Unit = {},
-    onBack: () -> Unit = {},
-){
-    Column {
-        SheetTopBar(title = "Add to Folder", onBack = onBack)
-        FolderPicker(
-            folders = folders,
-            selectedValue = selectedValue,
-            onValueChange = onValueChange
-        )
-        Spacer(modifier = Modifier.height(21.dp))
+
+
+data class FolderPickerSheet(
+    val folders: List<Folder> = emptyList(),
+    val selectedId: Long,
+    val onValueChange: (Long) -> Unit = {},
+): Screen {
+
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+        Column {
+            DragHandle()
+            SheetTopBar(title = "Add to Folder", onBack = { navigator.pop() })
+            FolderPicker(
+                folders = folders,
+                selectedValue = selectedId,
+                onValueChange = onValueChange
+            )
+            Spacer(modifier = Modifier.height(21.dp))
+        }
     }
 }
