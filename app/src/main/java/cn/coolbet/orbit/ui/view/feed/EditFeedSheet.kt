@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,9 +34,13 @@ import org.koin.core.parameter.parametersOf
 
 data class EditFeedSheet(val feed: Feed): Screen {
 
+    private val state by lazy {
+        EditFeedState(feed, feed.folder)
+    }
+
+
     @Composable
     override fun Content() {
-        val state = rememberEditFeedState(feed, feed.folder)
         val model = koinScreenModel<EditFeedScreenModel> {
             parametersOf(state, EditFeedContent())
         }
@@ -45,8 +50,6 @@ data class EditFeedSheet(val feed: Feed): Screen {
         }
         val navigator = LocalNavigator.currentOrThrow
         val folders by model.cacheStore.foldersState.collectAsState()
-
-        Log.d("EditFeedSheet", "EditFeedSheet recomposing, category.title: ${state.category.title}")
 
         Column {
             DragHandle()
@@ -76,7 +79,6 @@ data class EditFeedSheet(val feed: Feed): Screen {
                                 selectedId = state.category.id,
                                 onValueChange = { id ->
                                     state.updateCategory(model.cacheStore.folder(id))
-                                    Log.d("EditFeedSheet", "EditFeedSheet recomposing, category.title: ${state.category.title}")
                                     navigator.pop()
                                 }
                             )
@@ -109,22 +111,3 @@ data class EditFeedSheet(val feed: Feed): Screen {
     }
 
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewEditFeedSheet() {
-//    val state = remember {
-//        EditFeedState(
-//            Feed.EMPTY.copy(title = "少数派", feedURL = "https://sspai.com/feed"),
-//            Folder.EMPTY)
-//    }
-//    EditFeedSheet(state = state, actions = object : EditFeedActions {
-//        override fun applyChanges() {
-//        }
-//
-//        override fun unsubscribe() {
-//        }
-//
-//    }) { }
-//}

@@ -4,8 +4,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 
@@ -40,9 +38,4 @@ class EditFeedState(
     fun updateTitle(v: String) { title = v }
     fun updateCategory(f: Folder) { category = f }
 
-}
-
-@Composable
-fun rememberEditFeedState(feed: Feed, category: Folder) = remember(feed, category) {
-    EditFeedState(feed, category)
 }
