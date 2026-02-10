@@ -5,7 +5,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 
-data class FlowNavigatorScreen(
+data class AnimatedSlideWrapper(
     private val initialScreen: Screen
 ) : Screen {
 

@@ -40,19 +40,20 @@ import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
-import cn.coolbet.orbit.ui.kit.FlowNavigatorScreen
+import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
 import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
+import cn.coolbet.orbit.ui.kit.showAnimated
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
 import cn.coolbet.orbit.ui.view.listdetail.component.skeleton.LDSkeletonList
 import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
-import cn.coolbet.orbit.ui.view.listdetail.setting.ListDetailSettingScreen
+import cn.coolbet.orbit.ui.view.listdetail.setting.LDSettingSheet
 import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
 
@@ -137,9 +138,7 @@ data class ListDetailScreen(
                             )
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable { sheetNavigator.show(
-                                    FlowNavigatorScreen(ListDetailSettingScreen)
-                                ) },
+                                modifier = Modifier.clickable { sheetNavigator.showAnimated(LDSettingSheet) },
                             )
                         }
                     }

@@ -37,3 +37,7 @@ class EditFeedScreenModel(
         }
     }
 }
+
+class EditFeedContent{
+
+}

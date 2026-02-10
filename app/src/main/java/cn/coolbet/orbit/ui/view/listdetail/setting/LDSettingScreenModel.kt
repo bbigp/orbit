@@ -1,24 +1,19 @@
 package cn.coolbet.orbit.ui.view.listdetail.setting
 
 import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.dao.LDSettingsDao
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.ListDetailCoordinator
-import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.entity.DisplayMode
 import cn.coolbet.orbit.model.entity.LDSettingKey
-import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.model.entity.LDSort
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
-class ListDetailSettingScreenModel(
+class LDSettingScreenModel(
     private val ldSettingsDao: LDSettingsDao,
     val coordinator: ListDetailCoordinator,
     val cacheStore: CacheStore

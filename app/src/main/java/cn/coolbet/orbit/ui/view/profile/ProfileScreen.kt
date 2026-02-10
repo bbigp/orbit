@@ -27,7 +27,6 @@ import cn.coolbet.orbit.model.domain.OpenContentWith
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
-import cn.coolbet.orbit.ui.kit.showSheet
 import cafe.adriel.voyager.core.screen.Screen
 import cn.coolbet.orbit.ui.kit.ListTileSwitch
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
@@ -116,17 +115,16 @@ object ProfileScreen: Screen {
                             title = "根文件夹", icon = R.drawable.folder_1,
                             trailing = state.rootFolder.title,
                             modifier = Modifier.click{
-                                sheetNavigator.showSheet(showDragHandle = false) {
-//                                    FolderPickerSheet(
-//                                        folders = folders,
-//                                        selectedValue = rootFolderId,
-//                                        onValueChange = { id ->
-//                                            Env.settings.rootFolder.value = id
-//                                            sheetNavigator.pop()
-//                                        },
-//                                        onBack = { sheetNavigator.pop() }
-//                                    )
-                                }
+                                sheetNavigator.show(
+                                    FolderPickerSheet(
+                                        folders = folders,
+                                        selectedId = rootFolderId,
+                                        onValueChange = { id ->
+                                            Env.settings.rootFolder.value = id
+                                            sheetNavigator.hide()
+                                        },
+                                    )
+                                )
                             },
                         )
                     }
