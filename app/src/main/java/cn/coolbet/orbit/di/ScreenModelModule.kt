@@ -1,8 +1,11 @@
-package cn.coolbet.orbit.di
+﻿package cn.coolbet.orbit.di
 
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
+import cn.coolbet.orbit.ui.view.addfeed.AddFeedContent
+import cn.coolbet.orbit.ui.view.addfeed.AddFeedScreenModel
+import cn.coolbet.orbit.ui.view.addfeed.AddFeedState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailScreenModel
 import cn.coolbet.orbit.ui.view.content.ContentScreenModel
 import cn.coolbet.orbit.ui.view.feed.EditFeedContent
@@ -46,6 +49,11 @@ val screenModelModule = module {
     factoryOf(::LDSettingScreenModel)
     factory { (state: EditFeedState, content: EditFeedContent) ->
         EditFeedScreenModel(
+            state, content, get()
+        )
+    }
+    factory { (state: AddFeedState, content: AddFeedContent) ->
+        AddFeedScreenModel(
             state, content, get()
         )
     }
