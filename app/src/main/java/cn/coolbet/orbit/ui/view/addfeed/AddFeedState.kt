@@ -12,24 +12,15 @@ interface AddFeedActions {
 }
 
 @Stable
-class AddFeedState(
-    private val initialCategory: Folder = Folder.EMPTY,
-) {
-    var feedUrl by mutableStateOf("")
-    var title by mutableStateOf("")
-    var category by mutableStateOf(initialCategory)
-    var isAdding by mutableStateOf(false)
+class AddFeedState {
 
-    val canSubmit: Boolean
-        get() = feedUrl.isNotBlank() && !isAdding
+    var text by mutableStateOf("")
 
-    fun updateFeedUrl(v: String) { feedUrl = v }
-    fun updateTitle(v: String) { title = v }
-    fun updateCategory(f: Folder) { category = f }
+//    var isAdding by mutableStateOf(false)
+//    val canSubmit: Boolean
+//        get() = feedUrl.isNotBlank() && !isAdding
+    fun updateText(v: String) { text = v }
+//    fun updateTitle(v: String) { title = v }
+//    fun updateCategory(f: Folder) { category = f }
 
-    fun reset() {
-        feedUrl = ""
-        title = ""
-        category = initialCategory
-    }
 }

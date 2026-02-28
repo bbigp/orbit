@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -47,10 +48,14 @@ data class EditFeedSheet(val feed: Feed): Screen {
         }
         val navigator = LocalNavigator.currentOrThrow
         val folders by model.cacheStore.foldersState.collectAsState()
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         Column {
             DragHandle()
-            SheetTopBar(title = "Edit Feed", onBack = { navigator.pop() })
+            SheetTopBar(title = "Edit Feed", onBack = {
+                keyboardController?.hide()
+                navigator.pop()
+            })
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 ObTextField(
                     sizes = ObTextFieldDefaults.large,

@@ -80,6 +80,7 @@ object HomeScreen: Screen {
                                     },
                                 )
                             ObIcon(id = R.drawable.add, modifier = Modifier.clickable {
+                                NavigatorBus.push(Route.AddFeed)
                             })
                         }
                     }

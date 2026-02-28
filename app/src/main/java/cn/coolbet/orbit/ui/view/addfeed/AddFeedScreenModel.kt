@@ -12,15 +12,7 @@ class AddFeedScreenModel(
 ) : ScreenModel {
 
     fun addFeed() {
-        if (!state.canSubmit) return
-        screenModelScope.launch {
-            state.isAdding = true
-            try {
-                // TODO: Implement add feed logic
-            } finally {
-                state.isAdding = false
-            }
-        }
+
     }
 }
 

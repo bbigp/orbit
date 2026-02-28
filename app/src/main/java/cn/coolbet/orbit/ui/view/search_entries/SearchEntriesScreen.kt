@@ -90,7 +90,6 @@ data class SearchEntriesScreen(
                             model.coordinator.reset()
                             search = ""
                             showSearchResult = false
-                            focusRequester.requestFocus()
                         } else {
                             search = v
                         }

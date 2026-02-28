@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +15,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -29,6 +32,7 @@ import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
+import cn.coolbet.orbit.ui.kit.ObIconTextField
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import org.koin.core.parameter.parametersOf
@@ -43,17 +47,14 @@ object AddFeedScreen: Screen {
         val model = koinScreenModel<AddFeedScreenModel> { parametersOf(state, content) }
         val navigator = LocalNavigator.currentOrThrow
         val folders by model.cacheStore.foldersState.collectAsState()
+        val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
 
-        LaunchedEffect(folders) {
-            if (state.category.id == Folder.EMPTY.id && folders.isNotEmpty()) {
-                state.updateCategory(folders.first())
-            }
-        }
 
         Scaffold(
             topBar = {
                 ObBackTopAppBar(
-                    title = { Text("Add Feed", style = AppTypography.M17) }
+                    title = { Text("RSS/Atom", style = AppTypography.M17) }
                 )
             }
         ) { paddingValues ->
@@ -61,48 +62,22 @@ object AddFeedScreen: Screen {
                 modifier = Modifier.padding(paddingValues)
                     .fillMaxSize()
             ) {
-                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp)) {
-                    ObTextField(
-                        hint = "Feed URL",
-                        sizes = ObTextFieldDefaults.large,
-                        value = state.feedUrl,
-                        onValueChange = { state.updateFeedUrl(it) },
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ObTextField(
-                        hint = "Title (optional)",
-                        sizes = ObTextFieldDefaults.large,
-                        value = state.title,
-                        onValueChange = { state.updateTitle(it) },
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ObCard {
-                        ListTileChevronUpDown(
-                            title = "Folder",
-                            icon = R.drawable.folder_1,
-                            trailing = state.category.title,
-                            modifier = Modifier.click {
-                                navigator.push(
-                                    FolderPickerSheet(
-                                        folders = folders,
-                                        selectedId = state.category.id,
-                                        onValueChange = { id ->
-                                            state.updateCategory(model.cacheStore.folder(id))
-                                            navigator.pop()
-                                        }
-                                    )
-                                )
-                            },
+                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 0.dp)) {
+                    ObIconTextField(
+                        hint = "URL...",
+                        value = state.text,
+                        icon = R.drawable.search,
+                        onValueChange = { v ->
+                            state.updateText(v)
+                        },
+                        focusRequester = focusRequester,
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                            }
                         )
-                    }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ObAsyncTextButton(
-                        "Add",
-                        sizes = OButtonDefaults.large,
-                        isLoading = state.isAdding,
-                        disable = !state.canSubmit,
-                        onClick = { model.addFeed() }
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }

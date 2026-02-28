@@ -2,7 +2,6 @@ package cn.coolbet.orbit.ui.kit
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,27 +17,23 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black04
@@ -90,6 +85,7 @@ fun ObTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     focusRequester: FocusRequester? = null,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Row(
         modifier = Modifier.height(sizes.height).fillMaxWidth()
             .clip(RoundedCornerShape(sizes.radius))
@@ -131,7 +127,11 @@ fun ObTextField(
             Image(
                 modifier = Modifier.size(sizes.iconSize)
                     .clickable(
-                        onClick = { onValueChange("") }
+                        onClick = {
+                            onValueChange("")
+                            focusRequester?.requestFocus()
+                            keyboardController?.show()
+                        }
                     ),
                 painter = painterResource(id = R.drawable.x_fill),
                 contentDescription = "",
@@ -152,7 +152,8 @@ data class ObTextFieldSize(
 object ObTextFieldDefaults {
     val background: Color = Black04
     val small = ObTextFieldSize(
-        height = 36.dp, padding = 8.dp, radius = 10.dp, iconSize = 20.dp
+        //设计图padding = 8
+        height = 36.dp, padding = 7.dp, radius = 10.dp, iconSize = 20.dp
     )
     val large = ObTextFieldSize(
         height = 52.dp, padding = 12.dp, radius = 12.dp, iconSize = 24.dp
