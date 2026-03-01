@@ -7,14 +7,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,13 +24,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.R
@@ -38,6 +43,7 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.DragHandleArrow
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
@@ -46,7 +52,6 @@ import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.theme.BgSecondary
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailActions
@@ -83,7 +88,16 @@ data class AddFeedPreviewScreen(
                 override fun onBack() { navigator?.pop() }
             }
         }
-        var expanded by remember { mutableStateOf(true) }
+        var expanded by rememberSaveable { mutableStateOf(true) }
+        val sheetScreen = remember(meta) {
+            AnimatedSlideWrapper(
+                EditFeedSheet(
+                    feed = meta,
+                    dragArrow = DragHandleArrow.DOWN,
+                    onDragClick = { expanded = !expanded }
+                )
+            )
+        }
 
         Scaffold(
             topBar = {
@@ -134,31 +148,73 @@ data class AddFeedPreviewScreen(
                         .align(Alignment.BottomCenter)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFE8E8E8))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {}
+                        )
                 ) {
                     AnimatedVisibility(
                         visible = expanded,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        EditFeedSheet(
-                            feed = meta,
-                            dragArrow = DragHandleArrow.DOWN,
-                            onDragClick = { expanded = !expanded }
-                        ).Content()
+                        sheetScreen.Content()
                     }
                     if (!expanded) {
-                        Column {
-                            Box(modifier = Modifier.click { expanded = !expanded }) {
-                                DragHandle(arrow = DragHandleArrow.DOWN)
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
-                                ObAsyncTextButton(
-                                    "Done",
-                                    sizes = OButtonDefaults.large,
-                                )
-                            }
-                        }
+                        AddFeedCollapsedActions(
+                            title = preview.title,
+                            onExpand = { expanded = !expanded }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddFeedCollapsedActions() {
+    AddFeedCollapsedActions("sspai.com") { }
+}
+
+@Composable
+private fun AddFeedCollapsedActions(
+    title: String,
+    onExpand: () -> Unit,
+) {
+    val navigator = LocalNavigator.current
+    Column {
+        Box(modifier = Modifier.click(onClick = onExpand)) {
+            DragHandle(arrow = DragHandleArrow.UP)
+        }
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)) {
+            Column {
+                Text(
+                    title,
+                    maxLines = 1,
+                    style = AppTypography.M17,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                )
+                Row {
+                    Box(modifier = Modifier.weight(1f)) {
+                        ObAsyncTextButton(
+                            "Cancel",
+                            sizes = OButtonDefaults.medium,
+                            colors = OButtonDefaults.danger,
+                            onClick = { navigator?.pop() }
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        ObAsyncTextButton(
+                            "Add",
+                            sizes = OButtonDefaults.medium,
+                        )
                     }
                 }
             }

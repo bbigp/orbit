@@ -3,6 +3,7 @@ package cn.coolbet.orbit.ui.view.feed
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -69,7 +70,15 @@ data class EditFeedSheet(
                     },
                 )
             } else {
-                Text("Feed", maxLines = 1, style = AppTypography.M15B50, modifier = Modifier.padding(start = 20.dp, bottom = 8.dp))
+                Text(
+                    "Feed",
+                    maxLines = 1,
+                    style = AppTypography.M15B50,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, bottom = 8.dp)
+                        .click { onDragClick?.invoke() }
+                )
             }
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 ObTextField(
@@ -105,23 +114,25 @@ data class EditFeedSheet(
             }
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp)) {
                 ObAsyncTextButton(
-                    "Done",
+                    if (feed.id == 0L) "Add" else "Done",
                     sizes = OButtonDefaults.large,
                     isLoading = state.isApplying,
                     disable = !state.isModified || state.isApplying,
                     onClick = { actions.applyChanges() }
                 )
             }
-            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)) {
-                ObAsyncIconButton(
-                    icon = R.drawable.reduce_o,
-                    content = "Unsubscribe",
-                    isLoading = state.isUnsubscribing,
-                    disable = state.isUnsubscribing,
-                    onClick = { actions.unsubscribe() },
-                    sizes = OButtonDefaults.large,
-                    colors = OButtonDefaults.dangerGhost,
-                )
+            if (feed.id != 0L) {
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)) {
+                    ObAsyncIconButton(
+                        icon = R.drawable.reduce_o,
+                        content = "Unsubscribe",
+                        isLoading = state.isUnsubscribing,
+                        disable = state.isUnsubscribing,
+                        onClick = { actions.unsubscribe() },
+                        sizes = OButtonDefaults.large,
+                        colors = OButtonDefaults.dangerGhost,
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(21.dp))
         }
