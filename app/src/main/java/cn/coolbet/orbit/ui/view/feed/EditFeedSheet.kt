@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.DragHandle
+import cn.coolbet.orbit.ui.kit.DragHandleArrow
 import cn.coolbet.orbit.ui.kit.ListTileChevronUpDown
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObAsyncIconButton
@@ -27,15 +29,19 @@ import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.kit.ObTextField
 import cn.coolbet.orbit.ui.kit.ObTextFieldDefaults
 import cn.coolbet.orbit.ui.kit.SheetTopBar
+import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import org.koin.core.parameter.parametersOf
 
-data class EditFeedSheet(val feed: Feed): Screen {
+data class EditFeedSheet(
+    val feed: Feed,
+    val dragArrow: DragHandleArrow = DragHandleArrow.NONE,
+    val onDragClick: (() -> Unit)? = null,
+): Screen {
 
     private val state by lazy {
         EditFeedState(feed, feed.folder)
     }
-
 
     @Composable
     override fun Content() {
@@ -51,11 +57,20 @@ data class EditFeedSheet(val feed: Feed): Screen {
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Column {
-            DragHandle()
-            SheetTopBar(title = "Edit Feed", onBack = {
-                keyboardController?.hide()
-                navigator.pop()
-            })
+            Box(modifier = Modifier.click { onDragClick?.invoke() }) {
+                DragHandle(arrow = dragArrow)
+            }
+            if (feed.id != 0L) {
+                SheetTopBar(
+                    title = "Edit Feed",
+                    onBack = {
+                        keyboardController?.hide()
+                        navigator.pop()
+                    },
+                )
+            } else {
+                Text("Feed", maxLines = 1, style = AppTypography.M15B50, modifier = Modifier.padding(start = 20.dp, bottom = 8.dp))
+            }
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                 ObTextField(
                     sizes = ObTextFieldDefaults.large,
@@ -73,7 +88,7 @@ data class EditFeedSheet(val feed: Feed): Screen {
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)) {
                 ObCard {
                     ListTileChevronUpDown(
-                        title = "文件夹", icon = R.drawable.folder_1,
+                        title = "Folder", icon = R.drawable.folder_1,
                         trailing = state.category.title,
                         modifier = Modifier.click{ navigator.push(
                             FolderPickerSheet(
@@ -111,5 +126,4 @@ data class EditFeedSheet(val feed: Feed): Screen {
             Spacer(modifier = Modifier.height(21.dp))
         }
     }
-
 }

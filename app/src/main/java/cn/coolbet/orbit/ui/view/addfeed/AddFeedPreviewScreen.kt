@@ -1,17 +1,33 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -22,10 +38,16 @@ import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
+import cn.coolbet.orbit.ui.kit.DragHandle
+import cn.coolbet.orbit.ui.kit.DragHandleArrow
+import cn.coolbet.orbit.ui.kit.OButtonDefaults
+import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.theme.BgSecondary
+import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
@@ -61,6 +83,7 @@ data class AddFeedPreviewScreen(
                 override fun onBack() { navigator?.pop() }
             }
         }
+        var expanded by remember { mutableStateOf(true) }
 
         Scaffold(
             topBar = {
@@ -88,17 +111,14 @@ data class AddFeedPreviewScreen(
                 )
             }
         ) { paddingValues ->
-            Box(
-                modifier = Modifier.padding(paddingValues)
-                    .fillMaxSize()
-            ) {
+            Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
                 if (preview.entries.isEmpty()) {
                     LDCUEmptyView()
                 } else {
                     CompositionLocalProvider(
                         LocalOverscrollFactory provides null,
                         LocalListDetailActions provides actions,
-                        LocalUnreadState provides remember { androidx.compose.runtime.mutableStateOf(emptyMap()) },
+                        LocalUnreadState provides remember { mutableStateOf(emptyMap()) },
                     ) {
                         LDItemList(
                             scrollState = scrollState,
@@ -106,6 +126,39 @@ data class AddFeedPreviewScreen(
                             groupedData = mapOf("" to preview.entries),
                             enablePullToRefresh = false
                         )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFE8E8E8))
+                ) {
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        EditFeedSheet(
+                            feed = meta,
+                            dragArrow = DragHandleArrow.DOWN,
+                            onDragClick = { expanded = !expanded }
+                        ).Content()
+                    }
+                    if (!expanded) {
+                        Column {
+                            Box(modifier = Modifier.click { expanded = !expanded }) {
+                                DragHandle(arrow = DragHandleArrow.DOWN)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
+                                ObAsyncTextButton(
+                                    "Done",
+                                    sizes = OButtonDefaults.large,
+                                )
+                            }
+                        }
                     }
                 }
             }
