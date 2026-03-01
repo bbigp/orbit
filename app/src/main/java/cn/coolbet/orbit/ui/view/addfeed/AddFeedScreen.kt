@@ -36,7 +36,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.ui.kit.ObCard
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconTextField
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
@@ -126,7 +125,13 @@ object AddFeedScreen: Screen {
                     }
 
                     if (dataState.previews.isNotEmpty()) {
-                        AddFeedPreviewList(dataState.previews)
+                        AddFeedPreviewList(
+                            items = dataState.previews,
+                            onItemClick = { preview ->
+                                keyboardController?.hide()
+                                navigator?.push(AddFeedPreviewScreen(preview))
+                            }
+                        )
                     }
                 }
             }
@@ -135,13 +140,16 @@ object AddFeedScreen: Screen {
 }
 
 @Composable
-private fun AddFeedPreviewList(items: List<AddFeedPreview>) {
+private fun AddFeedPreviewList(
+    items: List<AddFeedPreview>,
+    onItemClick: (AddFeedPreview) -> Unit,
+) {
     Column {
         items.forEach { item ->
             Row (
-                modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth(),
+                modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth()
+                    .click { onItemClick(item) },
                 verticalAlignment = Alignment.CenterVertically,
-
             ) {
                 FeedIcon(
                     url = item.iconUrl,

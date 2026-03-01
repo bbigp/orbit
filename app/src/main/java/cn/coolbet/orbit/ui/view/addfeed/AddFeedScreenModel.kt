@@ -1,11 +1,10 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.Feed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,7 +74,7 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
             ?: doc.selectFirst("feed > icon")?.text()?.trim()
             ?: doc.selectFirst("feed > logo")?.text()?.trim()
             ?: ""
-        val entries = parseEntries(doc)
+        val entries = parseEntries(doc, title, url, iconUrl)
 
         return AddFeedResultUnit(
             previews = listOf(
@@ -90,29 +89,35 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
     }
 
     
-    private fun parseEntries(doc: org.jsoup.nodes.Document): List<Entry> {
+    private fun parseEntries(doc: org.jsoup.nodes.Document, title: String, url: String, iconUrl: String): List<Entry> {
+        val feed = Feed.EMPTY.copy(
+            title = title,
+            feedURL = url,
+            iconURL = iconUrl,
+        )
         val rssItems = doc.select("channel > item")
         if (rssItems.isNotEmpty()) {
-            return rssItems.map { item ->
+            return rssItems.mapIndexed { index, item ->
                 val title = item.selectFirst("title")?.text()?.trim().orEmpty()
                 val link = item.selectFirst("link")?.text()?.trim().orEmpty()
                 val summary = item.selectFirst("description")?.text()?.trim()
                     ?: item.selectFirst("content|encoded")?.text()?.trim().orEmpty()
                 val pubDate = item.selectFirst("pubDate")?.text()?.trim().orEmpty()
                 Entry(
-                    id = 0,
+                    id = (index + 1).toLong(),
                     userId = 0,
                     feedId = 0,
                     title = title.ifEmpty { link },
                     url = link,
                     publishedAt = parseDateToMillis(pubDate),
                     summary = summary,
+                    feed = feed,
                 )
             }
         }
 
         val atomEntries = doc.select("feed > entry")
-        return atomEntries.map { entry ->
+        return atomEntries.mapIndexed { index, entry ->
             val title = entry.selectFirst("title")?.text()?.trim().orEmpty()
             val linkEl = entry.selectFirst("link[rel=alternate]") ?: entry.selectFirst("link")
             val link = linkEl?.attr("href")?.trim()?.ifEmpty { linkEl.text().trim() }.orEmpty()
@@ -121,13 +126,14 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
             val published = entry.selectFirst("published")?.text()?.trim().orEmpty()
             val updated = entry.selectFirst("updated")?.text()?.trim().orEmpty()
             Entry(
-                id = 0,
+                id = (index + 1).toLong(),
                 userId = 0,
                 feedId = 0,
                 title = title.ifEmpty { link },
                 url = link,
                 publishedAt = parseDateToMillis(published.ifEmpty { updated }),
                 summary = summary,
+                feed = feed,
             )
         }
     }

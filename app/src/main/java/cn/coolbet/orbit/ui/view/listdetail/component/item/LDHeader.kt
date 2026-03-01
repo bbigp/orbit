@@ -29,7 +29,7 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 @Composable
 fun LDHeader(
     meta: Meta,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val unreadState = LocalUnreadState.current
     val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
@@ -45,6 +45,16 @@ fun LDHeader(
             maxLines = 1, overflow = TextOverflow.Ellipsis,
             style = AppTypography.M28
         ) //8 + 34 + 4 + 13 + 16 + 2
+        val feedUrl = (meta as? Feed)?.feedURL?.takeIf { it.isNotBlank() && meta.id == 0L }
+        if (!feedUrl.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                feedUrl,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = AppTypography.M13B25
+            )
+        }
         if (unreadMark == UnreadMark.NUMBER && count > 0) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(

@@ -39,27 +39,39 @@ interface LDItemListState {
 fun LDItemList(
     scrollState: ListScrollState,
     state: LDItemListState,
-    groupedData: Map<String, List<Entry>>
+    groupedData: Map<String, List<Entry>>,
+    enablePullToRefresh: Boolean = true,
 ) {
     val actions = LocalListDetailActions.current
 
     LazyColumn(
         state = scrollState.listState,
         modifier = Modifier.fillMaxSize()
-            .pullToRefresh(
-                state = scrollState.pullState,
-                isRefreshing = state.isRefreshing,
-                onRefresh = { scrollState.onRefresh() }
+            .then(
+                if (enablePullToRefresh) {
+                    Modifier.pullToRefresh(
+                        state = scrollState.pullState,
+                        isRefreshing = state.isRefreshing,
+                        onRefresh = { scrollState.onRefresh() }
+                    )
+                } else {
+                    Modifier
+                }
             ),
     ) {
-        item(key = "refresh-indicator") {
-            RefreshIndicatorItem(
-                state = scrollState.pullState,
-                isRefreshing = state.isRefreshing,
-            )
+        if (enablePullToRefresh) {
+            item(key = "refresh-indicator") {
+                RefreshIndicatorItem(
+                    state = scrollState.pullState,
+                    isRefreshing = state.isRefreshing,
+                )
+            }
         }
         item(key = "ld-header") {
-            LDHeader(state.meta, modifier = Modifier.graphicsLayer { alpha = 1 - scrollState.progress })
+            LDHeader(
+                meta = state.meta,
+                modifier = Modifier.graphicsLayer { alpha = 1 - scrollState.progress },
+            )
         }
 
         groupedData.forEach { (date, entries) ->

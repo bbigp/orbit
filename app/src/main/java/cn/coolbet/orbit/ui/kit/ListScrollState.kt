@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.dp
 class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val listState: LazyListState,
     val pullState: PullToRefreshState,
-    private val flyDistancePx: Float, // 将滑动距离内建
+    private val flyDistancePx: Float, // 滑动距离
+    private val headerIndexOffset: Int,
     val onRefresh: () -> Unit,
     val onLoadMore: () -> Unit
 ) {
@@ -29,8 +30,8 @@ class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
         val firstOffset = listState.firstVisibleItemScrollOffset
 
         when {
-            firstIndex <= 1 && firstOffset <= 0 -> 0f
-            firstIndex > 1 -> 1f
+            firstIndex <= headerIndexOffset && firstOffset <= 0 -> 0f
+            firstIndex > headerIndexOffset -> 1f
             else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
 
             //因为第一项是 RefreshIndicatorItem 所以listState.firstVisibleItemIndex 必须从1开始算
@@ -50,14 +51,16 @@ class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
 fun rememberListScrollState(
     flyDistance: Dp = 80.dp,
     onRefresh: () -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    hasRefreshIndicator: Boolean = true,
 ): ListScrollState {
     val listState = rememberLazyListState()
     val pullState = rememberPullToRefreshState()
     val density = LocalDensity.current
     val flyDistancePx = with(density) { flyDistance.toPx() }
+    val headerIndexOffset = if (hasRefreshIndicator) 1 else 0
 
-    return remember(listState, pullState, flyDistancePx) {
-        ListScrollState(listState, pullState, flyDistancePx, onRefresh, onLoadMore)
+    return remember(listState, pullState, flyDistancePx, headerIndexOffset) {
+        ListScrollState(listState, pullState, flyDistancePx, headerIndexOffset, onRefresh, onLoadMore)
     }
 }
