@@ -29,7 +29,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -55,18 +57,41 @@ fun ObIconTextField(
     focusRequester: FocusRequester? = null,
 ) {
     ObTextField(
-        hint = hint, value = value, background = background, readOnly = readOnly,
-        keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
-        onValueChange = onValueChange, focusRequester = focusRequester,
-        leading = {
-            Image(
-                modifier = Modifier.size(sizes.iconSize),
-                painter = painterResource(id = icon),
-                contentDescription = "",
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Black25),
-            )
-        }
+        hint = hint,
+        value = value,
+        background = background,
+        readOnly = readOnly,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        onValueChange = onValueChange,
+        focusRequester = focusRequester,
+        leading = { ObTextFieldLeadingIcon(icon, sizes) }
+    )
+}
+
+@Composable
+fun ObIconTextField(
+    icon: Int, readOnly: Boolean = false,
+    hint: String = "Search", value: TextFieldValue,
+    background: Color = ObTextFieldDefaults.background,
+    sizes: ObTextFieldSize = ObTextFieldDefaults.small,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        imeAction = ImeAction.Done,
+    ),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onValueChange: (TextFieldValue) -> Unit = {},
+    focusRequester: FocusRequester? = null,
+) {
+    ObTextField(
+        hint = hint,
+        value = value,
+        background = background,
+        readOnly = readOnly,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        onValueChange = onValueChange,
+        focusRequester = focusRequester,
+        leading = { ObTextFieldLeadingIcon(icon, sizes) }
     )
 }
 
@@ -84,6 +109,65 @@ fun ObTextField(
     ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     focusRequester: FocusRequester? = null,
+) {
+    ObTextField(
+        modifier = modifier,
+        hint = hint,
+        value = TextFieldValue(value),
+        readOnly = readOnly,
+        onValueChange = { onValueChange(it.text) },
+        background = background,
+        sizes = sizes,
+        leading = leading,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        focusRequester = focusRequester,
+    )
+}
+
+@Composable
+fun ObTextField(
+    modifier: Modifier = Modifier,
+    hint: String = "Search", value: TextFieldValue,
+    readOnly: Boolean = false,
+    onValueChange: (TextFieldValue) -> Unit = {},
+    background: Color = ObTextFieldDefaults.background,
+    sizes: ObTextFieldSize = ObTextFieldDefaults.small,
+    leading: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        imeAction = ImeAction.Done,
+    ),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester? = null,
+) {
+    ObTextFieldCore(
+        modifier = modifier,
+        hint = hint,
+        value = value,
+        readOnly = readOnly,
+        onValueChange = onValueChange,
+        background = background,
+        sizes = sizes,
+        leading = leading,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        focusRequester = focusRequester,
+    )
+}
+
+@Composable
+private fun ObTextFieldCore(
+    modifier: Modifier,
+    hint: String,
+    value: TextFieldValue,
+    readOnly: Boolean,
+    onValueChange: (TextFieldValue) -> Unit,
+    background: Color,
+    sizes: ObTextFieldSize,
+    leading: @Composable (() -> Unit)?,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions,
+    focusRequester: FocusRequester?,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Row(
@@ -108,11 +192,11 @@ fun ObTextField(
                 value = value, onValueChange = onValueChange,
                 singleLine = true, readOnly = readOnly,
                 textStyle = AppTypography.R15,
-                cursorBrush = SolidColor(Black95), // 光标
+                cursorBrush = SolidColor(Black95),
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
             )
-            if (value.isEmpty()) {
+            if (value.text.isEmpty()) {
                 Text(
                     text = hint,
                     maxLines = 1,
@@ -122,13 +206,13 @@ fun ObTextField(
             }
         }
 
-        if (value.isNotEmpty() && !readOnly) {
+        if (value.text.isNotEmpty() && !readOnly) {
             Spacer(modifier = Modifier.width(8.dp))
             Image(
                 modifier = Modifier.size(sizes.iconSize)
                     .clickable(
                         onClick = {
-                            onValueChange("")
+                            onValueChange(TextFieldValue("", selection = TextRange(0)))
                             focusRequester?.requestFocus()
                             keyboardController?.show()
                         }
@@ -140,6 +224,17 @@ fun ObTextField(
             )
         }
     }
+}
+
+@Composable
+private fun ObTextFieldLeadingIcon(icon: Int, sizes: ObTextFieldSize) {
+    Image(
+        modifier = Modifier.size(sizes.iconSize),
+        painter = painterResource(id = icon),
+        contentDescription = "",
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(Black25),
+    )
 }
 
 data class ObTextFieldSize(

@@ -3,7 +3,6 @@
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
-import cn.coolbet.orbit.ui.view.addfeed.AddFeedContent
 import cn.coolbet.orbit.ui.view.addfeed.AddFeedScreenModel
 import cn.coolbet.orbit.ui.view.addfeed.AddFeedState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailScreenModel
@@ -52,9 +51,9 @@ val screenModelModule = module {
             state, content, get()
         )
     }
-    factory { (state: AddFeedState, content: AddFeedContent) ->
+    factory { (state: AddFeedState) ->
         AddFeedScreenModel(
-            state, content, get()
+            state
         )
     }
     factory { (feed: Feed) ->
