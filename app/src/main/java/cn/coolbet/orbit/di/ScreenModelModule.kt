@@ -53,7 +53,9 @@ val screenModelModule = module {
     }
     factory { (state: AddFeedState) ->
         AddFeedScreenModel(
-            state
+            state,
+            get(),
+            get()
         )
     }
     factory { (feed: Feed) ->

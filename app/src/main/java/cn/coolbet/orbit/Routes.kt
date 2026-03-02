@@ -10,6 +10,7 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.view.addfeed.AddFeedScreen
+import cn.coolbet.orbit.ui.view.listdetail.ListDetailConfig
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailScreen
 import cn.coolbet.orbit.ui.view.content.ContentScreen
 import cn.coolbet.orbit.ui.view.home.HomeScreen
@@ -30,8 +31,8 @@ data class Route(val screen: Screen) {
         val Profile = Route(screen = ProfileScreen)
         val Sync = Route(screen = SyncScreen)
         val AddFeed = Route(screen = AddFeedScreen)
-        fun Entries(metaId: MetaId) = Route(
-            screen = ListDetailScreen(metaId)
+        fun Entries(metaId: MetaId, config: ListDetailConfig = ListDetailConfig()) = Route(
+            screen = ListDetailScreen(metaId = metaId, config = config)
         )
         fun SearchEntries(meta: Meta) = Route(
             screen = SearchEntriesScreen(meta)

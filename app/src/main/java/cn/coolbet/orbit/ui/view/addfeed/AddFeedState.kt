@@ -8,10 +8,18 @@ import cn.coolbet.orbit.model.domain.Entry
 
 data class AddFeedPreview(
     val title: String,
+    val feedId: Long = 0,
     val url: String,
     val iconUrl: String,
+    val subscribeState: AddFeedSubscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED,
     val entries: List<Entry> = emptyList(),
 )
+
+enum class AddFeedSubscribeState {
+    NOT_SUBSCRIBED,
+    SUBSCRIBED,
+    SUBSCRIBING,
+}
 
 data class AddFeedResultUnit(
     val previews: List<AddFeedPreview> = emptyList(),

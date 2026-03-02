@@ -25,8 +25,10 @@ import cn.coolbet.orbit.ui.theme.Black08
 
 @Composable
 fun DragHandle(
-    arrow: DragHandleArrow = DragHandleArrow.NONE,
+    arrow: DragHandleArrow = DragHandleArrow.BAR,
 ) {
+    if (arrow == DragHandleArrow.NONE) return
+
     Box(
         modifier = Modifier.fillMaxWidth()
             .padding(top = 10.dp, bottom = 8.dp),
@@ -40,7 +42,7 @@ fun DragHandle(
                     contentDescription = "",
                 )
             }
-            if (arrow == DragHandleArrow.NONE) {
+            if (arrow == DragHandleArrow.BAR) {
                 Spacer(
                     modifier = Modifier
                         .size(width = 36.dp, height = 3.5.dp)
@@ -61,6 +63,7 @@ fun DragHandle(
 
 enum class DragHandleArrow {
     NONE,
+    BAR,
     UP,
     DOWN,
 }

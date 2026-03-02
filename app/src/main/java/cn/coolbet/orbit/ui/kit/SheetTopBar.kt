@@ -26,6 +26,7 @@ import cn.coolbet.orbit.ui.theme.AppTypography
 @Composable
 fun SheetTopBar(
     title: String = "",
+    backIconId: Int = R.drawable.arrow_left,
     onBack: () -> Unit = {},
 ) {
     Row(
@@ -36,7 +37,7 @@ fun SheetTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         ObIcon(
-            id = R.drawable.arrow_left,
+            id = backIconId,
             modifier = Modifier.background(Color.Transparent).click(onClick = onBack)
         )
         Text(

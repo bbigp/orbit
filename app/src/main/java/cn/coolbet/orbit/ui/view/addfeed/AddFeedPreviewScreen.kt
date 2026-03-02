@@ -1,24 +1,23 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
 import androidx.compose.foundation.LocalOverscrollFactory
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -31,33 +30,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
-import cn.coolbet.orbit.model.domain.Meta
-import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.DragHandleArrow
-import cn.coolbet.orbit.ui.kit.OButtonDefaults
-import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
-import cn.coolbet.orbit.ui.kit.ObIcon
-import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
-import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
+import cn.coolbet.orbit.ui.view.feed.EditFeedSheetConfig
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
-import cn.coolbet.orbit.ui.view.listdetail.component.LDItemListState
 import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
 
 data class AddFeedPreviewScreen(
@@ -93,38 +82,19 @@ data class AddFeedPreviewScreen(
             AnimatedSlideWrapper(
                 EditFeedSheet(
                     feed = meta,
-                    dragArrow = DragHandleArrow.DOWN,
-                    onDragClick = { expanded = !expanded }
+                    config = EditFeedSheetConfig(
+                        dragArrow = DragHandleArrow.NONE
+                    )
                 )
             )
         }
+        val dragRotation by animateFloatAsState(
+            targetValue = if (expanded) 180f else 0f,
+            animationSpec = tween(durationMillis = 220),
+            label = "add_feed_drag_rotation"
+        )
 
-        Scaffold(
-            topBar = {
-                ObTopAppbar(
-                    navigationIcon = {
-                        ObIcon(
-                            id = R.drawable.arrow_left,
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .click { actions.onBack() }
-                        )
-                    },
-                    title = {
-                        Row(
-                            modifier = Modifier.graphicsLayer { alpha = scrollState.progress },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                preview.title,
-                                maxLines = 1,
-                                style = AppTypography.M17
-                            )
-                        }
-                    },
-                )
-            }
-        ) { paddingValues ->
+        Scaffold { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
                 if (preview.entries.isEmpty()) {
                     LDCUEmptyView()
@@ -138,7 +108,8 @@ data class AddFeedPreviewScreen(
                             scrollState = scrollState,
                             state = state,
                             groupedData = mapOf("" to preview.entries),
-                            enablePullToRefresh = false
+                            enablePullToRefresh = false,
+                            enableSwipe = false
                         )
                     }
                 }
@@ -154,17 +125,37 @@ data class AddFeedPreviewScreen(
                             onClick = {}
                         )
                 ) {
-                    AnimatedVisibility(
-                        visible = expanded,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        sheetScreen.Content()
-                    }
-                    if (!expanded) {
-                        AddFeedCollapsedActions(
-                            title = preview.title,
-                            onExpand = { expanded = !expanded }
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .click { expanded = !expanded }
+                        ) {
+                            Box(modifier = Modifier.graphicsLayer { rotationZ = dragRotation }) {
+                                DragHandle(arrow = DragHandleArrow.UP)
+                            }
+                        }
+                        AnimatedContent(
+                            targetState = expanded,
+                            transitionSpec = {
+                                ContentTransform(
+                                    targetContentEnter = expandVertically() + fadeIn(),
+                                    initialContentExit = shrinkVertically() + fadeOut()
+                                )
+                            }
+                        ) { isExpanded ->
+                            if (isExpanded) {
+                                sheetScreen.Content()
+                            } else {
+                                AddFeedCollapsedHeader(
+                                    title = preview.title,
+                                    onExpand = { expanded = true }
+                                )
+                            }
+                        }
+                        AddFeedActionBar(
+                            onCancel = { navigator?.pop() },
+                            onAdd = { }
                         )
                     }
                 }
@@ -172,59 +163,3 @@ data class AddFeedPreviewScreen(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewAddFeedCollapsedActions() {
-    AddFeedCollapsedActions("sspai.com") { }
-}
-
-@Composable
-private fun AddFeedCollapsedActions(
-    title: String,
-    onExpand: () -> Unit,
-) {
-    val navigator = LocalNavigator.current
-    Column {
-        Box(modifier = Modifier.click(onClick = onExpand)) {
-            DragHandle(arrow = DragHandleArrow.UP)
-        }
-        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)) {
-            Column {
-                Text(
-                    title,
-                    maxLines = 1,
-                    style = AppTypography.M17,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                )
-                Row {
-                    Box(modifier = Modifier.weight(1f)) {
-                        ObAsyncTextButton(
-                            "Cancel",
-                            sizes = OButtonDefaults.medium,
-                            colors = OButtonDefaults.danger,
-                            onClick = { navigator?.pop() }
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        ObAsyncTextButton(
-                            "Add",
-                            sizes = OButtonDefaults.medium,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-private data class AddFeedPreviewListState(
-    override val meta: Meta,
-    override val settings: LDSettings = LDSettings.defaultSettings,
-    override val isRefreshing: Boolean = false,
-    override val hasMore: Boolean = false,
-): LDItemListState

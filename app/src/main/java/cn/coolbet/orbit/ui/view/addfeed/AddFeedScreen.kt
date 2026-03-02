@@ -3,13 +3,10 @@ package cn.coolbet.orbit.ui.view.addfeed
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
@@ -22,27 +19,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconTextField
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.view.FeedIcon
-import cn.coolbet.orbit.ui.view.FeedIconDefaults
+import cn.coolbet.orbit.ui.view.listdetail.ListDetailConfig
+import cn.coolbet.orbit.ui.view.listdetail.ListDetailMoreAction
+import cn.coolbet.orbit.model.domain.MetaId
 import org.koin.core.parameter.parametersOf
 
 object AddFeedScreen: Screen {
@@ -60,8 +57,8 @@ object AddFeedScreen: Screen {
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(
                 TextFieldValue(
-                    "https://juejin.cn/rss",
-                    selection = TextRange("https://juejin.cn/rss".length)
+                    "https://sspai.com/feed",
+//                    "https://juejin.cn/rss",
                 )
             )
         }
@@ -129,51 +126,31 @@ object AddFeedScreen: Screen {
                             items = dataState.previews,
                             onItemClick = { preview ->
                                 keyboardController?.hide()
-                                navigator?.push(AddFeedPreviewScreen(preview))
-                            }
+                                if (preview.feedId > 0L) {
+                                    NavigatorBus.push(
+                                        Route.Entries(
+                                            metaId = MetaId("e", preview.feedId),
+                                            config = ListDetailConfig(
+                                                showSearch = true,
+                                                enableSwipe = true,
+                                                moreAction = ListDetailMoreAction.OPEN_EDIT_FEED
+                                            )
+                                        )
+                                    )
+                                } else {
+                                    navigator?.push(AddFeedPreviewScreen(preview))
+                                }
+                            },
+                            onSubscribeClick = { preview, state ->
+                                when (state) {
+                                    AddFeedSubscribeState.NOT_SUBSCRIBED -> model.addFeed(preview)
+                                    AddFeedSubscribeState.SUBSCRIBED -> model.unsubscribeFeed(preview)
+                                    AddFeedSubscribeState.SUBSCRIBING -> Unit
+                                }
+                            },
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AddFeedPreviewList(
-    items: List<AddFeedPreview>,
-    onItemClick: (AddFeedPreview) -> Unit,
-) {
-    Column {
-        items.forEach { item ->
-            Row (
-                modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth()
-                    .click { onItemClick(item) },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                FeedIcon(
-                    url = item.iconUrl,
-                    alt = item.title,
-                    size = FeedIconDefaults.LARGE,
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        item.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = AppTypography.M15,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        item.url,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = AppTypography.R13B50,
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                ObIcon(id = R.drawable.plus_fill)
             }
         }
     }

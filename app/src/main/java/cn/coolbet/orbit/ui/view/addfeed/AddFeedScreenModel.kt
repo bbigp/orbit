@@ -10,13 +10,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
+import cn.coolbet.orbit.manager.EntryManager
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
+class AddFeedScreenModel(
+    val state: AddFeedState,
+    private val cacheStore: CacheStore,
+    private val entryManager: EntryManager,
+) : ScreenModel {
 
     private val _unit = MutableStateFlow(AddFeedResultUnit())
     val unit = _unit.asStateFlow()
@@ -34,6 +40,25 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
             state.setLoading(true)
             _unit.value = AddFeedResultUnit()
             try {
+                val localFeed = cacheStore.feedsState.value.firstOrNull { it.feedURL == normalized }
+                if (localFeed != null) {
+                    val localEntries = withContext(Dispatchers.IO) {
+                        entryManager.getPage(meta = localFeed, page = 1, size = 20)
+                    }
+                    _unit.value = AddFeedResultUnit(
+                        previews = listOf(
+                            AddFeedPreview(
+                                title = localFeed.title,
+                                feedId = localFeed.id,
+                                url = localFeed.feedURL,
+                                iconUrl = localFeed.iconURL,
+                                subscribeState = AddFeedSubscribeState.SUBSCRIBED,
+                                entries = localEntries,
+                            )
+                        )
+                    )
+                    return@launch
+                }
                 val result = withContext(Dispatchers.IO) {
                     loadPreview(normalized)
                 }
@@ -47,7 +72,34 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
     }
 
     fun addFeed() {
-        // TODO: Implement add feed logic
+        val preview = _unit.value.previews.firstOrNull() ?: return
+        addFeed(preview)
+    }
+
+    fun addFeed(preview: AddFeedPreview) {
+        if (preview.subscribeState != AddFeedSubscribeState.NOT_SUBSCRIBED) return
+        screenModelScope.launch {
+            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
+            delay(1000)
+            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBED)
+        }
+    }
+
+    fun unsubscribeFeed(preview: AddFeedPreview) {
+        if (preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) return
+        screenModelScope.launch {
+            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
+            delay(600)
+            updatePreviewState(preview.url, AddFeedSubscribeState.NOT_SUBSCRIBED)
+        }
+    }
+
+    private fun updatePreviewState(url: String, state: AddFeedSubscribeState) {
+        val current = _unit.value
+        val next = current.previews.map { preview ->
+            if (preview.url == url) preview.copy(subscribeState = state) else preview
+        }
+        _unit.value = current.copy(previews = next, error = null)
     }
 
     
@@ -80,6 +132,7 @@ class AddFeedScreenModel(val state: AddFeedState) : ScreenModel {
             previews = listOf(
                 AddFeedPreview(
                     title = title,
+                    feedId = 0,
                     url = url,
                     iconUrl = iconUrl,
                     entries = entries,

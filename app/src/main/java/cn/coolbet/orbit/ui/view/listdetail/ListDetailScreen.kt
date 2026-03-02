@@ -38,6 +38,7 @@ import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.LoadingState
 import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
 import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
@@ -53,6 +54,9 @@ import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
 import cn.coolbet.orbit.ui.view.listdetail.component.skeleton.LDSkeletonList
 import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
+import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
+import cn.coolbet.orbit.ui.view.feed.EditFeedBackAction
+import cn.coolbet.orbit.ui.view.feed.EditFeedSheetConfig
 import cn.coolbet.orbit.ui.view.listdetail.setting.LDSettingSheet
 import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
@@ -60,6 +64,7 @@ import org.koin.core.parameter.parametersOf
 @Parcelize
 data class ListDetailScreen(
     val metaId: MetaId,
+    val config: ListDetailConfig = ListDetailConfig(),
 ): Screen, Parcelable {
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -132,13 +137,35 @@ data class ListDetailScreen(
                     },
                     actions = {
                         ObIconGroup {
-                            ObIcon(
-                                R.drawable.search,
-                                modifier = Modifier.clickable { NavigatorBus.push(Route.SearchEntries(state.meta)) },
-                            )
+                            if (config.showSearch) {
+                                ObIcon(
+                                    R.drawable.search,
+                                    modifier = Modifier.clickable { NavigatorBus.push(Route.SearchEntries(state.meta)) },
+                                )
+                            }
                             ObIcon(
                                 R.drawable.more,
-                                modifier = Modifier.clickable { sheetNavigator.showAnimated(LDSettingSheet) },
+                                modifier = Modifier.clickable {
+                                    when (config.moreAction) {
+                                        ListDetailMoreAction.OPEN_EDIT_FEED -> {
+                                            val feed = state.meta as? Feed
+                                            if (feed != null && feed.id > 0L) {
+                                                sheetNavigator.showAnimated(
+                                                    EditFeedSheet(
+                                                        feed = feed,
+                                                        config = EditFeedSheetConfig(
+                                                            topBarBackIconId = R.drawable.x,
+                                                            backAction = EditFeedBackAction.HIDE_SHEET
+                                                        )
+                                                    )
+                                                )
+                                            }
+                                        }
+                                        ListDetailMoreAction.OPEN_SETTINGS -> {
+                                            sheetNavigator.showAnimated(LDSettingSheet)
+                                        }
+                                    }
+                                },
                             )
                         }
                     }
@@ -161,7 +188,8 @@ data class ListDetailScreen(
                             LDItemList(
                                 scrollState = scrollState,
                                 state = state,
-                                groupedData = groupedItems
+                                groupedData = groupedItems,
+                                enableSwipe = config.enableSwipe
                             )
                         }
                     }

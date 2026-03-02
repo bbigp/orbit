@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.common.click
@@ -36,8 +37,7 @@ import org.koin.core.parameter.parametersOf
 
 data class EditFeedSheet(
     val feed: Feed,
-    val dragArrow: DragHandleArrow = DragHandleArrow.NONE,
-    val onDragClick: (() -> Unit)? = null,
+    val config: EditFeedSheetConfig = EditFeedSheetConfig(),
 ): Screen {
 
     private val state by lazy {
@@ -54,19 +54,22 @@ data class EditFeedSheet(
             override fun unsubscribe() = model.unsubscribe()
         }
         val navigator = LocalNavigator.currentOrThrow
+        val sheetNavigator = LocalBottomSheetNavigator.current
         val folders by model.cacheStore.foldersState.collectAsState()
         val keyboardController = LocalSoftwareKeyboardController.current
 
         Column {
-            Box(modifier = Modifier.click { onDragClick?.invoke() }) {
-                DragHandle(arrow = dragArrow)
-            }
+            DragHandle(arrow = config.dragArrow)
             if (feed.id != 0L) {
                 SheetTopBar(
                     title = "Edit Feed",
+                    backIconId = config.topBarBackIconId,
                     onBack = {
                         keyboardController?.hide()
-                        navigator.pop()
+                        when (config.backAction) {
+                            EditFeedBackAction.POP_SCREEN -> navigator.pop()
+                            EditFeedBackAction.HIDE_SHEET -> sheetNavigator.hide()
+                        }
                     },
                 )
             } else {
@@ -77,7 +80,6 @@ data class EditFeedSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 20.dp, bottom = 8.dp)
-                        .click { onDragClick?.invoke() }
                 )
             }
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
@@ -112,16 +114,16 @@ data class EditFeedSheet(
                     )
                 }
             }
-            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp)) {
-                ObAsyncTextButton(
-                    if (feed.id == 0L) "Add" else "Done",
-                    sizes = OButtonDefaults.large,
-                    isLoading = state.isApplying,
-                    disable = !state.isModified || state.isApplying,
-                    onClick = { actions.applyChanges() }
-                )
-            }
             if (feed.id != 0L) {
+                Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp)) {
+                    ObAsyncTextButton(
+                        "Done",
+                        sizes = OButtonDefaults.large,
+                        isLoading = state.isApplying,
+                        disable = !state.isModified || state.isApplying,
+                        onClick = { actions.applyChanges() }
+                    )
+                }
                 Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)) {
                     ObAsyncIconButton(
                         icon = R.drawable.reduce_o,
@@ -138,3 +140,14 @@ data class EditFeedSheet(
         }
     }
 }
+
+enum class EditFeedBackAction {
+    POP_SCREEN,
+    HIDE_SHEET,
+}
+
+data class EditFeedSheetConfig(
+    val dragArrow: DragHandleArrow = DragHandleArrow.BAR,
+    val topBarBackIconId: Int = R.drawable.arrow_left,
+    val backAction: EditFeedBackAction = EditFeedBackAction.POP_SCREEN,
+)

@@ -41,6 +41,7 @@ fun LDItemList(
     state: LDItemListState,
     groupedData: Map<String, List<Entry>>,
     enablePullToRefresh: Boolean = true,
+    enableSwipe: Boolean = true,
 ) {
     val actions = LocalListDetailActions.current
 
@@ -82,23 +83,29 @@ fun LDItemList(
             }
 
             items(entries, key = { it.id }) { item ->
-                SwipeWrapper(
-                    rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
-                        onClick = {
-                            actions.toggleRead(item)
-                            ObToastManager.show("Marked as Read")
-                        }
-                    ) else UnreadStateDefinition.copy(
-                        onClick = {
-                            actions.toggleRead(item)
-                            ObToastManager.show("Marked as Unread")
-                        }
-                    ),
-                    leftSwipeState = NoneStateDefinition
-                ) {
+                val rowContent: @Composable () -> Unit = {
                     LDRow(item, state.settings.displayMode, modifier = Modifier.click {
                         NavigatorBus.push(Route.Entry(item, state.settings))
                     })
+                }
+                if (enableSwipe) {
+                    SwipeWrapper(
+                        rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
+                            onClick = {
+                                actions.toggleRead(item)
+                                ObToastManager.show("Marked as Read")
+                            }
+                        ) else UnreadStateDefinition.copy(
+                            onClick = {
+                                actions.toggleRead(item)
+                                ObToastManager.show("Marked as Unread")
+                            }
+                        ),
+                        leftSwipeState = NoneStateDefinition,
+                        content = rowContent
+                    )
+                } else {
+                    rowContent()
                 }
                 SpacerDivider(start = 16.dp, end = 16.dp)
             }
