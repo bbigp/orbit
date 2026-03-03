@@ -57,8 +57,8 @@ object AddFeedScreen: Screen {
         var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(
                 TextFieldValue(
-                    "https://sspai.com/feed",
-//                    "https://juejin.cn/rss",
+//                    "https://sspai.com/feed",
+                    "https://juejin.cn/rss",
                 )
             )
         }
