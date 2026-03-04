@@ -108,6 +108,9 @@ abstract class EntryDao(protected val db: AppDatabase) {
     @Query("delete from entries")
     abstract suspend fun clearAll()
 
+    @Query("delete from entries where feed_id = :feedId")
+    abstract suspend fun deleteByFeedId(feedId: Long)
+
     @Query("""
         select feed_id, sum(case when status = 'unread' then 1 else 0 end) as count 
         from entries

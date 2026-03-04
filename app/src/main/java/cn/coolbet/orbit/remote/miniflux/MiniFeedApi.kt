@@ -3,11 +3,21 @@ package cn.coolbet.orbit.remote.miniflux
 import cn.coolbet.orbit.model.OrderPublishedAt
 import cn.coolbet.orbit.model.domain.Feed
 import com.google.gson.annotations.SerializedName
+import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.POST
 
 interface MiniFeedApi {
     @GET("v1/feeds")
     suspend fun getFeeds() : List<FeedResponse>
+
+    @POST("v1/feeds")
+    suspend fun createFeed(@Body request: FeedCreationRequest): CreateFeedResponse
+
+    @DELETE("v1/feeds/{feedId}")
+    suspend fun deleteFeed(@Path("feedId") feedId: Long)
 }
 
 fun FeedResponse.to(): Feed {
@@ -58,3 +68,27 @@ data class IconResponse(
     }
     val isEmpty: Boolean get() = iconId == 0L
 }
+
+data class FeedCreationRequest(
+    @SerializedName("feed_url") val feedUrl: String,
+    @SerializedName("category_id") val categoryId: Long,
+    @SerializedName("user_agent") val userAgent: String = "",
+    @SerializedName("cookie") val cookie: String = "",
+    @SerializedName("username") val username: String = "",
+    @SerializedName("password") val password: String = "",
+    @SerializedName("crawler") val crawler: Boolean = false,
+    @SerializedName("disabled") val disabled: Boolean = false,
+    @SerializedName("ignore_http_cache") val ignoreHttpCache: Boolean = false,
+    @SerializedName("allow_self_signed_certificates") val allowSelfSignedCertificates: Boolean = false,
+    @SerializedName("fetch_via_proxy") val fetchViaProxy: Boolean = false,
+    @SerializedName("scraper_rules") val scraperRules: String = "",
+    @SerializedName("rewrite_rules") val rewriteRules: String = "",
+    @SerializedName("blocklist_rules") val blocklistRules: String = "",
+    @SerializedName("keeplist_rules") val keeplistRules: String = "",
+    @SerializedName("hide_globally") val hideGlobally: Boolean = false,
+    @SerializedName("disable_http2") val disableHttp2: Boolean = false,
+)
+
+data class CreateFeedResponse(
+    @SerializedName("feed_id") val feedId: Long = 0,
+)

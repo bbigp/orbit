@@ -28,8 +28,8 @@ import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.view.feed.EditFeedBottomButtonsLayout
 import cn.coolbet.orbit.ui.view.feed.EditFeedDragMode
+import cn.coolbet.orbit.ui.view.feed.EditFeedArgs
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
-import cn.coolbet.orbit.ui.view.feed.EditFeedSheetConfig
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
@@ -68,7 +68,7 @@ data class AddFeedPreviewScreen(
             AnimatedSlideWrapper(
                 EditFeedSheet(
                     feed = meta,
-                    config = EditFeedSheetConfig(
+                    args = EditFeedArgs(
                         dragMode = EditFeedDragMode.TOGGLE,
                         expandable = true,
                         expandableInitialExpanded = true,

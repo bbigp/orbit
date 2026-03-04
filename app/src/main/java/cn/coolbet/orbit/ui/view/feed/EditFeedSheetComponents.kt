@@ -101,7 +101,7 @@ internal fun EditFeedCollapsedHeader(
 
 @Composable
 internal fun EditFeedDrag(
-    config: EditFeedSheetConfig,
+    config: EditFeedArgs,
     rotation: Float,
     onToggle: () -> Unit,
 ) {
@@ -120,7 +120,7 @@ internal fun EditFeedDrag(
 
 @Composable
 internal fun EditFeedBottomButtons(
-    config: EditFeedSheetConfig,
+    config: EditFeedArgs,
     showEditButtons: Boolean,
     isApplying: Boolean,
     isUnsubscribing: Boolean,

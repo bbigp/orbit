@@ -9,6 +9,20 @@ class FeedApi(
     private val miniFeedApi: MiniFeedApi
 ) {
     suspend fun getFeeds(): List<Feed> = withContext(Dispatchers.IO) {
-        miniFeedApi.getFeeds().map { it.to() }
+        minifluxRequest {
+            miniFeedApi.getFeeds().map { it.to() }
+        }
+    }
+
+    suspend fun createFeed(request: FeedCreationRequest): Long = withContext(Dispatchers.IO) {
+        minifluxRequest {
+            miniFeedApi.createFeed(request).feedId
+        }
+    }
+
+    suspend fun deleteFeed(feedId: Long) = withContext(Dispatchers.IO) {
+        minifluxRequest {
+            miniFeedApi.deleteFeed(feedId)
+        }
     }
 }

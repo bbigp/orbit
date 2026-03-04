@@ -28,41 +28,60 @@ import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import org.koin.core.parameter.parametersOf
 
 data class EditFeedSheet(
     val feed: Feed,
-    val config: EditFeedSheetConfig = EditFeedSheetConfig(),
-): Screen {
+    val args: EditFeedArgs = EditFeedArgs(),
+) : Screen {
 
     private val state by lazy {
-        EditFeedState(feed, feed.folder)
+        EditFeedState(feed)
     }
 
     @Composable
     override fun Content() {
         val model = koinScreenModel<EditFeedScreenModel> {
-            parametersOf(state, EditFeedContent())
+            parametersOf(state)
         }
-        val actions: EditFeedActions = object: EditFeedActions {
-            override fun applyChanges() = model.applyChanges()
-            override fun unsubscribe() = model.unsubscribe()
-        }
+        val unit by model.unit.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
         val sheetNavigator = LocalBottomSheetNavigator.current
-        val folders by model.cacheStore.foldersState.collectAsState()
         val keyboardController = LocalSoftwareKeyboardController.current
+
         val rootFolderId = Env.settings.rootFolder.value
-        val rootFolder = folders.find { it.id == rootFolderId }
-        var expanded by rememberSaveable { mutableStateOf(config.expandableInitialExpanded) }
-        val contentExpanded = if (config.expandable) expanded else true
+        val rootFolder = unit.folders.find { it.id == rootFolderId }
+
+        var expanded by rememberSaveable { mutableStateOf(args.expandableInitialExpanded) }
+        val contentExpanded = if (args.expandable) expanded else true
 
         LaunchedEffect(feed.id, rootFolder?.id) {
             if (feed.id == 0L && state.category.id == 0L && rootFolder != null) {
                 state.updateCategory(rootFolder)
+            }
+        }
+        LaunchedEffect(model, args.backAction) {
+            model.effects.collect { effect ->
+                when (effect) {
+                    is EditFeedEffect.Unsubscribed -> {
+                        keyboardController?.hide()
+                        when (args.backAction) {
+                            EditFeedBackAction.POP_SCREEN -> navigator.pop()
+                            EditFeedBackAction.HIDE_SHEET -> sheetNavigator.hide()
+                        }
+                        NavigatorBus.replaceAll(Route.Home)
+                        ObToastManager.show("Unsubscribed")
+                    }
+                    is EditFeedEffect.Error -> {
+                        ObToastManager.show(effect.message, ToastType.Error)
+                    }
+                }
             }
         }
         val dragRotation by animateFloatAsState(
@@ -73,7 +92,7 @@ data class EditFeedSheet(
 
         val onClose: () -> Unit = {
             keyboardController?.hide()
-            when (config.backAction) {
+            when (args.backAction) {
                 EditFeedBackAction.POP_SCREEN -> navigator.pop()
                 EditFeedBackAction.HIDE_SHEET -> sheetNavigator.hide()
             }
@@ -81,9 +100,9 @@ data class EditFeedSheet(
 
         Column {
             EditFeedDrag(
-                config = config,
+                config = args,
                 rotation = dragRotation,
-                onToggle = { if (config.expandable) expanded = !expanded }
+                onToggle = { if (args.expandable) expanded = !expanded }
             )
 
             AnimatedContent(
@@ -100,17 +119,20 @@ data class EditFeedSheet(
                         feed = feed,
                         title = state.title,
                         folderTitle = state.category.title,
-                        topBarBackIconId = config.topBarBackIconId,
+                        topBarBackIconId = args.topBarBackIconId,
                         onBack = onClose,
-                        onTitleChange = state::updateTitle,
+                        onTitleChange = { v -> state.updateTitle(v) },
                         onPickFolder = {
                             navigator.push(
                                 FolderPickerSheet(
-                                    folders = folders,
+                                    folders = unit.folders,
                                     selectedId = state.category.id,
                                     onValueChange = { id ->
-                                        state.updateCategory(model.cacheStore.folder(id))
-                                        navigator.pop()
+                                        val folder = unit.folders.find { it.id == id }
+                                        if (folder != null) {
+                                            state.updateCategory(folder)
+                                            navigator.pop()
+                                        }
                                     }
                                 )
                             )
@@ -125,13 +147,17 @@ data class EditFeedSheet(
             }
 
             EditFeedBottomButtons(
-                config = config,
+                config = args,
                 showEditButtons = feed.id != 0L,
                 isApplying = state.isApplying,
                 isUnsubscribing = state.isUnsubscribing,
                 isModified = state.isModified,
-                onApply = { actions.applyChanges() },
-                onUnsubscribe = { actions.unsubscribe() },
+                onApply = {
+                    model.onAction(EditFeedAction.ApplyChanges)
+                },
+                onUnsubscribe = {
+                    model.onAction(EditFeedAction.Unsubscribe)
+                },
                 onCancel = {
                     if (feed.id == 0L) {
                         NavigatorBus.pop()

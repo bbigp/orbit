@@ -4,6 +4,7 @@ import androidx.work.WorkManager
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.manager.EntryManager
 import cn.coolbet.orbit.manager.EventBus
+import cn.coolbet.orbit.manager.FeedManager
 import cn.coolbet.orbit.manager.ListDetailCoordinator
 import cn.coolbet.orbit.manager.LocalDataManager
 import cn.coolbet.orbit.manager.Preference
@@ -37,6 +38,7 @@ val appModule = module {
 
     singleOf(::CacheStore)
     singleOf(::EntryManager)
+    singleOf(::FeedManager)
     single { EventBus() }
     singleOf(::ListDetailCoordinator)
     singleOf(::LocalDataManager)

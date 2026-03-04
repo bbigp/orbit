@@ -3,6 +3,11 @@ package cn.coolbet.orbit.ui.view.feed
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
+import cn.coolbet.orbit.manager.FeedManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -11,33 +16,55 @@ import kotlinx.coroutines.launch
  */
 class EditFeedScreenModel(
     val state: EditFeedState,
-    val content: EditFeedContent,
     val cacheStore: CacheStore,
+    private val feedManager: FeedManager,
 ) : ScreenModel {
+    private val _unit = MutableStateFlow(EditFeedUnit())
+    val unit = _unit.asStateFlow()
+    private val _effects = MutableSharedFlow<EditFeedEffect>(extraBufferCapacity = 1)
+    val effects = _effects.asSharedFlow()
 
-    fun applyChanges() {
-        if (!state.isModified || state.isApplying) return
+    init {
+        screenModelScope.launch {
+            cacheStore.foldersState.collect { folders ->
+                _unit.value = _unit.value.copy(folders = folders)
+            }
+        }
+    }
+
+    fun onAction(action: EditFeedAction) {
+        when (action) {
+            is EditFeedAction.ApplyChanges -> applyChanges()
+            is EditFeedAction.Unsubscribe -> unsubscribe()
+        }
+    }
+
+    private fun applyChanges() {
+        if (state.isApplying) return
         screenModelScope.launch {
             state.isApplying = true
             try {
+                // TODO: apply title/category changes with `state`.
+            } catch (e: Exception) {
+                _effects.emit(EditFeedEffect.Error(e.message ?: "Failed to apply feed changes"))
             } finally {
                 state.isApplying = false
             }
         }
     }
 
-    fun unsubscribe() {
+    private fun unsubscribe() {
         if (state.isUnsubscribing) return
         screenModelScope.launch {
             state.isUnsubscribing = true
             try {
+                feedManager.unsubscribeFeed(state.feed.id)
+                _effects.emit(EditFeedEffect.Unsubscribed)
+            } catch (e: Exception) {
+                _effects.emit(EditFeedEffect.Error(e.message ?: "Failed to unsubscribe feed"))
             } finally {
                 state.isUnsubscribing = false
             }
         }
     }
-}
-
-class EditFeedContent{
-
 }

@@ -124,7 +124,10 @@ fun ObToast() {
     LaunchedEffect(Unit) {
         ObToastManager.events.collect { event ->
             when (event) {
-                is ObToastEvent.Show -> state.show(scope, event.message, event.type)
+                is ObToastEvent.Show -> {
+                    val duration = if (event.type == ToastType.Error) 3000L else 1000L
+                    state.show(scope, event.message, event.type, hideInSeconds = duration)
+                }
             }
         }
     }

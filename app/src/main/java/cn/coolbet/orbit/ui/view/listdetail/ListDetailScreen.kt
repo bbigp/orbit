@@ -56,7 +56,7 @@ import cn.coolbet.orbit.ui.view.listdetail.component.skeleton.LDSkeletonList
 import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
 import cn.coolbet.orbit.ui.view.feed.EditFeedBackAction
-import cn.coolbet.orbit.ui.view.feed.EditFeedSheetConfig
+import cn.coolbet.orbit.ui.view.feed.EditFeedArgs
 import cn.coolbet.orbit.ui.view.listdetail.setting.LDSettingSheet
 import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
@@ -153,7 +153,7 @@ data class ListDetailScreen(
                                                 sheetNavigator.showAnimated(
                                                     EditFeedSheet(
                                                         feed = feed,
-                                                        config = EditFeedSheetConfig(
+                                                        args = EditFeedArgs(
                                                             topBarBackIconId = R.drawable.x,
                                                             backAction = EditFeedBackAction.HIDE_SHEET
                                                         )

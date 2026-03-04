@@ -47,6 +47,9 @@ abstract class FeedDao(private val db: AppDatabase) {
     @Query("delete from feeds")
     abstract suspend fun clearAll()
 
+    @Query("delete from feeds where id = :feedId")
+    abstract suspend fun deleteById(feedId: Long)
+
     @Query("""
         update feeds set feed_url = :feedURL, site_url = :siteURL,
             title = :title, error_count = :errorCount, error_msg = :errorMsg,

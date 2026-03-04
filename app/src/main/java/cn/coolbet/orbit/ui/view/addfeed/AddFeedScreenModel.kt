@@ -5,27 +5,33 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.manager.Env
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.delay
 import cn.coolbet.orbit.manager.EntryManager
+import cn.coolbet.orbit.manager.FeedManager
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class AddFeedScreenModel(
     val state: AddFeedState,
     private val cacheStore: CacheStore,
     private val entryManager: EntryManager,
+    private val feedManager: FeedManager,
 ) : ScreenModel {
 
     private val _unit = MutableStateFlow(AddFeedResultUnit())
     val unit = _unit.asStateFlow()
+    private val _effects = MutableSharedFlow<AddFeedEffect>(extraBufferCapacity = 1)
+    val effects = _effects.asSharedFlow()
 
     fun clearPreview() {
         _unit.value = AddFeedResultUnit()
@@ -71,17 +77,30 @@ class AddFeedScreenModel(
         }
     }
 
-    fun addFeed() {
-        val preview = _unit.value.previews.firstOrNull() ?: return
-        addFeed(preview)
-    }
-
     fun addFeed(preview: AddFeedPreview) {
         if (preview.subscribeState != AddFeedSubscribeState.NOT_SUBSCRIBED) return
         screenModelScope.launch {
             updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
-            delay(1000)
-            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBED)
+            try {
+                val folderId = resolveSubscribeFolderId()
+                val feedId = feedManager.subscribeFeed(preview.url, folderId)
+                val current = _unit.value
+                val next = current.previews.map { item ->
+                    if (item.url == preview.url) {
+                        item.copy(
+                            feedId = feedId,
+                            subscribeState = AddFeedSubscribeState.SUBSCRIBED
+                        )
+                    } else {
+                        item
+                    }
+                }
+                _unit.value = current.copy(previews = next, error = null)
+            } catch (e: Exception) {
+                updatePreviewState(preview.url, AddFeedSubscribeState.NOT_SUBSCRIBED)
+                _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to subscribe feed"))
+                return@launch
+            }
         }
     }
 
@@ -89,8 +108,22 @@ class AddFeedScreenModel(
         if (preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) return
         screenModelScope.launch {
             updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
-            delay(600)
-            updatePreviewState(preview.url, AddFeedSubscribeState.NOT_SUBSCRIBED)
+            try {
+                feedManager.unsubscribeFeed(preview.feedId)
+                val current = _unit.value
+                val next = current.previews.map { item ->
+                    if (item.url == preview.url) {
+                        item.copy(feedId = 0L, subscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED)
+                    } else {
+                        item
+                    }
+                }
+                _unit.value = current.copy(previews = next, error = null)
+            } catch (e: Exception) {
+                updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBED)
+                _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to unsubscribe feed"))
+                return@launch
+            }
         }
     }
 
@@ -100,6 +133,16 @@ class AddFeedScreenModel(
             if (preview.url == url) preview.copy(subscribeState = state) else preview
         }
         _unit.value = current.copy(previews = next, error = null)
+    }
+
+    private fun resolveSubscribeFolderId(): Long {
+        val folders = cacheStore.foldersState.value
+        val rootFolderId = Env.settings.rootFolder.value
+        val categoryId = folders.find { it.id == rootFolderId }?.id
+            ?: folders.firstOrNull()?.id
+            ?: 0L
+        require(categoryId > 0L) { "No available folder for subscription" }
+        return categoryId
     }
 
     

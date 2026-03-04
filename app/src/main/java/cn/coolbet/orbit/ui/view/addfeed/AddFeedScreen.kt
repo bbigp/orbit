@@ -35,6 +35,8 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconTextField
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
+import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailConfig
@@ -66,6 +68,13 @@ object AddFeedScreen: Screen {
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
             keyboardController?.show()
+        }
+        LaunchedEffect(model) {
+            model.effects.collect { effect ->
+                when (effect) {
+                    is AddFeedEffect.Error -> ObToastManager.show(effect.message, ToastType.Error)
+                }
+            }
         }
 
         val onExit: () -> Unit = {

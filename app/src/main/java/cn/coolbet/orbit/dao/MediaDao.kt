@@ -18,6 +18,9 @@ abstract class MediaDao {
     @Query("delete from medias")
     abstract suspend fun clearAll()
 
+    @Query("delete from medias where entry_id in (select id from entries where feed_id = :feedId)")
+    abstract suspend fun deleteByFeedId(feedId: Long)
+
 
     @Query("select * from medias where entry_id in (:entryIds)")
     internal abstract suspend fun getMediasImpl(entryIds: List<Long>): List<MediaEntity>
