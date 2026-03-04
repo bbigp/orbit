@@ -15,9 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
@@ -29,7 +26,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.Route
-import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ToastType
@@ -42,7 +38,9 @@ data class EditFeedSheet(
 ) : Screen {
 
     private val state by lazy {
-        EditFeedState(feed)
+        EditFeedState(feed).apply {
+            updateExpanded(args.initiallyExpanded)
+        }
     }
 
     @Composable
@@ -55,17 +53,8 @@ data class EditFeedSheet(
         val sheetNavigator = LocalBottomSheetNavigator.current
         val keyboardController = LocalSoftwareKeyboardController.current
 
-        val rootFolderId = Env.settings.rootFolder.value
-        val rootFolder = unit.folders.find { it.id == rootFolderId }
+        val contentExpanded = if (args.collapsible) state.expanded else true
 
-        var expanded by rememberSaveable { mutableStateOf(args.expandableInitialExpanded) }
-        val contentExpanded = if (args.expandable) expanded else true
-
-        LaunchedEffect(feed.id, rootFolder?.id) {
-            if (feed.id == 0L && state.category.id == 0L && rootFolder != null) {
-                state.updateCategory(rootFolder)
-            }
-        }
         LaunchedEffect(model, args.backAction) {
             model.effects.collect { effect ->
                 when (effect) {
@@ -85,7 +74,7 @@ data class EditFeedSheet(
             }
         }
         val dragRotation by animateFloatAsState(
-            targetValue = if (expanded) 180f else 0f,
+            targetValue = if (state.expanded) 180f else 0f,
             animationSpec = tween(durationMillis = 220),
             label = "edit_feed_drag_rotation"
         )
@@ -102,7 +91,7 @@ data class EditFeedSheet(
             EditFeedDrag(
                 config = args,
                 rotation = dragRotation,
-                onToggle = { if (args.expandable) expanded = !expanded }
+                onToggle = { if (args.collapsible) state.toggleExpanded() }
             )
 
             AnimatedContent(
@@ -141,7 +130,7 @@ data class EditFeedSheet(
                 } else {
                     EditFeedCollapsedHeader(
                         text = feed.title.ifBlank { state.title },
-                        onExpand = { expanded = true }
+                        onExpand = { state.updateExpanded(true) }
                     )
                 }
             }

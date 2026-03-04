@@ -70,8 +70,8 @@ data class AddFeedPreviewScreen(
                     feed = meta,
                     args = EditFeedArgs(
                         dragMode = EditFeedDragMode.TOGGLE,
-                        expandable = true,
-                        expandableInitialExpanded = true,
+                        collapsible = true,
+                        initiallyExpanded = true,
                         bottomButtonsLayout = EditFeedBottomButtonsLayout.HORIZONTAL_TWO,
                     )
                 )

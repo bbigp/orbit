@@ -3,6 +3,7 @@ package cn.coolbet.orbit.ui.view.feed
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
+import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.FeedManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,10 @@ class EditFeedScreenModel(
         screenModelScope.launch {
             cacheStore.foldersState.collect { folders ->
                 _unit.value = _unit.value.copy(folders = folders)
+                if (state.feed.id == 0L && state.category.id == 0L) {
+                    val rootFolderId = Env.settings.rootFolder.value
+                    folders.find { it.id == rootFolderId }?.let { state.updateCategory(it) }
+                }
             }
         }
     }

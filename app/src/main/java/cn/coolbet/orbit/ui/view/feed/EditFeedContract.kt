@@ -26,8 +26,10 @@ enum class EditFeedBottomButtonsLayout {
 
 data class EditFeedArgs(
     val dragMode: EditFeedDragMode = EditFeedDragMode.STATIC,
-    val expandable: Boolean = false,
-    val expandableInitialExpanded: Boolean = true,
+    // 是否允许用户折叠/展开内容区域。
+    val collapsible: Boolean = false,
+    // 内容区域初始是否展开，仅在 `collapsible = true` 时生效。
+    val initiallyExpanded: Boolean = true,
     val bottomButtonsLayout: EditFeedBottomButtonsLayout = EditFeedBottomButtonsLayout.VERTICAL_TWO,
     val topBarBackIconId: Int = R.drawable.arrow_left,
     val backAction: EditFeedBackAction = EditFeedBackAction.POP_SCREEN,
@@ -43,12 +45,15 @@ data class EditFeedState(
 ) {
     var title by mutableStateOf(feed.title)
     var category by mutableStateOf(feed.folder)
+    var expanded by mutableStateOf(true)
 
     val isModified: Boolean
         get() = title != feed.title || category.id != feed.folder.id
 
     fun updateTitle(v: String) { title = v }
     fun updateCategory(f: Folder) { category = f }
+    fun updateExpanded(v: Boolean) { expanded = v }
+    fun toggleExpanded() { expanded = !expanded }
 
     var isApplying by mutableStateOf(false)
     var isUnsubscribing by mutableStateOf(false)
