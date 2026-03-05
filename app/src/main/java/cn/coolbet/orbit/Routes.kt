@@ -30,7 +30,7 @@ data class Route(val screen: Screen) {
         val Home = Route(screen = HomeScreen)
         val Profile = Route(screen = ProfileScreen)
         val Sync = Route(screen = SyncScreen)
-        val AddFeed = Route(screen = AddFeedScreen)
+        val AddFeed = Route(screen = AddFeedScreen())
         fun Entries(metaId: MetaId, config: ListDetailConfig = ListDetailConfig()) = Route(
             screen = ListDetailScreen(metaId = metaId, config = config)
         )

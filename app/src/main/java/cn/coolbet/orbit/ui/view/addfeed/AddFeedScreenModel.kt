@@ -28,30 +28,37 @@ class AddFeedScreenModel(
     private val feedManager: FeedManager,
 ) : ScreenModel {
 
-    private val _unit = MutableStateFlow(AddFeedResultUnit())
+    private val _unit = MutableStateFlow(AddFeedUnit())
     val unit = _unit.asStateFlow()
     private val _effects = MutableSharedFlow<AddFeedEffect>(extraBufferCapacity = 1)
     val effects = _effects.asSharedFlow()
 
-    fun clearPreview() {
-        _unit.value = AddFeedResultUnit()
+    fun onAction(action: AddFeedAction) {
+        when (action) {
+            is AddFeedAction.FetchPreview -> fetchPreview()
+            is AddFeedAction.Subscribe -> addFeed(action.preview)
+            is AddFeedAction.Unsubscribe -> unsubscribeFeed(action.preview)
+        }
     }
 
-    
-    fun fetchPreview(url: String) {
+    private fun clearPreview() {
+        _unit.value = AddFeedUnit()
+    }
+
+    private fun fetchPreview() {
         clearPreview()
-        val normalized = url.trim()
+        val normalized = state.inputUrl.text.trim()
         if (normalized.isBlank()) return
         screenModelScope.launch {
             state.setLoading(true)
-            _unit.value = AddFeedResultUnit()
+            _unit.value = AddFeedUnit()
             try {
                 val localFeed = cacheStore.feedsState.value.firstOrNull { it.feedURL == normalized }
                 if (localFeed != null) {
                     val localEntries = withContext(Dispatchers.IO) {
                         entryManager.getPage(meta = localFeed, page = 1, size = 20)
                     }
-                    _unit.value = AddFeedResultUnit(
+                    _unit.value = AddFeedUnit(
                         previews = listOf(
                             AddFeedPreview(
                                 title = localFeed.title,
@@ -70,14 +77,14 @@ class AddFeedScreenModel(
                 }
                 _unit.value = result
             } catch (e: Exception) {
-                _unit.value = AddFeedResultUnit(error = e.message ?: "Failed to load feed preview")
+                _unit.value = AddFeedUnit(error = e.message ?: "Failed to load feed preview")
             } finally {
                 state.setLoading(false)
             }
         }
     }
 
-    fun addFeed(preview: AddFeedPreview) {
+    private fun addFeed(preview: AddFeedPreview) {
         if (preview.subscribeState != AddFeedSubscribeState.NOT_SUBSCRIBED) return
         screenModelScope.launch {
             updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
@@ -104,7 +111,7 @@ class AddFeedScreenModel(
         }
     }
 
-    fun unsubscribeFeed(preview: AddFeedPreview) {
+    private fun unsubscribeFeed(preview: AddFeedPreview) {
         if (preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) return
         screenModelScope.launch {
             updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
@@ -146,7 +153,7 @@ class AddFeedScreenModel(
     }
 
     
-    private fun loadPreview(url: String): AddFeedResultUnit {
+    private fun loadPreview(url: String): AddFeedUnit {
         val doc = Jsoup.connect(url)
             .ignoreContentType(true)
             .userAgent("Orbit/1.0")
@@ -171,7 +178,7 @@ class AddFeedScreenModel(
             ?: ""
         val entries = parseEntries(doc, title, url, iconUrl)
 
-        return AddFeedResultUnit(
+        return AddFeedUnit(
             previews = listOf(
                 AddFeedPreview(
                     title = title,

@@ -15,16 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -44,26 +40,19 @@ import cn.coolbet.orbit.ui.view.listdetail.ListDetailMoreAction
 import cn.coolbet.orbit.model.domain.MetaId
 import org.koin.core.parameter.parametersOf
 
-object AddFeedScreen: Screen {
-    private fun readResolve(): Any = AddFeedScreen
+data class AddFeedScreen(
+    val args: AddFeedArgs = AddFeedArgs(),
+) : Screen {
 
     @Composable
     override fun Content() {
         val state = remember { AddFeedState() }
         val model = koinScreenModel<AddFeedScreenModel> { parametersOf(state) }
-        val dataState by model.unit.collectAsState()
+        val unit by model.unit.collectAsState()
         val navigator = LocalNavigator.current
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
-        var text by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(
-                TextFieldValue(
-//                    "https://sspai.com/feed",
-                    "https://juejin.cn/rss",
-                )
-            )
-        }
 
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
@@ -104,17 +93,17 @@ object AddFeedScreen: Screen {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 0.dp)) {
                     ObIconTextField(
                         hint = "URL...",
-                        value = text,
+                        value = state.inputUrl,
                         icon = R.drawable.search,
                         onValueChange = { v ->
-                            text = v
+                            state.updateInputUrl(v)
                         },
                         focusRequester = focusRequester,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
                             onDone = {
                                 focusManager.clearFocus()
-                                model.fetchPreview(text.text)
+                                model.onAction(AddFeedAction.FetchPreview)
                             }
                         )
                     )
@@ -125,14 +114,14 @@ object AddFeedScreen: Screen {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    dataState.error?.let { msg ->
+                    unit.error?.let { msg ->
                         Text(msg, style = AppTypography.R13B50)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    if (dataState.previews.isNotEmpty()) {
+                    if (unit.previews.isNotEmpty()) {
                         AddFeedPreviewList(
-                            items = dataState.previews,
+                            items = unit.previews,
                             onItemClick = { preview ->
                                 keyboardController?.hide()
                                 if (preview.feedId > 0L) {
@@ -152,8 +141,8 @@ object AddFeedScreen: Screen {
                             },
                             onSubscribeClick = { preview, state ->
                                 when (state) {
-                                    AddFeedSubscribeState.NOT_SUBSCRIBED -> model.addFeed(preview)
-                                    AddFeedSubscribeState.SUBSCRIBED -> model.unsubscribeFeed(preview)
+                                    AddFeedSubscribeState.NOT_SUBSCRIBED -> model.onAction(AddFeedAction.Subscribe(preview))
+                                    AddFeedSubscribeState.SUBSCRIBED -> model.onAction(AddFeedAction.Unsubscribe(preview))
                                     AddFeedSubscribeState.SUBSCRIBING -> Unit
                                 }
                             },
