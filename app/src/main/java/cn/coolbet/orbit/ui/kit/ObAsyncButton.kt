@@ -45,11 +45,17 @@ fun ObAsyncTextButton(
     colors: OButtonColors = OButtonDefaults.buttonColor,
     sizes: OButtonSize = OButtonDefaults.buttonSize,
 ) {
+    val resolvedContentColor = when {
+        isLoading -> colors.loadingContentColor
+        disable -> colors.disabledContentColor
+        else -> colors.contentColor
+    }
+
     @Composable
     fun ButtonTextContent() {
         Text(
             content, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            style = sizes.fontSize.copy(colors.contentColor)
+            style = sizes.fontSize.copy(resolvedContentColor)
         )
     }
 
@@ -59,7 +65,7 @@ fun ObAsyncTextButton(
             ButtonTextContent()
         },
         onLoadingContent = {
-            ProgressIndicator(size = 24.dp, color = colors.contentColor)
+            ProgressIndicator(size = 24.dp, color = colors.loadingContentColor)
             Spacer(modifier = Modifier.size(8.dp))
             ButtonTextContent()
         }
@@ -94,20 +100,26 @@ fun ObAsyncIconButton(
     sizes: OButtonSize = OButtonDefaults.buttonSize,
     iconOnRight: Boolean = false,
 ) {
+    val resolvedContentColor = when {
+        isLoading -> colors.loadingContentColor
+        disable -> colors.disabledContentColor
+        else -> colors.contentColor
+    }
+
     val iconContent = @Composable {
         Image(
             modifier = Modifier.size(20.dp),
             painter = painterResource(id = icon),
             contentDescription = "",
             contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(if (disable) colors.disabledContentColor else colors.contentColor),
+            colorFilter = ColorFilter.tint(resolvedContentColor),
         )
     }
 
     val textContent = @Composable {
         if (content.isNotEmpty()) {
             Text(content, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                style = sizes.fontSize.copy(color = if (disable) colors.disabledContentColor else colors.contentColor))
+                style = sizes.fontSize.copy(color = resolvedContentColor))
         }
     }
 
@@ -133,7 +145,7 @@ fun ObAsyncIconButton(
         },
         onLoadingContent = {
             val spinnerContent = @Composable {
-                ProgressIndicator(size = 24.dp, color = colors.contentColor)
+                ProgressIndicator(size = 24.dp, color = colors.loadingContentColor)
             }
 
             if (content.isEmpty()) {

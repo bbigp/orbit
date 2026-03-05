@@ -103,8 +103,10 @@ class AddFeedScreenModel(
                     }
                 }
                 _unit.value = current.copy(previews = next, error = null)
+                _effects.tryEmit(AddFeedEffect.Success("Subscribed"))
             } catch (e: Exception) {
                 updatePreviewState(preview.url, AddFeedSubscribeState.NOT_SUBSCRIBED)
+                _unit.value = _unit.value.copy(error = e.message ?: "Failed to subscribe feed")
                 _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to subscribe feed"))
                 return@launch
             }
@@ -126,8 +128,10 @@ class AddFeedScreenModel(
                     }
                 }
                 _unit.value = current.copy(previews = next, error = null)
+                _effects.tryEmit(AddFeedEffect.Success("Unsubscribed"))
             } catch (e: Exception) {
                 updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBED)
+                _unit.value = _unit.value.copy(error = e.message ?: "Failed to unsubscribe feed")
                 _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to unsubscribe feed"))
                 return@launch
             }

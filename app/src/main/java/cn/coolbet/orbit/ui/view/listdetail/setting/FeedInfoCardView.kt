@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.R
@@ -76,7 +77,13 @@ fun FeedInfoCardView(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(meta.url, style = AppTypography.R13B50, maxLines = 1)
+                    Text(
+                        meta.url,
+                        style = AppTypography.R13B50,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
                     Image(
                         modifier = Modifier.size(16.dp)

@@ -61,6 +61,7 @@ data class AddFeedScreen(
         LaunchedEffect(model) {
             model.effects.collect { effect ->
                 when (effect) {
+                    is AddFeedEffect.Success -> ObToastManager.show(effect.message)
                     is AddFeedEffect.Error -> ObToastManager.show(effect.message, ToastType.Error)
                 }
             }

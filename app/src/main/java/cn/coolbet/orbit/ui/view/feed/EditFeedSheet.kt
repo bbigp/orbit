@@ -25,11 +25,11 @@ import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
+import kotlinx.coroutines.delay
 import org.koin.core.parameter.parametersOf
 
 data class EditFeedSheet(
@@ -60,11 +60,9 @@ data class EditFeedSheet(
                 when (effect) {
                     is EditFeedEffect.Unsubscribed -> {
                         keyboardController?.hide()
-                        when (args.backAction) {
-                            EditFeedBackAction.POP_SCREEN -> navigator.pop()
-                            EditFeedBackAction.HIDE_SHEET -> sheetNavigator.hide()
-                        }
-                        NavigatorBus.replaceAll(Route.Home)
+                        sheetNavigator.hide()
+                        NavigatorBus.pop()
+                        delay(120)
                         ObToastManager.show("Unsubscribed")
                     }
                     is EditFeedEffect.Error -> {

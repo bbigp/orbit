@@ -153,6 +153,7 @@ data class OButtonColors(
     val contentColor: Color,
     val disabledContainerColor: Color,
     val disabledContentColor: Color,
+    val loadingContentColor: Color,
     val borderColor: Color = Color.Transparent,
 )
 data class OButtonSize(
@@ -169,27 +170,33 @@ object OButtonDefaults {
     val primary = OButtonColors( //黑色背景 白色字体
         containerColor = Black95, contentColor = Color.White,
         disabledContainerColor = Black08, disabledContentColor = Black25,
+        loadingContentColor = Color.White,
     )
     val secondary = OButtonColors( //灰色背景 黑色字体
         containerColor = Black04, contentColor = Black95,
         disabledContainerColor = Black04, disabledContentColor = Black25,
+        loadingContentColor = Black95,
     )
     val ghost = OButtonColors( //透明背景 黑色字体
         containerColor = Color.Transparent, contentColor = Black95,
         disabledContainerColor = Color.Transparent, disabledContentColor = Black25,
+        loadingContentColor = Black95,
     )
     val stroked = OButtonColors( //透明背景 黑色字体 带描边
         containerColor = Color.Transparent, contentColor = Black95,
         disabledContainerColor = Black04, disabledContentColor = Black25,
+        loadingContentColor = Black95,
         borderColor = Black08,
     )
     val danger = OButtonColors( //红色背景 红色字体
         containerColor = ContainerRed, contentColor = ContentRed,
         disabledContainerColor = Black04, disabledContentColor = Black25,
+        loadingContentColor = ContentRed,
     )
     val dangerGhost = OButtonColors( //透明背景 红色字体
         containerColor = Color.Transparent, contentColor = ContentRed,
         disabledContainerColor = Color.Transparent, disabledContentColor = Black25,
+        loadingContentColor = ContentRed,
     )
 
 

@@ -83,16 +83,20 @@ data class ListDetailScreen(
             onLoadMore = { model.nextPage() }
         )
         val navigator = LocalNavigator.current
-        val actions = remember(model) {
+        val sheetNavigator = LocalBottomSheetNavigator.current
+        val actions = remember(model, sheetNavigator, navigator) {
             object : ListDetailActions {
                 override fun toggleRead(entry: Entry) = model.toggleReadStatus(entry)
                 override fun onBack() {
+                    if (sheetNavigator.isVisible) {
+                        sheetNavigator.hide()
+                        return
+                    }
                     model.coordinator.clear()
                     navigator?.pop()
                 }
             }
         }
-        val sheetNavigator = LocalBottomSheetNavigator.current
 
         BackHandler(onBack = { actions.onBack() })
 

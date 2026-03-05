@@ -31,5 +31,6 @@ data class AddFeedUnit(
 )
 
 sealed class AddFeedEffect {
+    data class Success(val message: String) : AddFeedEffect()
     data class Error(val message: String) : AddFeedEffect()
 }
