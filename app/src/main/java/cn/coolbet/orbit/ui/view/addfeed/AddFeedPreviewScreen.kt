@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,7 +22,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cn.coolbet.orbit.model.domain.Entry
-import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.AnimatedSlideWrapper
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.view.feed.EditFeedBottomButtonsLayout
@@ -42,16 +40,10 @@ data class AddFeedPreviewScreen(
 
     @Composable
     override fun Content() {
+        val state = remember { AddFeedPreviewState(preview) }
         val navigator = LocalNavigator.current
-        val meta = remember(preview) {
-            Feed.EMPTY.copy(
-                title = preview.title,
-                feedURL = preview.url,
-                iconURL = preview.iconUrl,
-            )
-        }
-        val state = remember(preview) {
-            AddFeedPreviewListState(meta = meta)
+        val listState = remember(state.feed) {
+            AddFeedPreviewListState(meta = state.feed)
         }
         val scrollState = rememberListScrollState(
             onRefresh = {},
@@ -64,10 +56,10 @@ data class AddFeedPreviewScreen(
                 override fun onBack() { navigator?.pop() }
             }
         }
-        val sheetScreen = remember(meta) {
+        val sheetScreen = remember(state.feed) {
             AnimatedSlideWrapper(
                 EditFeedSheet(
-                    feed = meta,
+                    feed = state.feed,
                     args = EditFeedArgs(
                         dragMode = EditFeedDragMode.TOGGLE,
                         collapsible = true,
@@ -90,8 +82,8 @@ data class AddFeedPreviewScreen(
                     ) {
                         LDItemList(
                             scrollState = scrollState,
-                            state = state,
-                            groupedData = mapOf("" to preview.entries),
+                            state = listState,
+                            groupedData = mapOf("" to state.preview.entries),
                             enablePullToRefresh = false,
                             enableSwipe = false
                         )
