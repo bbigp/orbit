@@ -1,82 +1,49 @@
-# 页面契约与分层规范（讨论整理）
-
-## 1. 页面六件套定义
-
+﻿# 页面契约与分层规范（补充规则）
+- 新增硬性规则：`Unit` 必须在 `Model` 内实例化并维护（例如 `MutableStateFlow(Unit())`），`Screen` 只能 `collect/read`，不能创建或回传 `Unit`。
+- 新增硬性规则：如果是 `Screen` 参数传入的数据，放到 `State`，不要放到 `Unit`。
+# 椤甸潰濂戠害涓庡垎灞傝鑼冿紙璁ㄨ鏁寸悊锛?
+## 1. 椤甸潰鍏欢濂楀畾涔?
 ### Args
-- 含义：页面配置参数（控制展示/交互策略）。
-- 示例：`dragMode`、`backAction`、`bottomButtonsLayout`。
-- 约束：`Args` 不承载查询数据，不承载数据库/网络结果。
-
+- 鍚箟锛氶〉闈㈤厤缃弬鏁帮紙鎺у埗灞曠ず/浜や簰绛栫暐锛夈€?- 绀轰緥锛歚dragMode`銆乣backAction`銆乣bottomButtonsLayout`銆?- 绾︽潫锛歚Args` 涓嶆壙杞芥煡璇㈡暟鎹紝涓嶆壙杞芥暟鎹簱/缃戠粶缁撴灉銆?
 ### Action
-- 含义：用户业务意图（页面发给 Model）。
-- 示例：`ApplyChanges`、`Unsubscribe`。
-- 约束：只保留业务动作，不把纯输入事件（如每次输入字符）都塞进 `Action`。
-
+- 鍚箟锛氱敤鎴蜂笟鍔℃剰鍥撅紙椤甸潰鍙戠粰 Model锛夈€?- 绀轰緥锛歚ApplyChanges`銆乣Unsubscribe`銆?- 绾︽潫锛氬彧淇濈暀涓氬姟鍔ㄤ綔锛屼笉鎶婄函杈撳叆浜嬩欢锛堝姣忔杈撳叆瀛楃锛夐兘濉炶繘 `Action`銆?
 ### State
-- 含义：页面状态数据（包含用户输入态 + 流程态）。
-- 示例：`title`、`category`、`isApplying`、`isUnsubscribing`。
-- 约束：可包含用于业务操作的关键字段（如 `feed`），并可内聚计算逻辑（如 `isModified`）。
-
+- 鍚箟锛氶〉闈㈢姸鎬佹暟鎹紙鍖呭惈鐢ㄦ埛杈撳叆鎬?+ 娴佺▼鎬侊級銆?- 绀轰緥锛歚title`銆乣category`銆乣isApplying`銆乣isUnsubscribing`銆?- 绾︽潫锛氬彲鍖呭惈鐢ㄤ簬涓氬姟鎿嶄綔鐨勫叧閿瓧娈碉紙濡?`feed`锛夛紝骞跺彲鍐呰仛璁＄畻閫昏緫锛堝 `isModified`锛夈€?
 ### Effect
-- 含义：一次性事件（页面副作用）。
-- 示例：跳转、关闭 Sheet、错误提示。
-- 约束：Model 发 Effect，页面消费 Effect。
-
+- 鍚箟锛氫竴娆℃€т簨浠讹紙椤甸潰鍓綔鐢級銆?- 绀轰緥锛氳烦杞€佸叧闂?Sheet銆侀敊璇彁绀恒€?- 绾︽潫锛歁odel 鍙?Effect锛岄〉闈㈡秷璐?Effect銆?
 ### Model
-- 含义：业务动作执行器与流程编排器。
-- 约束：
-  - 接收 `Action`，执行异步任务。
-  - 可以修改同一份 `State` 的流程字段（如 loading）。
-  - 不直接操作具体 UI 组件（例如不直接调页面控件）。
-
+- 鍚箟锛氫笟鍔″姩浣滄墽琛屽櫒涓庢祦绋嬬紪鎺掑櫒銆?- 绾︽潫锛?  - 鎺ユ敹 `Action`锛屾墽琛屽紓姝ヤ换鍔°€?  - 鍙互淇敼鍚屼竴浠?`State` 鐨勬祦绋嬪瓧娈碉紙濡?loading锛夈€?  - 涓嶇洿鎺ユ搷浣滃叿浣?UI 缁勪欢锛堜緥濡備笉鐩存帴璋冮〉闈㈡帶浠讹級銆?
 ### Unit
-- 含义：查询数据（Query Result），用于页面展示。
-- 约束（硬性）：
-  - `Unit` 始终是“查询结果 -> 页面”的方向。
-  - `Unit` 绝不能从 Screen 回传给 Model。
-  - 上一页面传入的业务对象不算查询数据，不应强行塞进 Unit。
+- 鍚箟锛氭煡璇㈡暟鎹紙Query Result锛夛紝鐢ㄤ簬椤甸潰灞曠ず銆?- 绾︽潫锛堢‖鎬э級锛?  - `Unit` 濮嬬粓鏄€滄煡璇㈢粨鏋?-> 椤甸潰鈥濈殑鏂瑰悜銆?  - `Unit` 缁濅笉鑳戒粠 Screen 鍥炰紶缁?Model銆?  - 涓婁竴椤甸潰浼犲叆鐨勪笟鍔″璞′笉绠楁煡璇㈡暟鎹紝涓嶅簲寮鸿濉炶繘 Unit銆?
+---
+
+## 2. 鍏抽敭杈圭晫锛堟渶缁堢粨璁猴級
+
+1. `Screen` 璐熻矗鍙?`Action`锛屼笉鍦ㄦ寜閽洖璋冮噷鑷寮€鍗忕▼鍋氫笟鍔℃祦绋嬬紪鎺掋€? 
+2. `Model` 浣跨敤鑷韩浣滅敤鍩熸墽琛屽紓姝ヤ换鍔★紝骞跺湪鎵ц鏈熼棿鏇存柊 `State` 鐨勬祦绋嬪瓧娈点€? 
+3. `Model` 閫氳繃 `Effect` 閫氱煡椤甸潰鍋氫竴娆℃€у鐞嗭紙瀵艰埅銆佹彁绀猴級銆? 
+4. `State` 鏄〉闈㈡暟鎹腑蹇冿紱鏄惁淇敼绛夊垽鏂€昏緫搴斿敖閲忓唴鑱氬埌 `State`銆? 
+5. `Unit` 鍙壙杞芥煡璇㈡暟鎹紝涓ユ牸鍗曞悜娴佸悜 Screen銆? 
+6. 鍗充娇鏌愪竴绫诲绾﹀綋鍓嶄负绌猴紝涔熶繚鐣欏绾﹀畾涔夛紙淇濇寔缁撴瀯涓€鑷达級銆? 
 
 ---
 
-## 2. 关键边界（最终结论）
+## 3. EditFeed 椤甸潰钀藉湴绾﹀畾
 
-1. `Screen` 负责发 `Action`，不在按钮回调里自行开协程做业务流程编排。  
-2. `Model` 使用自身作用域执行异步任务，并在执行期间更新 `State` 的流程字段。  
-3. `Model` 通过 `Effect` 通知页面做一次性处理（导航、提示）。  
-4. `State` 是页面数据中心；是否修改等判断逻辑应尽量内聚到 `State`。  
-5. `Unit` 只承载查询数据，严格单向流向 Screen。  
-6. 即使某一类契约当前为空，也保留契约定义（保持结构一致）。  
+### 宸茬‘璁ょ殑妯″紡
+- `EditFeedState`锛氭寔鏈?`feed`銆乣title`銆乣category`銆乣isApplying`銆乣isUnsubscribing`锛屽苟鍐呰仛 `isModified`銆?- `EditFeedAction`锛氫粎淇濈暀涓氬姟鍔ㄤ綔锛坄ApplyChanges`銆乣Unsubscribe`锛夈€?- `EditFeedScreenModel`锛氭帴鏀跺悓涓€浠?`state`锛屾墽琛屼笟鍔″姩浣滃苟鍙?`effects`銆?- `EditFeedUnit`锛氫粎鐢ㄤ簬鏌ヨ鏁版嵁锛堝 `folders`锛夛紝涓嶄粠 Screen 鍥炰紶銆?- `EditFeedArgs`锛氫粎椤甸潰閰嶇疆銆?
+### 鍙嶄緥锛堜笉瑕佸啀鍑虹幇锛?- 鍦?`Screen` 鐨勬寜閽偣鍑讳腑 `scope.launch { ...涓氬姟璋冪敤... }`銆?- `Unit` 浠?Screen 鍙嶅悜浼犲洖 Model銆?- 鍚屾椂缁存姢涓や唤绛変环椤甸潰鐘舵€佸苟鎵嬪伐鍚屾銆?
+---
+
+## 4. 鎺ㄨ崘鏁版嵁娴?
+1. 鐢ㄦ埛鎿嶄綔 -> `Screen` 璋?`model.onAction(...)`  
+2. `Model` 鍚姩寮傛 -> 鏇存柊 `state` 娴佺▼瀛楁  
+3. 椤甸潰鍩轰簬 `state` 鑷姩鍝嶅簲锛堟寜閽?loading 绛夛級  
+4. `Model` 鍙?`Effect` -> 椤甸潰鎵ц瀵艰埅/鎻愮ず  
 
 ---
 
-## 3. EditFeed 页面落地约定
+## 5. 绠€鍖栧師鍒?
+- 浼樺厛鈥滃崟涓€鐪熺浉鏉ユ簮鈥濓紙椤甸潰鐘舵€佸敖閲忓彧淇濈暀涓€浠斤級銆?- 浼樺厛鈥滆亴璐ｆ竻鏅扳€濊€屼笉鏄€滃眰娆¤繃澶氣€濄€?- 瀵圭函 UI 杈撳叆锛岄伩鍏嶆棤鎰忎箟鐨?Action 鍖呰銆?
 
-### 已确认的模式
-- `EditFeedState`：持有 `feed`、`title`、`category`、`isApplying`、`isUnsubscribing`，并内聚 `isModified`。
-- `EditFeedAction`：仅保留业务动作（`ApplyChanges`、`Unsubscribe`）。
-- `EditFeedScreenModel`：接收同一份 `state`，执行业务动作并发 `effects`。
-- `EditFeedUnit`：仅用于查询数据（如 `folders`），不从 Screen 回传。
-- `EditFeedArgs`：仅页面配置。
-
-### 反例（不要再出现）
-- 在 `Screen` 的按钮点击中 `scope.launch { ...业务调用... }`。
-- `Unit` 从 Screen 反向传回 Model。
-- 同时维护两份等价页面状态并手工同步。
-
----
-
-## 4. 推荐数据流
-
-1. 用户操作 -> `Screen` 调 `model.onAction(...)`  
-2. `Model` 启动异步 -> 更新 `state` 流程字段  
-3. 页面基于 `state` 自动响应（按钮 loading 等）  
-4. `Model` 发 `Effect` -> 页面执行导航/提示  
-
----
-
-## 5. 简化原则
-
-- 优先“单一真相来源”（页面状态尽量只保留一份）。
-- 优先“职责清晰”而不是“层次过多”。
-- 对纯 UI 输入，避免无意义的 Action 包装。
 

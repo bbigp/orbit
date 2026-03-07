@@ -33,6 +33,10 @@ class AddFeedScreenModel(
     private val _effects = MutableSharedFlow<AddFeedEffect>(extraBufferCapacity = 1)
     val effects = _effects.asSharedFlow()
 
+    init {
+        observeSubscribedState()
+    }
+
     fun onAction(action: AddFeedAction) {
         when (action) {
             is AddFeedAction.FetchPreview -> fetchPreview()
@@ -154,6 +158,41 @@ class AddFeedScreenModel(
             ?: 0L
         require(categoryId > 0L) { "No available folder for subscription" }
         return categoryId
+    }
+
+    private fun observeSubscribedState() {
+        screenModelScope.launch {
+            cacheStore.feedsState.collect { feeds ->
+                val current = _unit.value
+                if (current.previews.isEmpty()) return@collect
+
+                var changed = false
+                val next = current.previews.map { preview ->
+                    val matched = feeds.firstOrNull { it.feedURL == preview.url }
+                    when {
+                        matched != null && (preview.feedId != matched.id || preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) -> {
+                            changed = true
+                            preview.copy(
+                                feedId = matched.id,
+                                subscribeState = AddFeedSubscribeState.SUBSCRIBED
+                            )
+                        }
+                        matched == null && preview.subscribeState == AddFeedSubscribeState.SUBSCRIBED -> {
+                            changed = true
+                            preview.copy(
+                                feedId = 0L,
+                                subscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED
+                            )
+                        }
+                        else -> preview
+                    }
+                }
+
+                if (changed) {
+                    _unit.value = current.copy(previews = next)
+                }
+            }
+        }
     }
 
     

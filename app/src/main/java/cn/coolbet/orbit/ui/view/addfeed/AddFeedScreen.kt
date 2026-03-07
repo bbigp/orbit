@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.R
@@ -35,8 +36,6 @@ import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.ui.theme.AppTypography
-import cn.coolbet.orbit.ui.view.listdetail.ListDetailConfig
-import cn.coolbet.orbit.ui.view.listdetail.ListDetailMoreAction
 import cn.coolbet.orbit.model.domain.MetaId
 import org.koin.core.parameter.parametersOf
 
@@ -50,6 +49,7 @@ data class AddFeedScreen(
         val model = koinScreenModel<AddFeedScreenModel> { parametersOf(state) }
         val unit by model.unit.collectAsState()
         val navigator = LocalNavigator.current
+        val sheetNavigator = LocalBottomSheetNavigator.current
         val focusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -125,20 +125,7 @@ data class AddFeedScreen(
                             items = unit.previews,
                             onItemClick = { preview ->
                                 keyboardController?.hide()
-                                if (preview.feedId > 0L) {
-                                    NavigatorBus.push(
-                                        Route.Entries(
-                                            metaId = MetaId("e", preview.feedId),
-                                            config = ListDetailConfig(
-                                                showSearch = true,
-                                                enableSwipe = true,
-                                                moreAction = ListDetailMoreAction.OPEN_EDIT_FEED
-                                            )
-                                        )
-                                    )
-                                } else {
-                                    navigator?.push(AddFeedPreviewScreen(preview))
-                                }
+                                navigator?.push(AddFeedPreviewScreen(preview))
                             },
                             onSubscribeClick = { preview, state ->
                                 when (state) {
