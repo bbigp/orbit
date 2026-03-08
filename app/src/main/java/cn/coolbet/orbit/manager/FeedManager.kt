@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import cn.coolbet.orbit.dao.EntryDao
 import cn.coolbet.orbit.dao.FeedDao
 import cn.coolbet.orbit.dao.MediaDao
+import cn.coolbet.orbit.remote.EntryApi
 import cn.coolbet.orbit.remote.miniflux.FeedApi
 import cn.coolbet.orbit.remote.miniflux.FeedCreationRequest
 
@@ -14,6 +15,7 @@ private const val SYNC_WORK_TAG = "data_sync_on_home_entry_tag"
 
 class FeedManager(
     private val feedApi: FeedApi,
+    private val entryApi: EntryApi,
     private val session: Session,
     private val workManager: WorkManager,
     private val feedDao: FeedDao,
@@ -35,6 +37,8 @@ class FeedManager(
             )
         )
         check(feedId > 0L) { "Create feed failed" }
+
+        syncNewSubscription(feedId)
         triggerSync()
         return feedId
     }
@@ -60,5 +64,18 @@ class FeedManager(
             ExistingWorkPolicy.KEEP,
             syncRequest
         ).enqueue()
+    }
+
+    private suspend fun syncNewSubscription(feedId: Long) {
+        val feeds = feedApi.getFeeds()
+        feedDao.batchSave(feeds)
+
+        val entries = entryApi.getEntries(
+            page = 1,
+            size = 100,
+            feedId = feedId,
+        )
+        entryDao.batchSave(entries)
+        eventBus.post(Evt.CacheInvalidated(session.user.id))
     }
 }

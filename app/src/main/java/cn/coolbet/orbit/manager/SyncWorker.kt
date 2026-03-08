@@ -20,6 +20,8 @@ import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.model.entity.SyncTaskRecord
 import cn.coolbet.orbit.remote.EntryApi
+import cn.coolbet.orbit.remote.FolderApi
+import cn.coolbet.orbit.remote.miniflux.FeedApi
 
 
 const val IGNORE_TIME_KEY = "ignore_last_sync_time"
@@ -30,6 +32,8 @@ class SyncWorker(
     workerParams: WorkerParameters,
     private val dao: SyncTaskRecordDao,
     private val entryApi: EntryApi,
+    private val feedApi: FeedApi,
+    private val folderApi: FolderApi,
     private val preference: Preference,
     private val feedDao: FeedDao,
     private val folderDao: FolderDao,
@@ -57,7 +61,7 @@ class SyncWorker(
 
     override suspend fun doWork(): Result {
 //        val ignoreLastSyncTime = inputData.getBoolean(IGNORE_TIME_KEY, false)
-        this.startTask()
+        this.startTaskFeedsThenEntries()
         // 如果同步失败，可以选择重试或直接失败
         // 失败后重试 (Result.retry())
         // 彻底失败 (Result.failure())
@@ -173,6 +177,86 @@ class SyncWorker(
                 id = taskId
             )
             Log.i("sync", "执行完毕: $row $taskId $status $errorMsg")
+            val result = eventBus.post(Evt.CacheInvalidated(userId))
+            Log.i("eventbus", "缓存失效事件发送 $result")
+        }
+    }
+
+    suspend fun startTaskFeedsThenEntries(fullResync: Boolean = false) {
+        val user = preference.userProfile()
+        if (user.isEmpty) {
+            Log.i("sync", "未登录，无法同步")
+            return
+        }
+
+        val userId = user.id
+        val now = System.currentTimeMillis()
+        val record = dao.getLastRecord(userId)
+        var lastSyncProgress = record?.toTime ?: (now - DateUtils.DAY_IN_MILLIS * 365)
+        if (fullResync) {
+            lastSyncProgress = now - DateUtils.DAY_IN_MILLIS * 365
+        }
+        val taskId = dao.insert(
+            SyncTaskRecord(
+                executeTime = now,
+                userId = userId,
+                status = SyncTaskRecord.RUNNING
+            )
+        )
+
+        var from = 0L
+        var to = 0L
+        var entryCount = 0
+        var mediaCount = 0
+        var feedCount = 0
+        var folderCount = 0
+        var status = SyncTaskRecord.OK
+        var errorMsg = ""
+
+        try {
+            // Phase 1: full feeds/folders sync
+            val remoteFolders = folderApi.getFolders()
+            val remoteFeeds = feedApi.getFeeds()
+            folderDao.batchSave(remoteFolders)
+            feedDao.batchSave(remoteFeeds)
+            feedCount = remoteFeeds.size
+            folderCount = remoteFolders.size
+
+            // Phase 2: full entries sync
+            val size = 100
+            var page = 1
+            while (true) {
+                val listInfo = entryApi.getEntries(page = page, size = size)
+                if (listInfo.isEmpty()) break
+                if (page == 1) {
+                    to = listInfo.firstOrNull()?.changedAt ?: 0L
+                }
+
+                entryDao.batchSave(listInfo)
+                entryCount += listInfo.size
+                mediaCount += listInfo.sumOf { it.medias.size }
+                from = listInfo.last().changedAt
+
+                val hasMore = listInfo.size >= size
+                val reachedLastProgress = from < lastSyncProgress
+                if (!hasMore || reachedLastProgress) break
+                page++
+            }
+        } catch (e: Exception) {
+            status = SyncTaskRecord.FAIL
+            errorMsg = e.message ?: ""
+        } finally {
+            dao.updateFinish(
+                entry = entryCount,
+                media = mediaCount,
+                feed = feedCount,
+                folder = folderCount,
+                fromTime = from,
+                toTime = to,
+                status = status,
+                errorMsg = errorMsg,
+                id = taskId
+            )
             val result = eventBus.post(Evt.CacheInvalidated(userId))
             Log.i("eventbus", "缓存失效事件发送 $result")
         }

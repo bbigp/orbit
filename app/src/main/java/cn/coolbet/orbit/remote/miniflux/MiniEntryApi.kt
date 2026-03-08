@@ -15,6 +15,7 @@ interface MiniEntryApi {
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
         @Query("status") statuses: List<String>,
+        @Query("feed_id") feedId: Long? = null,
         @Query("order") order: String,
         @Query("direction") direction: String,
         @Query("globally_visible") globallyVisible: Boolean,

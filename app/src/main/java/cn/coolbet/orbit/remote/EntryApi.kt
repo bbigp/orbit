@@ -10,10 +10,11 @@ class EntryApi(
     private val miniEntryApi: MiniEntryApi
 ){
     suspend fun getEntries(page: Int = 1, size: Int = 10, statuses: List<String> = listOf("unread", "read", "removed"),
+        feedId: Long? = null,
         order: String = "changed_at", direction: String = "desc", globallyVisible: Boolean = false,
     ) = withContext(Dispatchers.IO) {
         val page = minifluxRequest {
-            miniEntryApi.getEntries(size, (page - 1) * size, statuses, order, direction, globallyVisible)
+            miniEntryApi.getEntries(size, (page - 1) * size, statuses, feedId, order, direction, globallyVisible)
         }
         if (page.total <= 0) return@withContext emptyList()
         page.entries.map { it.to() }

@@ -8,7 +8,6 @@ import cn.coolbet.orbit.model.entity.to
 
 @Dao
 abstract class MediaDao {
-
     suspend fun getMap(entryIds: List<Long>): Map<Long, List<Media>> {
         if (entryIds.isEmpty()) return emptyMap()
         val mediaEntities = getMediasImpl(entryIds).map { it.to() }
