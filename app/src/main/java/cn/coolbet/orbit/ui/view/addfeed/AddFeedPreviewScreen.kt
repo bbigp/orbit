@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
+import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
@@ -36,7 +38,9 @@ import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.kit.rememberListScrollState
+import cn.coolbet.orbit.ui.kit.showAnimated
 import cn.coolbet.orbit.ui.theme.AppTypography
+import cn.coolbet.orbit.ui.view.feed.EditFeedArgs
 import cn.coolbet.orbit.ui.view.feed.EditFeedSheet
 import cn.coolbet.orbit.ui.view.home.LocalUnreadState
 import cn.coolbet.orbit.ui.view.listdetail.ListDetailActions
@@ -56,6 +60,7 @@ data class AddFeedPreviewScreen(
         val state = remember(preview) { AddFeedPreviewState(preview) }
         val model = koinScreenModel<AddFeedPreviewScreenModel> { parametersOf(state) }
         val navigator = LocalNavigator.current
+        val sheetNavigator = LocalBottomSheetNavigator.current
         val listState = remember(state.feed) { AddFeedPreviewListState(meta = state.feed) }
         val scrollState = rememberListScrollState(
             onRefresh = {},
@@ -130,7 +135,7 @@ data class AddFeedPreviewScreen(
                         Row {
                             Box(modifier = Modifier.weight(1f)) {
                                 ObTextButton(
-                                    content = if (state.feedId > 0L) "Done" else "Cancel",
+                                    content = if (state.feed.id > 0L) "Done" else "Cancel",
                                     sizes = OButtonDefaults.medium,
                                     colors = OButtonDefaults.secondary,
                                     onClick = { navigator?.pop() }
@@ -139,13 +144,18 @@ data class AddFeedPreviewScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Box(modifier = Modifier.weight(1f)) {
                                 ObAsyncTextButton(
-                                    content = if (state.feedId > 0L) "More" else "Subscribe",
+                                    content = if (state.feed.id > 0L) "More" else "Subscribe",
                                     sizes = OButtonDefaults.medium,
                                     isLoading = state.isSubmitting,
                                     disable = state.isSubmitting,
                                     onClick = {
-                                        if (state.feedId > 0L) {
-                                            navigator?.push(EditFeedSheet(state.feed))
+                                        if (state.feed.id > 0L) {
+                                            sheetNavigator.showAnimated(
+                                                EditFeedSheet(
+                                                    state.feed,
+                                                    args = EditFeedArgs(topBarBackIconId = R.drawable.x),
+                                                )
+                                            )
                                         } else {
                                             model.onAction(AddFeedPreviewAction.Subscribe)
                                         }

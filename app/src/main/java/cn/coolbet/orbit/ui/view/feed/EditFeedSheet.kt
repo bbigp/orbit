@@ -16,10 +16,12 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.DragHandleArrow
 import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.SheetTopBar
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import kotlinx.coroutines.delay
@@ -56,24 +58,24 @@ data class EditFeedSheet(
 
         val onClose: () -> Unit = {
             keyboard?.hide()
-            when (args.closeMode) {
-                EditFeedCloseMode.HIDE_SHEET -> sheetNavigator.hide()
-                EditFeedCloseMode.POP -> navigator.pop()
+            when (args.topBarBackIconId) {
+                R.drawable.arrow_left -> navigator.pop()
+                else -> sheetNavigator.hide()
             }
         }
 
         Column {
-            when (args.dragMode) {
-                EditFeedDragMode.NONE -> Unit
-                EditFeedDragMode.STATIC -> DragHandle(arrow = DragHandleArrow.BAR)
-            }
+            DragHandle(arrow = args.dragMode)
+            SheetTopBar(
+                title = "Edit Feed",
+                backIconId = args.topBarBackIconId,
+                onBack = onClose,
+            )
 
             EditFeedExpandedContent(
                 feed = feed,
                 title = state.title,
                 folderTitle = state.category.title,
-                topBarBackIconId = args.topBarBackIconId,
-                onBack = onClose,
                 onTitleChange = { v -> state.updateTitle(v) },
                 onPickFolder = {
                     navigator.push(

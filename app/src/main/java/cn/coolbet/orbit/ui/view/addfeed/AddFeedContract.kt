@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
 import cn.coolbet.orbit.model.domain.Entry
+import cn.coolbet.orbit.model.domain.Feed
 
 class AddFeedArgs
 
@@ -11,10 +12,7 @@ sealed class AddFeedAction {
 }
 
 data class AddFeedPreview(
-    val title: String,
-    val feedId: Long = 0,
-    val url: String,
-    val iconUrl: String,
+    val feed: Feed,
     val subscribeState: AddFeedSubscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED,
     val entries: List<Entry> = emptyList(),
 )

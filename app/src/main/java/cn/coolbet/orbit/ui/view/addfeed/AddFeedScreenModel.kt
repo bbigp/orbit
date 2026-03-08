@@ -5,6 +5,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import cn.coolbet.orbit.manager.CacheStore
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
+import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.manager.Env
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,10 +66,7 @@ class AddFeedScreenModel(
                     _unit.value = AddFeedUnit(
                         previews = listOf(
                             AddFeedPreview(
-                                title = localFeed.title,
-                                feedId = localFeed.id,
-                                url = localFeed.feedURL,
-                                iconUrl = localFeed.iconURL,
+                                feed = localFeed,
                                 subscribeState = AddFeedSubscribeState.SUBSCRIBED,
                                 entries = localEntries,
                             )
@@ -91,15 +89,15 @@ class AddFeedScreenModel(
     private fun addFeed(preview: AddFeedPreview) {
         if (preview.subscribeState != AddFeedSubscribeState.NOT_SUBSCRIBED) return
         screenModelScope.launch {
-            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
+            updatePreviewState(preview.feed.feedURL, AddFeedSubscribeState.SUBSCRIBING)
             try {
                 val folderId = resolveSubscribeFolderId()
-                val feedId = feedManager.subscribeFeed(preview.url, folderId)
+                val feedId = feedManager.subscribeFeed(preview.feed.feedURL, folderId)
                 val current = _unit.value
                 val next = current.previews.map { item ->
-                    if (item.url == preview.url) {
+                    if (item.feed.feedURL == preview.feed.feedURL) {
                         item.copy(
-                            feedId = feedId,
+                            feed = item.feed.copy(id = feedId, folderId = folderId),
                             subscribeState = AddFeedSubscribeState.SUBSCRIBED
                         )
                     } else {
@@ -109,7 +107,7 @@ class AddFeedScreenModel(
                 _unit.value = current.copy(previews = next, error = null)
                 _effects.tryEmit(AddFeedEffect.Success("Subscribed"))
             } catch (e: Exception) {
-                updatePreviewState(preview.url, AddFeedSubscribeState.NOT_SUBSCRIBED)
+                updatePreviewState(preview.feed.feedURL, AddFeedSubscribeState.NOT_SUBSCRIBED)
                 _unit.value = _unit.value.copy(error = e.message ?: "Failed to subscribe feed")
                 _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to subscribe feed"))
                 return@launch
@@ -120,13 +118,16 @@ class AddFeedScreenModel(
     private fun unsubscribeFeed(preview: AddFeedPreview) {
         if (preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) return
         screenModelScope.launch {
-            updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBING)
+            updatePreviewState(preview.feed.feedURL, AddFeedSubscribeState.SUBSCRIBING)
             try {
-                feedManager.unsubscribeFeed(preview.feedId)
+                feedManager.unsubscribeFeed(preview.feed.id)
                 val current = _unit.value
                 val next = current.previews.map { item ->
-                    if (item.url == preview.url) {
-                        item.copy(feedId = 0L, subscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED)
+                    if (item.feed.feedURL == preview.feed.feedURL) {
+                        item.copy(
+                            feed = item.feed.copy(id = 0L, folderId = 0L, folder = Folder.EMPTY),
+                            subscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED
+                        )
                     } else {
                         item
                     }
@@ -134,7 +135,7 @@ class AddFeedScreenModel(
                 _unit.value = current.copy(previews = next, error = null)
                 _effects.tryEmit(AddFeedEffect.Success("Unsubscribed"))
             } catch (e: Exception) {
-                updatePreviewState(preview.url, AddFeedSubscribeState.SUBSCRIBED)
+                updatePreviewState(preview.feed.feedURL, AddFeedSubscribeState.SUBSCRIBED)
                 _unit.value = _unit.value.copy(error = e.message ?: "Failed to unsubscribe feed")
                 _effects.tryEmit(AddFeedEffect.Error(e.message ?: "Failed to unsubscribe feed"))
                 return@launch
@@ -145,7 +146,7 @@ class AddFeedScreenModel(
     private fun updatePreviewState(url: String, state: AddFeedSubscribeState) {
         val current = _unit.value
         val next = current.previews.map { preview ->
-            if (preview.url == url) preview.copy(subscribeState = state) else preview
+            if (preview.feed.feedURL == url) preview.copy(subscribeState = state) else preview
         }
         _unit.value = current.copy(previews = next, error = null)
     }
@@ -168,19 +169,19 @@ class AddFeedScreenModel(
 
                 var changed = false
                 val next = current.previews.map { preview ->
-                    val matched = feeds.firstOrNull { it.feedURL == preview.url }
+                    val matched = feeds.firstOrNull { it.feedURL == preview.feed.feedURL }
                     when {
-                        matched != null && (preview.feedId != matched.id || preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) -> {
+                        matched != null && (preview.feed.id != matched.id || preview.subscribeState != AddFeedSubscribeState.SUBSCRIBED) -> {
                             changed = true
                             preview.copy(
-                                feedId = matched.id,
+                                feed = matched,
                                 subscribeState = AddFeedSubscribeState.SUBSCRIBED
                             )
                         }
                         matched == null && preview.subscribeState == AddFeedSubscribeState.SUBSCRIBED -> {
                             changed = true
                             preview.copy(
-                                feedId = 0L,
+                                feed = preview.feed.copy(id = 0L, folderId = 0L, folder = Folder.EMPTY),
                                 subscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED
                             )
                         }
@@ -224,10 +225,11 @@ class AddFeedScreenModel(
         return AddFeedUnit(
             previews = listOf(
                 AddFeedPreview(
-                    title = title,
-                    feedId = 0,
-                    url = url,
-                    iconUrl = iconUrl,
+                    feed = Feed.EMPTY.copy(
+                        title = title,
+                        feedURL = url,
+                        iconURL = iconUrl,
+                    ),
                     entries = entries,
                 )
             )

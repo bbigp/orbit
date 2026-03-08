@@ -42,21 +42,21 @@ internal fun AddFeedPreviewList(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 FeedIcon(
-                    url = item.iconUrl,
-                    alt = item.title,
+                    url = item.feed.iconURL,
+                    alt = item.feed.title,
                     size = FeedIconDefaults.LARGE,
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        item.title,
+                        item.feed.title,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = AppTypography.M15,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        item.url,
+                        item.feed.feedURL,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = AppTypography.R13B50,

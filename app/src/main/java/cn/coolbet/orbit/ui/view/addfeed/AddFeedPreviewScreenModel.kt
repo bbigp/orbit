@@ -29,12 +29,12 @@ class AddFeedPreviewScreenModel(
     }
 
     private fun subscribe() {
-        if (state.isSubmitting || state.feedId > 0L) return
+        if (state.isSubmitting || state.feed.id > 0L) return
         screenModelScope.launch {
             state.isSubmitting = true
             try {
                 val folderId = resolveSubscribeFolderId()
-                val feedId = feedManager.subscribeFeed(state.preview.url, folderId)
+                val feedId = feedManager.subscribeFeed(state.preview.feed.feedURL, folderId)
                 _effects.tryEmit(AddFeedPreviewEffect.Subscribed(feedId))
             } catch (e: Exception) {
                 _effects.tryEmit(AddFeedPreviewEffect.Error(e.message ?: "Failed to subscribe feed"))

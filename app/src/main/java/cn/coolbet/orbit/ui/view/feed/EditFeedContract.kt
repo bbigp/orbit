@@ -6,21 +6,11 @@ import androidx.compose.runtime.setValue
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
-
-enum class EditFeedDragMode {
-    NONE,
-    STATIC,
-}
-
-enum class EditFeedCloseMode {
-    POP,
-    HIDE_SHEET,
-}
+import cn.coolbet.orbit.ui.kit.DragHandleArrow
 
 data class EditFeedArgs(
-    val dragMode: EditFeedDragMode = EditFeedDragMode.STATIC,
+    val dragMode: DragHandleArrow = DragHandleArrow.BAR,
     val topBarBackIconId: Int = R.drawable.arrow_left,
-    val closeMode: EditFeedCloseMode = EditFeedCloseMode.POP,
 )
 
 sealed class EditFeedAction {
