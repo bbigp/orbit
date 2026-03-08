@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.folder
 
+import android.os.Parcelable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,14 +13,17 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.ui.kit.DragHandle
 import cn.coolbet.orbit.ui.kit.SheetTopBar
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 
-
+@Parcelize
 data class FolderPickerSheet(
     val folders: List<Folder> = emptyList(),
     val selectedId: Long,
+    @IgnoredOnParcel
     val onValueChange: (Long) -> Unit = {},
-): Screen {
+): Screen, Parcelable {
 
     @Composable
     override fun Content() {

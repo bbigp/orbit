@@ -1,9 +1,12 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
+import android.os.Parcelable
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Feed
+import kotlinx.parcelize.Parcelize
 
-class AddFeedArgs
+@Parcelize
+class AddFeedArgs : Parcelable
 
 sealed class AddFeedAction {
     object FetchPreview : AddFeedAction()
@@ -11,11 +14,12 @@ sealed class AddFeedAction {
     data class Unsubscribe(val preview: AddFeedPreview) : AddFeedAction()
 }
 
+@Parcelize
 data class AddFeedPreview(
     val feed: Feed,
     val subscribeState: AddFeedSubscribeState = AddFeedSubscribeState.NOT_SUBSCRIBED,
     val entries: List<Entry> = emptyList(),
-)
+) : Parcelable
 
 enum class AddFeedSubscribeState {
     NOT_SUBSCRIBED,

@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
+import android.os.Parcelable
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,12 +49,14 @@ import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemList
 import cn.coolbet.orbit.ui.view.listdetail.component.unavailable.LDCUEmptyView
 import kotlinx.coroutines.delay
+import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
 
+@Parcelize
 data class AddFeedPreviewScreen(
     val preview: AddFeedPreview,
     val args: AddFeedPreviewArgs = AddFeedPreviewArgs(),
-) : Screen {
+) : Screen, Parcelable {
 
     @Composable
     override fun Content() {

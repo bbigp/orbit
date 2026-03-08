@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
+import android.os.Parcelable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,11 +38,13 @@ import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.model.domain.MetaId
+import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
 
+@Parcelize
 data class AddFeedScreen(
     val args: AddFeedArgs = AddFeedArgs(),
-) : Screen {
+) : Screen, Parcelable {
 
     @Composable
     override fun Content() {

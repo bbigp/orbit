@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.feed
 
+import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,11 +8,13 @@ import cn.coolbet.orbit.R
 import cn.coolbet.orbit.model.domain.Feed
 import cn.coolbet.orbit.model.domain.Folder
 import cn.coolbet.orbit.ui.kit.DragHandleArrow
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class EditFeedArgs(
     val dragMode: DragHandleArrow = DragHandleArrow.BAR,
     val topBarBackIconId: Int = R.drawable.arrow_left,
-)
+) : Parcelable
 
 sealed class EditFeedAction {
     object ApplyChanges : EditFeedAction()

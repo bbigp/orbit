@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.ui.view.feed
 
+import android.os.Parcelable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -25,12 +26,14 @@ import cn.coolbet.orbit.ui.kit.SheetTopBar
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.view.folder.FolderPickerSheet
 import kotlinx.coroutines.delay
+import kotlinx.parcelize.Parcelize
 import org.koin.core.parameter.parametersOf
 
+@Parcelize
 data class EditFeedSheet(
     val feed: Feed,
     val args: EditFeedArgs = EditFeedArgs(),
-) : Screen {
+) : Screen, Parcelable {
     private val state by lazy { EditFeedState(feed) }
 
     @Composable

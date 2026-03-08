@@ -1,10 +1,13 @@
 package cn.coolbet.orbit.ui.view.addfeed
 
+import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.parcelize.Parcelize
 
-class AddFeedPreviewArgs
+@Parcelize
+class AddFeedPreviewArgs : Parcelable
 
 sealed class AddFeedPreviewAction {
     object Subscribe : AddFeedPreviewAction()
