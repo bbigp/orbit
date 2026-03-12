@@ -87,17 +87,18 @@ abstract class EntryDao(protected val db: AppDatabase) {
                 dbHelper.execSQL(sql, args)
             }
 
-            if (medias.isEmpty()) return@withContext
-            val mediaSql = """
-                insert or ignore into medias(
-                    id, user_id, entry_id, url, mime_type, size
-                ) values (
-                    ?, ?, ?, ?, ?,       ?
-                )
-            """
-            for (item in medias) {
-                val args = arrayOf<Any>(item.id, item.userId, item.entryId, item.url, item.mimeType, item.size)
-                dbHelper.execSQL(mediaSql, args)
+            if (medias.isNotEmpty()) {
+                val mediaSql = """
+                    insert or ignore into medias(
+                        id, user_id, entry_id, url, mime_type, size
+                    ) values (
+                        ?, ?, ?, ?, ?,       ?
+                    )
+                """
+                for (item in medias) {
+                    val args = arrayOf<Any>(item.id, item.userId, item.entryId, item.url, item.mimeType, item.size)
+                    dbHelper.execSQL(mediaSql, args)
+                }
             }
             dbHelper.setTransactionSuccessful()
         } finally {

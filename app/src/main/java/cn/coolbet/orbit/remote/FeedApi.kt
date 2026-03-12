@@ -20,6 +20,12 @@ class FeedApi(
         }
     }
 
+    suspend fun updateFeed(feedId: Long, request: FeedModificationRequest): Feed = withContext(Dispatchers.IO) {
+        minifluxRequest {
+            miniFeedApi.updateFeed(feedId, request).to()
+        }
+    }
+
     suspend fun deleteFeed(feedId: Long) = withContext(Dispatchers.IO) {
         minifluxRequest {
             miniFeedApi.deleteFeed(feedId)

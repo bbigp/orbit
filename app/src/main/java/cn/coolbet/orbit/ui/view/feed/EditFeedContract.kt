@@ -38,6 +38,7 @@ data class EditFeedState(
 }
 
 sealed class EditFeedEffect {
+    object Applied : EditFeedEffect()
     object Unsubscribed : EditFeedEffect()
     data class Error(val message: String) : EditFeedEffect()
 }

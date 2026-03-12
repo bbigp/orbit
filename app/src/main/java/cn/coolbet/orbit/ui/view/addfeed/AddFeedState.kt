@@ -8,7 +8,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 @Stable
 class AddFeedState {
-    var inputUrl by mutableStateOf(TextFieldValue("https://www.gcores.com/rss"))
+    var inputUrl by mutableStateOf(TextFieldValue(""))
     var isFetchingPreview by mutableStateOf(false)
 
     fun updateInputUrl(v: TextFieldValue) { inputUrl = v }

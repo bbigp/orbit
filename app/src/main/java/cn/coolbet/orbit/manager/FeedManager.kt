@@ -1,5 +1,6 @@
 package cn.coolbet.orbit.manager
 
+import android.util.Log
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -10,6 +11,7 @@ import cn.coolbet.orbit.dao.MediaDao
 import cn.coolbet.orbit.remote.EntryApi
 import cn.coolbet.orbit.remote.miniflux.FeedApi
 import cn.coolbet.orbit.remote.miniflux.FeedCreationRequest
+import cn.coolbet.orbit.remote.miniflux.FeedModificationRequest
 
 private const val SYNC_WORK_TAG = "data_sync_on_home_entry_tag"
 
@@ -54,6 +56,22 @@ class FeedManager(
         eventBus.post(Evt.CacheInvalidated(session.user.id))
     }
 
+    suspend fun updateFeed(feedId: Long, title: String?, folderId: Long?) {
+        check(!session.user.isEmpty) { "Not logged in" }
+        require(feedId > 0L) { "Feed id is invalid" }
+        require(title != null || folderId != null) { "No feed changes" }
+
+        val updatedFeed = feedApi.updateFeed(
+            feedId = feedId,
+            request = FeedModificationRequest(
+                title = title,
+                categoryId = folderId,
+            )
+        )
+        feedDao.batchSave(listOf(updatedFeed))
+        eventBus.post(Evt.CacheInvalidated(session.user.id))
+    }
+
     private fun triggerSync() {
         val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
             .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
@@ -67,14 +85,20 @@ class FeedManager(
     }
 
     private suspend fun syncNewSubscription(feedId: Long) {
-        val feeds = feedApi.getFeeds()
-        feedDao.batchSave(feeds)
-
+        Log.i("syncNewSubscription", "$feedId")
         val entries = entryApi.getEntries(
             page = 1,
-            size = 100,
+            size = 30,
             feedId = feedId,
         )
+        val feeds = entries
+            .map { it.feed }
+            .filter { it.id > 0L }
+            .distinctBy { it.id }
+        if (feeds.isNotEmpty()) {
+            feedDao.batchSave(feeds)
+        }
+        Log.i("syncNewSubscription", "${entries.size}")
         entryDao.batchSave(entries)
         eventBus.post(Evt.CacheInvalidated(session.user.id))
     }

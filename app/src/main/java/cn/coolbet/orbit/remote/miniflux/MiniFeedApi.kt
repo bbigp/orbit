@@ -8,6 +8,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface MiniFeedApi {
     @GET("v1/feeds")
@@ -15,6 +16,12 @@ interface MiniFeedApi {
 
     @POST("v1/feeds")
     suspend fun createFeed(@Body request: FeedCreationRequest): CreateFeedResponse
+
+    @PUT("v1/feeds/{feedId}")
+    suspend fun updateFeed(
+        @Path("feedId") feedId: Long,
+        @Body request: FeedModificationRequest
+    ): FeedResponse
 
     @DELETE("v1/feeds/{feedId}")
     suspend fun deleteFeed(@Path("feedId") feedId: Long)
@@ -87,6 +94,28 @@ data class FeedCreationRequest(
     @SerializedName("keeplist_rules") val keeplistRules: String = "",
     @SerializedName("hide_globally") val hideGlobally: Boolean = false,
     @SerializedName("disable_http2") val disableHttp2: Boolean = false,
+)
+
+data class FeedModificationRequest(
+    @SerializedName("feed_url") val feedUrl: String? = null,
+    @SerializedName("site_url") val siteUrl: String? = null,
+    @SerializedName("title") val title: String? = null,
+    @SerializedName("scraper_rules") val scraperRules: String? = null,
+    @SerializedName("rewrite_rules") val rewriteRules: String? = null,
+    @SerializedName("blocklist_rules") val blocklistRules: String? = null,
+    @SerializedName("keeplist_rules") val keeplistRules: String? = null,
+    @SerializedName("crawler") val crawler: Boolean? = null,
+    @SerializedName("user_agent") val userAgent: String? = null,
+    @SerializedName("cookie") val cookie: String? = null,
+    @SerializedName("username") val username: String? = null,
+    @SerializedName("password") val password: String? = null,
+    @SerializedName("category_id") val categoryId: Long? = null,
+    @SerializedName("disabled") val disabled: Boolean? = null,
+    @SerializedName("ignore_http_cache") val ignoreHttpCache: Boolean? = null,
+    @SerializedName("allow_self_signed_certificates") val allowSelfSignedCertificates: Boolean? = null,
+    @SerializedName("fetch_via_proxy") val fetchViaProxy: Boolean? = null,
+    @SerializedName("hide_globally") val hideGlobally: Boolean? = null,
+    @SerializedName("disable_http2") val disableHttp2: Boolean? = null,
 )
 
 data class CreateFeedResponse(

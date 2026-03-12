@@ -49,7 +49,16 @@ class EditFeedScreenModel(
         screenModelScope.launch {
             state.isApplying = true
             try {
-                // TODO: apply title/category changes with `state`.
+                val title = state.title.trim().takeIf { it.isNotBlank() && it != state.feed.title }
+                val categoryId = state.category.id.takeIf { it > 0L && it != state.feed.folder.id }
+                if (title != null || categoryId != null) {
+                    feedManager.updateFeed(
+                        feedId = state.feed.id,
+                        title = title,
+                        folderId = categoryId,
+                    )
+                    _effects.emit(EditFeedEffect.Applied)
+                }
             } catch (e: Exception) {
                 _effects.emit(EditFeedEffect.Error(e.message ?: "Failed to apply feed changes"))
             } finally {

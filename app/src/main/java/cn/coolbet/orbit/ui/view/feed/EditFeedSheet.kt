@@ -44,9 +44,21 @@ data class EditFeedSheet(
         val sheetNavigator = LocalBottomSheetNavigator.current
         val keyboard = LocalSoftwareKeyboardController.current
 
+        val onClose: () -> Unit = {
+            keyboard?.hide()
+            when (args.topBarBackIconId) {
+                R.drawable.arrow_left -> navigator.pop()
+                else -> sheetNavigator.hide()
+            }
+        }
+
         LaunchedEffect(model) {
             model.effects.collect { effect ->
                 when (effect) {
+                    is EditFeedEffect.Applied -> {
+                        onClose()
+                        ObToastManager.show("Saved")
+                    }
                     is EditFeedEffect.Unsubscribed -> {
                         keyboard?.hide()
                         sheetNavigator.hide()
@@ -56,14 +68,6 @@ data class EditFeedSheet(
                     }
                     is EditFeedEffect.Error -> ObToastManager.show(effect.message, ToastType.Error)
                 }
-            }
-        }
-
-        val onClose: () -> Unit = {
-            keyboard?.hide()
-            when (args.topBarBackIconId) {
-                R.drawable.arrow_left -> navigator.pop()
-                else -> sheetNavigator.hide()
             }
         }
 

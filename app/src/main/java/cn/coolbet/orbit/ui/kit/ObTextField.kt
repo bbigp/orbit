@@ -18,6 +18,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -110,12 +114,22 @@ fun ObTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     focusRequester: FocusRequester? = null,
 ) {
+    var internalValue by remember {
+        mutableStateOf(TextFieldValue(value, selection = TextRange(value.length)))
+    }
+    if (internalValue.text != value) {
+        internalValue = TextFieldValue(value, selection = TextRange(value.length))
+    }
+
     ObTextField(
         modifier = modifier,
         hint = hint,
-        value = TextFieldValue(value),
+        value = internalValue,
         readOnly = readOnly,
-        onValueChange = { onValueChange(it.text) },
+        onValueChange = {
+            internalValue = it
+            onValueChange(it.text)
+        },
         background = background,
         sizes = sizes,
         leading = leading,
