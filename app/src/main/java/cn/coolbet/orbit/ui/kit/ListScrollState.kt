@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-
 @Stable
 class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val listState: LazyListState,
@@ -24,13 +23,14 @@ class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val onRefresh: () -> Unit,
     val onLoadMore: () -> Unit
 ) {
-    // 1. 直接提供 Progress 属性，父子组件都能直接读
+    // Progress for header collapse/toolbar fade.
+    // headerIndexOffset points to LDHeader index (1 with refresh indicator, otherwise 0).
     val progress: Float by derivedStateOf {
         val firstIndex = listState.firstVisibleItemIndex
         val firstOffset = listState.firstVisibleItemScrollOffset
 
         when {
-            firstIndex <= headerIndexOffset && firstOffset <= 0 -> 0f
+            firstIndex < headerIndexOffset -> 0f
             firstIndex > headerIndexOffset -> 1f
             else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
 
@@ -43,7 +43,6 @@ class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
 //                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
