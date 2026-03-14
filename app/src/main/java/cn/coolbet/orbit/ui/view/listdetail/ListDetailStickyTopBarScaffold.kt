@@ -58,7 +58,7 @@ import cn.coolbet.orbit.ui.theme.ObTheme
  * - Supports optional overlay below top-bar.
  */
 @Composable
-fun StickyTopBarLayout(
+fun PinnedTopBarLayout(
     listState: LazyListState,
     compactTitleThreshold: Dp = 60.dp,
     bottomInset: Dp = 0.dp,
@@ -194,7 +194,7 @@ fun ListDetailStickyTopBarReplicaSample(
 ) {
     val listState = rememberLazyListState()
 
-    StickyTopBarLayout(
+    PinnedTopBarLayout(
         listState = listState,
         topBar = { collapsed ->
             Column(modifier = Modifier.fillMaxWidth()) {
