@@ -30,6 +30,7 @@ import cafe.adriel.voyager.navigator.bottomSheet.LocalBottomSheetNavigator
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.R
+import cn.coolbet.orbit.ui.kit.ObBackIconButton
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconTextField
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
@@ -82,10 +83,7 @@ data class AddFeedScreen(
                 ObTopAppbar(
                     title = { Text("RSS/Atom", style = AppTypography.M17) },
                     navigationIcon = {
-                        ObIcon(
-                            id = R.drawable.arrow_left,
-                            modifier = Modifier.click { onExit() }
-                        )
+                        ObBackIconButton(onClick = { onExit() })
                     }
                 )
             }

@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val listState: LazyListState,
     val pullState: PullToRefreshState,
-    private val flyDistancePx: Float, // 滑动距离
+    private val flyDistancePx: Float,
     private val headerIndexOffset: Int,
     val onRefresh: () -> Unit,
     val onLoadMore: () -> Unit
@@ -28,19 +28,10 @@ class ListScrollState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val progress: Float by derivedStateOf {
         val firstIndex = listState.firstVisibleItemIndex
         val firstOffset = listState.firstVisibleItemScrollOffset
-
         when {
             firstIndex < headerIndexOffset -> 0f
             firstIndex > headerIndexOffset -> 1f
             else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
-
-            //因为第一项是 RefreshIndicatorItem 所以listState.firstVisibleItemIndex 必须从1开始算
-//                    // 明确：如果是第 0 项且位移为 0，进度必须是 0
-//                    firstIndex == 0 && firstOffset <= 0 -> 0f
-//                    // 如果已经滚过第一项了，进度必须是 1
-//                    firstIndex > 0 -> 1f
-//                    // 在第一项内部滚动时的计算
-//                    else -> (firstOffset.toFloat() / flyDistancePx).coerceIn(0f, 1f)
         }
     }
 }

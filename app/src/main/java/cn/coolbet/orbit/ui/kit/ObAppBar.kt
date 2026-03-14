@@ -137,6 +137,19 @@ fun ObTopAppbar(
     }
 }
 
+@Composable
+fun ObBackIconButton(
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    iconId: Int = R.drawable.arrow_left,
+) {
+    val navigator = LocalNavigator.current
+    ObIcon(
+        id = iconId,
+        modifier = modifier.clickable(onClick = { onClick?.invoke() ?: navigator?.pop() })
+    )
+}
+
 
 @Composable
 fun ObBackTopAppBar(
@@ -144,15 +157,12 @@ fun ObBackTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     background: Color = ObTheme.colors.primaryContainer,
 ) {
-    val navigator = LocalNavigator.current
     ObTopAppbar(
         title = title,
         actions = actions,
         navigationIcon = {
-            ObIcon(
-                id = R.drawable.arrow_left,
+            ObBackIconButton(
                 modifier = Modifier.background(background)
-                    .clickable(onClick = { navigator?.pop() })
             )
         },
         background = background,

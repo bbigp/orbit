@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.ui.view.listdetail
+package cn.coolbet.orbit.ui.kit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -48,7 +48,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.unit.IntOffset
 import cafe.adriel.voyager.core.screen.Screen
-import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.ObTheme
 
 /**
@@ -60,6 +59,7 @@ import cn.coolbet.orbit.ui.theme.ObTheme
 @Composable
 fun PinnedTopBarLayout(
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     compactTitleThreshold: Dp = 60.dp,
     bottomInset: Dp = 0.dp,
     topBar: @Composable (collapsed: Boolean) -> Unit,
@@ -79,7 +79,7 @@ fun PinnedTopBarLayout(
     }
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         content(PaddingValues(top = topInsetDp, bottom = bottomInset))
 
         Surface(
