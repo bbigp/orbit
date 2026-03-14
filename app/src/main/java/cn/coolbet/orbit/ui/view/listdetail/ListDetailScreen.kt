@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -49,13 +50,11 @@ import cn.coolbet.orbit.manager.asUnreadMarkState
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.UnreadMark
-import cn.coolbet.orbit.ui.kit.ListLoadMoreHandler
 import cn.coolbet.orbit.ui.kit.ObBackIconButton
 import cn.coolbet.orbit.ui.kit.ObIcon
 import cn.coolbet.orbit.ui.kit.ObIconGroup
 import cn.coolbet.orbit.ui.kit.ObTopAppbar
 import cn.coolbet.orbit.ui.kit.PinnedTopBarLayout
-import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.kit.showAnimated
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.theme.Black08
@@ -84,11 +83,7 @@ data class ListDetailScreen(
         val unreadState = model.unreadMapState.collectAsState()
         val unreadCountMap by unreadState
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
-        val scrollState = rememberListScrollState(
-            onRefresh = { model.refresh() },
-            onLoadMore = { model.nextPage() },
-            hasRefreshIndicator = false,
-        )
+        val listState = rememberLazyListState()
         val navigator = LocalNavigator.current
         val sheetNavigator = LocalBottomSheetNavigator.current
         val actions = remember(model, sheetNavigator, navigator) {
@@ -110,14 +105,13 @@ data class ListDetailScreen(
         LaunchedEffect(Unit) {
             model.coordinator.unfreeze()
         }
-        ListLoadMoreHandler(scrollState, state)
 
         Scaffold(
             contentWindowInsets = WindowInsets.navigationBars
         ) { paddingValues ->
             PinnedTopBarLayout(
                 modifier = Modifier.padding(paddingValues),
-                listState = scrollState.listState,
+                listState = listState,
                 topBar = { collapsed ->
                     ObTopAppbar(
                         navigationIcon = { ObBackIconButton(onClick = { actions.onBack() }) },
@@ -166,7 +160,9 @@ data class ListDetailScreen(
                                 LocalUnreadState provides unreadState,
                             ) {
                                 LDItemList(
-                                    scrollState = scrollState,
+                                    listState = listState,
+                                    onRefresh = { model.refresh() },
+                                    onLoadMore = { model.nextPage() },
                                     state = state,
                                     groupedData = groupedItems,
                                     enableSwipe = config.enableSwipe

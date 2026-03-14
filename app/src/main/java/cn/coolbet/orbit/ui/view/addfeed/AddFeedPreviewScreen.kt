@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,7 +39,6 @@ import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.ToastType
-import cn.coolbet.orbit.ui.kit.rememberListScrollState
 import cn.coolbet.orbit.ui.kit.showAnimated
 import cn.coolbet.orbit.ui.theme.AppTypography
 import cn.coolbet.orbit.ui.view.feed.EditFeedArgs
@@ -65,11 +65,7 @@ data class AddFeedPreviewScreen(
         val navigator = LocalNavigator.current
         val sheetNavigator = LocalBottomSheetNavigator.current
         val listState = remember(state.feed) { AddFeedPreviewListState(meta = state.feed) }
-        val scrollState = rememberListScrollState(
-            onRefresh = {},
-            onLoadMore = {},
-            hasRefreshIndicator = false
-        )
+        val lazyListState = rememberLazyListState()
         val actions = remember {
             object : ListDetailActions {
                 override fun toggleRead(entry: Entry) {}
@@ -103,7 +99,9 @@ data class AddFeedPreviewScreen(
                         LocalUnreadState provides remember { mutableStateOf(emptyMap()) },
                     ) {
                         LDItemList(
-                            scrollState = scrollState,
+                            listState = lazyListState,
+                            onRefresh = {},
+                            onLoadMore = {},
                             state = listState,
                             groupedData = mapOf("" to state.preview.entries),
                             enablePullToRefresh = false,
