@@ -50,7 +50,6 @@ class ListDetailCoordinator(
 
     fun refresh(scope: CoroutineScope) {
         val value = state.value
-        update { it.copy(items = emptyList()) }
         scope.launch { initData(metaId = value.meta.metaId, settings = value.settings, search = value.search) }
     }
 
@@ -111,7 +110,7 @@ class ListDetailCoordinator(
                 throw IllegalStateException("MetaId type is neither Feed nor Folder.")
             }
         }
-        delay(500)
+        delay(2000)
         try {
             val meta = metaDataFlow.first()
             val ldSettings = settings ?: ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings

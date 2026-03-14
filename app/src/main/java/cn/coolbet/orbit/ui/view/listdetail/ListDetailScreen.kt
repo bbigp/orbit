@@ -76,7 +76,8 @@ data class ListDetailScreen(
         val unreadMark by Env.settings.unreadMark.asUnreadMarkState()
         val scrollState = rememberListScrollState(
             onRefresh = { model.refresh() },
-            onLoadMore = { model.nextPage() }
+            onLoadMore = { model.nextPage() },
+            hasRefreshIndicator = false,
         )
         val navigator = LocalNavigator.current
         val sheetNavigator = LocalBottomSheetNavigator.current
@@ -159,6 +160,7 @@ data class ListDetailScreen(
                     .fillMaxSize()
             ) {
                 when(state.state) {
+                    is LoadingState.Idle -> { LDSkeletonList() }
                     is LoadingState.Loading -> { LDSkeletonList() }
                     is LoadingState.Empty -> { LDCUEmptyView() }
                     else -> {
