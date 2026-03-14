@@ -147,7 +147,8 @@ data class ListDetailScreen(
                             ObIcon(
                                 R.drawable.more,
                                 modifier = Modifier.clickable {
-                                    sheetNavigator.showAnimated(LDSettingSheet)
+                                    navigator?.push(TetScreen)
+//                                    sheetNavigator.showAnimated(LDSettingSheet)
                                 },
                             )
                         }
