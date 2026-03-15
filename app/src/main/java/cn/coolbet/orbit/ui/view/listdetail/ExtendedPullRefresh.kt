@@ -9,7 +9,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,31 +49,39 @@ import kotlin.math.PI
 import kotlin.math.roundToInt
 
 private enum class RefreshingIndicatorType { Circle, Snowflake }
+private const val SHORT_PULL_BIT = 0
+private const val LONG_PULL_BIT = 1
 
 /**
- * Two-stage pull-to-refresh aligned with Brew iOS behavior:
- * - Stage 1 (progress < 1.15): two balls
- * - Stage 2 (progress >= 1.15): rotating snowflake
+ * Pull-to-refresh with short-pull and long-pull behavior:
+ * - Short pull (progress < 1.15): two balls
+ * - Long pull (progress >= 1.15): rotating snowflake
  *
  * Trigger on release:
- * - progress >= secondStageTrigger and secondStageAction != null -> secondStageAction()
- * - progress >= refreshTrigger -> onRefresh()
+ * - progress >= longPullTrigger and onLongPull != null -> onLongPull()
+ * - progress >= shortPullTrigger -> onRefresh() ?: onShortPull()
  */
 @Composable
-fun TwoStagePullRefreshLayout(
+fun ExtendedPullRefreshLayout(
     isRefreshing: Boolean,
-    onRefresh: () -> Unit,
-    secondStageAction: (() -> Unit)?,
-    canPullDown: () -> Boolean,
+    listState: LazyListState,
     modifier: Modifier = Modifier,
+    onShortPull: (() -> Unit)? = null,
+    onLongPull: (() -> Unit)? = null,
+    onRefresh: (() -> Unit)? = null,
     threshold: Dp = 56.dp,
-    refreshTrigger: Float = 0.6f,
-    secondStageTrigger: Float = 1.5f,
+    shortPullIndicatorStart: Float = 0f,
+    shortPullTrigger: Float = 0.6f,
+    longPullTrigger: Float = 1.5f,
+    longPullIndicatorStart: Float = 1.15f,
     pullResistance: Float = 1.3f,
     content: @Composable () -> Unit
 ) {
+    val shortPullAction = onRefresh ?: onShortPull
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
+    fun canPullDown(): Boolean =
+        listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
 
     val thresholdPx = with(density) { threshold.toPx() }
     val maxPullPx = thresholdPx * 2.6f
@@ -78,50 +89,61 @@ fun TwoStagePullRefreshLayout(
     val offsetY by animateFloatAsState(
         targetValue = offsetTargetY,
         animationSpec = spring(),
-        label = "two_stage_pull_offset"
+        label = "extended_pull_offset"
     )
 
     var progress by remember { mutableFloatStateOf(0f) }
-    var crossedStage1 by remember { mutableStateOf(false) }
-    var crossedStage2 by remember { mutableStateOf(false) }
+    var pullFlags by remember { mutableLongStateOf(0L) }
     var pullingByUser by remember { mutableStateOf(false) }
     var refreshingIndicatorType by remember { mutableStateOf(RefreshingIndicatorType.Circle) }
 
-    fun updateProgress() {
-        progress = (offsetY / thresholdPx).coerceAtLeast(0f)
-        if (pullingByUser && progress >= refreshTrigger && !crossedStage1) {
-            crossedStage1 = true
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        } else if (progress < refreshTrigger) {
-            crossedStage1 = false
+    fun isPast(bit: Int): Boolean = (pullFlags and (1L shl bit)) != 0L
+    fun setPast(bit: Int, value: Boolean) {
+        pullFlags = if (value) {
+            pullFlags or (1L shl bit)
+        } else {
+            pullFlags and (1L shl bit).inv()
         }
+    }
 
-        if (pullingByUser && progress >= secondStageTrigger && !crossedStage2) {
-            crossedStage2 = true
+    fun updateStageHaptic(bit: Int, isPastThreshold: Boolean) {
+        val crossedNow = pullingByUser && isPastThreshold && !isPast(bit)
+        if (crossedNow) {
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        } else if (progress < secondStageTrigger) {
-            crossedStage2 = false
         }
+        setPast(bit, isPastThreshold)
+    }
+
+    fun updateProgress(currentOffsetY: Float) {
+        val nextProgress = (currentOffsetY / thresholdPx).coerceAtLeast(0f)
+        progress = nextProgress
+
+        updateStageHaptic(bit = SHORT_PULL_BIT, isPastThreshold = nextProgress >= shortPullTrigger)
+        updateStageHaptic(bit = LONG_PULL_BIT, isPastThreshold = nextProgress >= longPullTrigger)
+    }
+
+    fun setOffsetTarget(next: Float) {
+        offsetTargetY = next
+        updateProgress(currentOffsetY = offsetTargetY)
     }
 
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
-            offsetTargetY = thresholdPx
+            setOffsetTarget(thresholdPx)
         } else {
-            offsetTargetY = 0f
+            setOffsetTarget(0f)
             refreshingIndicatorType = RefreshingIndicatorType.Circle
         }
-        updateProgress()
     }
 
-    val nestedScroll = remember(canPullDown, isRefreshing, secondStageAction) {
+    val nestedScroll = remember(listState, isRefreshing, onLongPull) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (source != NestedScrollSource.UserInput) return Offset.Zero
-                if (available.y < 0f && offsetY > 0f) {
-                    val next = (offsetY + available.y).coerceAtLeast(0f)
-                    val consumedY = next - offsetY
-                    offsetTargetY = next
+                if (available.y < 0f && offsetTargetY > 0f) {
+                    val next = (offsetTargetY + available.y).coerceAtLeast(0f)
+                    val consumedY = next - offsetTargetY
+                    setOffsetTarget(next)
                     return Offset(0f, consumedY)
                 }
                 return Offset.Zero
@@ -133,9 +155,9 @@ fun TwoStagePullRefreshLayout(
                 if (available.y > 0f && canPullDown()) {
                     pullingByUser = true
                     val delta = available.y * pullResistance
-                    val next = (offsetY + delta).coerceAtMost(maxPullPx)
-                    val consumedY = next - offsetY
-                    offsetTargetY = next
+                    val next = (offsetTargetY + delta).coerceAtMost(maxPullPx)
+                    val consumedY = next - offsetTargetY
+                    setOffsetTarget(next)
                     return Offset(0f, consumedY)
                 }
                 return Offset.Zero
@@ -143,39 +165,35 @@ fun TwoStagePullRefreshLayout(
 
             override suspend fun onPreFling(available: Velocity): Velocity {
                 pullingByUser = false
-                updateProgress()
+                updateProgress(currentOffsetY = offsetY)
 
-                if (!isRefreshing && progress >= secondStageTrigger && secondStageAction != null) {
+                if (!isRefreshing && progress >= longPullTrigger && onLongPull != null) {
                     refreshingIndicatorType = RefreshingIndicatorType.Snowflake
-                    secondStageAction()
-                    offsetTargetY = 0f
-                    updateProgress()
-                    return Velocity.Zero
+                    onLongPull()
+                    setOffsetTarget(0f)
+                    return available
                 }
 
-                if (!isRefreshing && progress >= refreshTrigger) {
+                if (!isRefreshing && progress >= shortPullTrigger && shortPullAction != null) {
                     refreshingIndicatorType = RefreshingIndicatorType.Circle
-                    onRefresh()
-                    offsetTargetY = thresholdPx
-                    updateProgress()
-                    return Velocity.Zero
+                    shortPullAction()
+                    setOffsetTarget(thresholdPx)
+                    return available
                 }
 
-                offsetTargetY = 0f
-                updateProgress()
+                setOffsetTarget(0f)
                 return Velocity.Zero
             }
         }
     }
 
-    LaunchedEffect(offsetY) { updateProgress() }
+    LaunchedEffect(offsetY) { updateProgress(currentOffsetY = offsetY) }
 
-    Box(modifier = modifier.nestedScroll(nestedScroll)) {
+    Box(modifier = modifier.fillMaxSize().nestedScroll(nestedScroll)) {
         Box(modifier = Modifier.offset { IntOffset(0, offsetY.roundToInt()) }) {
             content()
         }
 
-        val showSecondStage = secondStageAction != null && progress >= 1.15f
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -186,12 +204,14 @@ fun TwoStagePullRefreshLayout(
             when {
                 isRefreshing && refreshingIndicatorType == RefreshingIndicatorType.Snowflake -> RefreshingSnowflakeIndicator()
                 isRefreshing -> CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
-                pullingByUser && showSecondStage -> SnowflakeIndicator(
+                pullingByUser && onLongPull != null && progress >= longPullIndicatorStart -> SnowflakeIndicator(
                     progress = progress,
-                    secondStageStart = 1.15f,
-                    secondStageTrigger = secondStageTrigger
+                    longPullIndicatorStart = longPullIndicatorStart,
+                    longPullTrigger = longPullTrigger
                 )
-                pullingByUser && progress > 0f -> TwoBallIndicator(progress = progress.coerceIn(0f, 1f))
+                pullingByUser && progress >= shortPullIndicatorStart -> TwoBallIndicator(
+                    progress = progress.coerceIn(0f, 1f)
+                )
             }
         }
     }
@@ -241,13 +261,13 @@ private fun RefreshingSnowflakeIndicator() {
 @Composable
 private fun SnowflakeIndicator(
     progress: Float,
-    secondStageStart: Float,
-    secondStageTrigger: Float
+    longPullIndicatorStart: Float,
+    longPullTrigger: Float
 ) {
-    // Make stage-2 growth more obvious: stronger easing + larger max size.
-    val trigger = if (secondStageTrigger > secondStageStart) secondStageTrigger else secondStageStart + 0.01f
-    val stageProgress = ((progress - secondStageStart) / (trigger - secondStageStart)).coerceIn(0f, 1f)
-    val eased = stageProgress * 0.75f + (1f - (1f - stageProgress) * (1f - stageProgress)) * 0.25f
+    // Make long-pull growth more obvious: stronger easing + larger max size.
+    val trigger = if (longPullTrigger > longPullIndicatorStart) longPullTrigger else longPullIndicatorStart + 0.01f
+    val longPullProgress = ((progress - longPullIndicatorStart) / (trigger - longPullIndicatorStart)).coerceIn(0f, 1f)
+    val eased = longPullProgress * 0.75f + (1f - (1f - longPullProgress) * (1f - longPullProgress)) * 0.25f
     val minSize = 15f
     val maxSize = 28f
     val size = (minSize + (maxSize - minSize) * eased).dp

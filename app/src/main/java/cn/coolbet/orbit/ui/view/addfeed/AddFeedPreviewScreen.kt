@@ -38,6 +38,7 @@ import cn.coolbet.orbit.ui.kit.OButtonDefaults
 import cn.coolbet.orbit.ui.kit.ObAsyncTextButton
 import cn.coolbet.orbit.ui.kit.ObTextButton
 import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.SimplePagingLoadState
 import cn.coolbet.orbit.ui.kit.ToastType
 import cn.coolbet.orbit.ui.kit.showAnimated
 import cn.coolbet.orbit.ui.theme.AppTypography
@@ -65,6 +66,7 @@ data class AddFeedPreviewScreen(
         val navigator = LocalNavigator.current
         val sheetNavigator = LocalBottomSheetNavigator.current
         val listState = remember(state.feed) { AddFeedPreviewListState(meta = state.feed) }
+        val pagingState = remember { SimplePagingLoadState() }
         val lazyListState = rememberLazyListState()
         val actions = remember {
             object : ListDetailActions {
@@ -103,6 +105,7 @@ data class AddFeedPreviewScreen(
                             onRefresh = {},
                             onLoadMore = {},
                             state = listState,
+                            pagingState = pagingState,
                             groupedData = mapOf("" to state.preview.entries),
                             enablePullToRefresh = false,
                             enableSwipe = false

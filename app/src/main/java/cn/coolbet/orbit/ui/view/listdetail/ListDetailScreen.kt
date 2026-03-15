@@ -164,6 +164,7 @@ data class ListDetailScreen(
                                     onRefresh = { model.refresh() },
                                     onLoadMore = { model.nextPage() },
                                     state = state,
+                                    pagingState = state,
                                     groupedData = groupedItems,
                                     enableSwipe = config.enableSwipe
                                 )

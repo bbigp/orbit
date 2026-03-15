@@ -2,14 +2,9 @@ package cn.coolbet.orbit.ui.view.listdetail.component
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.Route
@@ -17,23 +12,18 @@ import cn.coolbet.orbit.common.click
 import cn.coolbet.orbit.model.domain.Entry
 import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
-import cn.coolbet.orbit.ui.kit.LoadMoreIndicator
-import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.ObToastManager
+import cn.coolbet.orbit.ui.kit.PagingLoadState
 import cn.coolbet.orbit.ui.kit.PagingLazyColumn
-import cn.coolbet.orbit.ui.kit.PagingResult
 import cn.coolbet.orbit.ui.kit.SpacerDivider
-import cn.coolbet.orbit.ui.kit.rememberPagingState
+import cn.coolbet.orbit.ui.view.listdetail.ExtendedPullRefreshLayout
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
-import cn.coolbet.orbit.ui.view.listdetail.TwoStagePullRefreshLayout
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDGroupTitle
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDHeader
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDRow
 
 interface LDItemListState {
     val settings: LDSettings
-    val isRefreshing: Boolean
-    val hasMore: Boolean
     val meta: Meta
 }
 
@@ -50,21 +40,12 @@ fun LDItemList(
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     state: LDItemListState,
+    pagingState: PagingLoadState,
     groupedData: Map<String, List<Entry>>,
     enablePullToRefresh: Boolean = true,
     enableSwipe: Boolean = true,
 ) {
     val actions = LocalListDetailActions.current
-    val pagingState = rememberPagingState(initialHasMoreData = state.hasMore)
-
-    LaunchedEffect(state.hasMore) {
-        pagingState.reset(page = pagingState.currentPage, hasMore = state.hasMore)
-    }
-    LaunchedEffect(state.isRefreshing) {
-        if (state.isRefreshing) {
-            pagingState.reset(page = 1, hasMore = state.hasMore)
-        }
-    }
 
     val listItems = remember(groupedData, state.settings.showGroupTitle, state.meta.id) {
         buildList {
@@ -82,10 +63,7 @@ fun LDItemList(
         PagingLazyColumn(
             items = listItems,
             pagingState = pagingState,
-            onLoadMore = {
-                onLoadMore()
-                if (state.hasMore) PagingResult.HasMoreData else PagingResult.NoMoreData
-            },
+            onLoadMore = { onLoadMore() },
             listState = listState,
             modifier = Modifier.fillMaxSize(),
             key = { _, item ->
@@ -94,12 +72,6 @@ fun LDItemList(
                     is LDListItem.Group -> "group-${item.date}"
                     is LDListItem.EntryRow -> item.entry.id
                 }
-            },
-            loadingFooter = {
-                if (!state.isRefreshing) LoadMoreIndicator()
-            },
-            endFooter = {
-                if (!state.isRefreshing) NoMoreIndicator()
             },
         ) { listItem ->
             when (listItem) {
@@ -138,15 +110,11 @@ fun LDItemList(
     }
 
     if (enablePullToRefresh) {
-        TwoStagePullRefreshLayout(
-            isRefreshing = state.isRefreshing,
+        ExtendedPullRefreshLayout(
+            isRefreshing = pagingState.isRefreshing,
+            listState = listState,
             onRefresh = onRefresh,
-            secondStageAction = onRefresh,
-            canPullDown = {
-                listState.firstVisibleItemIndex == 0 &&
-                    listState.firstVisibleItemScrollOffset == 0
-            },
-            modifier = Modifier.fillMaxSize(),
+            onLongPull = onRefresh,
         ) {
             listContent()
         }

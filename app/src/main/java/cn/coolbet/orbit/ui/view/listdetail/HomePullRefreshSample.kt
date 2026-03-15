@@ -15,25 +15,22 @@ import androidx.compose.ui.Modifier
 @Composable
 fun HomePullRefreshSample(
     items: List<String>,
-    onRefresh: () -> Unit,
+    onShortPull: () -> Unit,
     onLongPull: () -> Unit
 ) {
     val listState = rememberLazyListState()
     var refreshing by remember { mutableStateOf(false) }
 
-    TwoStagePullRefreshLayout(
+    ExtendedPullRefreshLayout(
         isRefreshing = refreshing,
+        listState = listState,
         onRefresh = {
             refreshing = true
-            onRefresh()
+            onShortPull()
             // In production, set this back to false after the network refresh completes.
             refreshing = false
         },
-        secondStageAction = onLongPull,
-        canPullDown = {
-            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
-        },
-        modifier = Modifier.fillMaxSize()
+        onLongPull = onLongPull,
     ) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             items(items) { item ->
