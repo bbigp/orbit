@@ -69,12 +69,12 @@ fun ExtendedPullRefreshLayout(
     onShortPull: (() -> Unit)? = null,
     onLongPull: (() -> Unit)? = null,
     onRefresh: (() -> Unit)? = null,
-    threshold: Dp = 56.dp,
-    shortPullIndicatorStart: Float = 0f,
-    shortPullTrigger: Float = 0.6f,
-    longPullTrigger: Float = 1.5f,
-    longPullIndicatorStart: Float = 1.15f,
-    pullResistance: Float = 1.3f,
+    threshold: Dp = 72.dp,
+    shortPullIndicatorStart: Float = 0.08f,
+    shortPullTrigger: Float = 1.0f,
+    longPullTrigger: Float = 1.85f,
+    longPullIndicatorStart: Float = 1.6f,
+    pullResistance: Float = 0.58f,
     content: @Composable () -> Unit
 ) {
     val shortPullAction = onRefresh ?: onShortPull
@@ -171,14 +171,14 @@ fun ExtendedPullRefreshLayout(
                     refreshingIndicatorType = RefreshingIndicatorType.Snowflake
                     onLongPull()
                     setOffsetTarget(0f)
-                    return available
+                    return Velocity.Zero
                 }
 
                 if (!isRefreshing && progress >= shortPullTrigger && shortPullAction != null) {
                     refreshingIndicatorType = RefreshingIndicatorType.Circle
                     shortPullAction()
                     setOffsetTarget(thresholdPx)
-                    return available
+                    return Velocity.Zero
                 }
 
                 setOffsetTarget(0f)
