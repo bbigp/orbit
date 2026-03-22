@@ -102,12 +102,9 @@ data class AddFeedPreviewScreen(
                     ) {
                         LDItemList(
                             listState = lazyListState,
-                            onRefresh = {},
-                            onLoadMore = {},
                             state = listState,
                             pagingState = pagingState,
                             groupedData = mapOf("" to state.preview.entries),
-                            enablePullToRefresh = false,
                             enableSwipe = false
                         )
                     }

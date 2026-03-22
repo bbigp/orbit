@@ -14,7 +14,7 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.PagingLoadState
-import cn.coolbet.orbit.ui.kit.PullRefreshPagingLazyColumn
+import cn.coolbet.orbit.ui.kit.ObLazyColumn
 import cn.coolbet.orbit.ui.kit.SpacerDivider
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDGroupTitle
@@ -36,12 +36,11 @@ private sealed interface LDListItem {
 @Composable
 fun LDItemList(
     listState: LazyListState,
-    onRefresh: () -> Unit,
-    onLoadMore: () -> Unit,
+    onRefresh: (() -> Unit)? = null,
+    onLoadMore: (() -> Unit)? = null,
     state: LDItemListState,
     pagingState: PagingLoadState,
     groupedData: Map<String, List<Entry>>,
-    enablePullToRefresh: Boolean = true,
     enableSwipe: Boolean = true,
 ) {
     val actions = LocalListDetailActions.current
@@ -58,14 +57,13 @@ fun LDItemList(
         }
     }
 
-    PullRefreshPagingLazyColumn(
+    ObLazyColumn(
         items = listItems,
         pagingState = pagingState,
         onRefresh = onRefresh,
         onLoadMore = onLoadMore,
         listState = listState,
         modifier = Modifier.fillMaxSize(),
-        enablePullToRefresh = enablePullToRefresh,
         onLongPull = onRefresh,
         key = { _, item ->
             when (item) {

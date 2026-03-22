@@ -27,20 +27,22 @@ private sealed interface FooterState {
     data object None : FooterState
 }
 
-private val PagingLoadState.footerState: FooterState
-    get() = when {
+private fun PagingLoadState.footerState(enableLoadMore: Boolean): FooterState {
+    if (!enableLoadMore) return FooterState.End
+    return when {
         isLoadingMore -> FooterState.Loading
         appendError != null -> FooterState.Error(requireNotNull(appendError))
         !hasMore -> FooterState.End
         else -> FooterState.None
     }
+}
 
 @Composable
 fun <T> PagingLazyColumn(
     modifier: Modifier = Modifier,
     items: List<T>,
     pagingState: PagingLoadState,
-    onLoadMore: () -> Unit,
+    onLoadMore: (() -> Unit)? = null,
     listState: LazyListState = rememberLazyListState(),
     prefetchItemCount: Int = 4,
     key: ((index: Int, item: T) -> Any)? = null,
@@ -51,14 +53,17 @@ fun <T> PagingLazyColumn(
     },
     content: @Composable LazyItemScope.(item: T) -> Unit
 ) {
+    val canLoadMore = onLoadMore != null
 
-    LoadMoreTrigger(
-        listState = listState,
-        itemCount = items.size,
-        pagingState = pagingState,
-        prefetchItemCount = prefetchItemCount,
-        onLoadMore = onLoadMore
-    )
+    if (canLoadMore) {
+        LoadMoreTrigger(
+            listState = listState,
+            itemCount = items.size,
+            pagingState = pagingState,
+            prefetchItemCount = prefetchItemCount,
+            onLoadMore = onLoadMore
+        )
+    }
 
     LazyColumn(
         state = listState,
@@ -77,11 +82,11 @@ fun <T> PagingLazyColumn(
             }
         }
         pagingFooter(
-            footerState = pagingState.footerState,
+            footerState = pagingState.footerState(canLoadMore),
             loadingFooter = loadingFooter,
             endFooter = endFooter,
             errorFooter = errorFooter,
-            onRetry = { onLoadMore() }
+            onRetry = { onLoadMore?.invoke() }
         )
     }
 }

@@ -166,22 +166,27 @@ fun ExtendedPullRefreshLayout(
             override suspend fun onPreFling(available: Velocity): Velocity {
                 pullingByUser = false
                 updateProgress(currentOffsetY = offsetY)
+                val hasPullOffset = offsetY > 0f
 
                 if (!isRefreshing && progress >= longPullTrigger && onLongPull != null) {
                     refreshingIndicatorType = RefreshingIndicatorType.Snowflake
                     onLongPull()
                     setOffsetTarget(0f)
-                    return Velocity.Zero
+                    return available
                 }
 
                 if (!isRefreshing && progress >= shortPullTrigger && shortPullAction != null) {
                     refreshingIndicatorType = RefreshingIndicatorType.Circle
                     shortPullAction()
                     setOffsetTarget(thresholdPx)
-                    return Velocity.Zero
+                    return available
                 }
 
-                setOffsetTarget(0f)
+                if (hasPullOffset) {
+                    setOffsetTarget(0f)
+                    return available
+                }
+
                 return Velocity.Zero
             }
         }
