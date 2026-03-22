@@ -14,9 +14,8 @@ import cn.coolbet.orbit.model.domain.Meta
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.ObToastManager
 import cn.coolbet.orbit.ui.kit.PagingLoadState
-import cn.coolbet.orbit.ui.kit.PagingLazyColumn
+import cn.coolbet.orbit.ui.kit.PullRefreshPagingLazyColumn
 import cn.coolbet.orbit.ui.kit.SpacerDivider
-import cn.coolbet.orbit.ui.view.listdetail.ExtendedPullRefreshLayout
 import cn.coolbet.orbit.ui.view.listdetail.LocalListDetailActions
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDGroupTitle
 import cn.coolbet.orbit.ui.view.listdetail.component.item.LDHeader
@@ -59,66 +58,54 @@ fun LDItemList(
         }
     }
 
-    val listContent: @Composable () -> Unit = {
-        PagingLazyColumn(
-            items = listItems,
-            pagingState = pagingState,
-            onLoadMore = { onLoadMore() },
-            listState = listState,
-            modifier = Modifier.fillMaxSize(),
-            key = { _, item ->
-                when (item) {
-                    LDListItem.Header -> "ld-header"
-                    is LDListItem.Group -> "group-${item.date}"
-                    is LDListItem.EntryRow -> item.entry.id
+    PullRefreshPagingLazyColumn(
+        items = listItems,
+        pagingState = pagingState,
+        onRefresh = onRefresh,
+        onLoadMore = onLoadMore,
+        listState = listState,
+        modifier = Modifier.fillMaxSize(),
+        enablePullToRefresh = enablePullToRefresh,
+        onLongPull = onRefresh,
+        key = { _, item ->
+            when (item) {
+                LDListItem.Header -> "ld-header"
+                is LDListItem.Group -> "group-${item.date}"
+                is LDListItem.EntryRow -> item.entry.id
+            }
+        },
+    ) { listItem ->
+        when (listItem) {
+            LDListItem.Header -> LDHeader(meta = state.meta)
+            is LDListItem.Group -> LDGroupTitle(date = listItem.date)
+            is LDListItem.EntryRow -> {
+                val item = listItem.entry
+                val rowContent: @Composable () -> Unit = {
+                    LDRow(item, state.settings.displayMode, modifier = Modifier.click {
+                        NavigatorBus.push(Route.Entry(item, state.settings))
+                    })
                 }
-            },
-        ) { listItem ->
-            when (listItem) {
-                LDListItem.Header -> LDHeader(meta = state.meta)
-                is LDListItem.Group -> LDGroupTitle(date = listItem.date)
-                is LDListItem.EntryRow -> {
-                    val item = listItem.entry
-                    val rowContent: @Composable () -> Unit = {
-                        LDRow(item, state.settings.displayMode, modifier = Modifier.click {
-                            NavigatorBus.push(Route.Entry(item, state.settings))
-                        })
-                    }
-                    if (enableSwipe) {
-                        SwipeWrapper(
-                            rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
-                                onClick = {
-                                    actions.toggleRead(item)
-                                    ObToastManager.show("Marked as Read")
-                                }
-                            ) else UnreadStateDefinition.copy(
-                                onClick = {
-                                    actions.toggleRead(item)
-                                    ObToastManager.show("Marked as Unread")
-                                }
-                            ),
-                            leftSwipeState = NoneStateDefinition,
-                            content = rowContent
-                        )
-                    } else {
-                        rowContent()
-                    }
-                    SpacerDivider(start = 16.dp, end = 16.dp)
+                if (enableSwipe) {
+                    SwipeWrapper(
+                        rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
+                            onClick = {
+                                actions.toggleRead(item)
+                                ObToastManager.show("Marked as Read")
+                            }
+                        ) else UnreadStateDefinition.copy(
+                            onClick = {
+                                actions.toggleRead(item)
+                                ObToastManager.show("Marked as Unread")
+                            }
+                        ),
+                        leftSwipeState = NoneStateDefinition,
+                        content = rowContent
+                    )
+                } else {
+                    rowContent()
                 }
+                SpacerDivider(start = 16.dp, end = 16.dp)
             }
         }
-    }
-
-    if (enablePullToRefresh) {
-        ExtendedPullRefreshLayout(
-            isRefreshing = pagingState.isRefreshing,
-            listState = listState,
-            onRefresh = onRefresh,
-            onLongPull = onRefresh,
-        ) {
-            listContent()
-        }
-    } else {
-        listContent()
     }
 }
