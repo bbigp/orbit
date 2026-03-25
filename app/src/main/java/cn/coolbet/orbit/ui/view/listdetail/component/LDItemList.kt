@@ -84,19 +84,19 @@ fun LDItemList(
                     })
                 }
                 if (enableSwipe) {
-                    SwipeWrapper(
-                        rightSwipeState = if (item.isUnread) ReadStateDefinition.copy(
-                            onClick = {
+                    SwipeActionItem(
+                        endAction = if (item.isUnread) MarkReadSwipeAction.copy(
+                            onTrigger = {
                                 actions.toggleRead(item)
                                 ObToastManager.show("Marked as Read")
                             }
-                        ) else UnreadStateDefinition.copy(
-                            onClick = {
+                        ) else MarkUnreadSwipeAction.copy(
+                            onTrigger = {
                                 actions.toggleRead(item)
                                 ObToastManager.show("Marked as Unread")
                             }
                         ),
-                        leftSwipeState = NoneStateDefinition,
+                        startAction = DisabledSwipeAction,
                         content = rowContent
                     )
                 } else {

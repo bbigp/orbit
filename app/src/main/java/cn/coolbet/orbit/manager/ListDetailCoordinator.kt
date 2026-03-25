@@ -111,7 +111,7 @@ class ListDetailCoordinator(
                 throw IllegalStateException("MetaId type is neither Feed nor Folder.")
             }
         }
-        delay(2000)
+        delay(500)
         try {
             val meta = metaDataFlow.first()
             val ldSettings = settings ?: ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
