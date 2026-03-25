@@ -1,6 +1,7 @@
 package cn.coolbet.orbit.ui.kit
 
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -27,6 +28,42 @@ fun <T> ObLazyColumn(
             onLoadMore = onLoadMore,
             listState = listState,
             key = key,
+            content = content
+        )
+    }
+
+    if (onRefresh != null) {
+        ExtendedPullRefreshLayout(
+            isRefreshing = pagingState.isRefreshing,
+            listState = listState,
+            onRefresh = onRefresh,
+            onLongPull = onLongPull,
+        ) {
+            listContent()
+        }
+    } else {
+        listContent()
+    }
+}
+
+@Composable
+fun ObLazyColumn(
+    modifier: Modifier = Modifier,
+    itemCount: Int,
+    pagingState: PagingLoadState,
+    onRefresh: (() -> Unit)? = null,
+    onLoadMore: (() -> Unit)? = null,
+    listState: LazyListState = rememberLazyListState(),
+    onLongPull: (() -> Unit)? = onRefresh,
+    content: LazyListScope.() -> Unit
+) {
+    val listContent: @Composable () -> Unit = {
+        PagingLazyColumn(
+            modifier = modifier,
+            itemCount = itemCount,
+            pagingState = pagingState,
+            onLoadMore = onLoadMore,
+            listState = listState,
             content = content
         )
     }

@@ -91,6 +91,48 @@ fun <T> PagingLazyColumn(
     }
 }
 
+@Composable
+fun PagingLazyColumn(
+    modifier: Modifier = Modifier,
+    itemCount: Int,
+    pagingState: PagingLoadState,
+    onLoadMore: (() -> Unit)?,
+    listState: LazyListState = rememberLazyListState(),
+    prefetchItemCount: Int = 4,
+    loadingFooter: @Composable () -> Unit = { LoadMoreIndicator() },
+    endFooter: @Composable () -> Unit = { NoMoreIndicator() },
+    errorFooter: @Composable (Throwable, onRetry: () -> Unit) -> Unit = { _, onRetry ->
+        PagingErrorFooter(onRetry = onRetry)
+    },
+    content: LazyListScope.() -> Unit
+) {
+    val canLoadMore = onLoadMore != null
+
+    if (canLoadMore) {
+        LoadMoreTrigger(
+            listState = listState,
+            itemCount = itemCount,
+            pagingState = pagingState,
+            prefetchItemCount = prefetchItemCount,
+            onLoadMore = onLoadMore
+        )
+    }
+
+    LazyColumn(
+        state = listState,
+        modifier = modifier
+    ) {
+        content()
+        pagingFooter(
+            footerState = pagingState.footerState(canLoadMore),
+            loadingFooter = loadingFooter,
+            endFooter = endFooter,
+            errorFooter = errorFooter,
+            onRetry = { onLoadMore?.invoke() }
+        )
+    }
+}
+
 private fun LazyListScope.pagingFooter(
     footerState: FooterState,
     loadingFooter: @Composable () -> Unit,
