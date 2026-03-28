@@ -66,7 +66,7 @@ class ContentScreenModel(
                 )
                 mutableState.update { ContentState(
                     entry = newEntry,
-                    readerModeOpened = newEntry.readerPageState != ReaderPageState.Failure,
+                    readerModeOpened = true,
                     index = index,
                     settings = settings,
                 ) }
@@ -86,18 +86,31 @@ class ContentScreenModel(
     fun toggleReaderMode(){
         val opened = !mutableState.value.readerModeOpened
         mutableState.update {
+            val shouldFetch = opened && (
+                it.entry.readerPageState == ReaderPageState.Idle ||
+                    it.entry.readerPageState == ReaderPageState.Failure
+                )
             it.copy(
                 readerModeOpened = opened,
                 entry = it.entry.copy(
-                    readerPageState =
-                        if (opened && it.entry.readerPageState == ReaderPageState.Idle)
-                            ReaderPageState.Fetching
-                        else
-                            it.entry.readerPageState,
+                    readerPageState = if (shouldFetch) ReaderPageState.Fetching else it.entry.readerPageState,
                 ),
             )
         }
         readerView(state.value.entry)
+    }
+
+    fun retryReaderMode() {
+        val current = mutableState.value.entry
+        if (current.isEmpty) return
+        val retrying = current.copy(readerPageState = ReaderPageState.Fetching)
+        mutableState.update {
+            it.copy(
+                readerModeOpened = true,
+                entry = retrying,
+            )
+        }
+        readerView(retrying)
     }
 
     private fun readerView(entry: Entry) {
