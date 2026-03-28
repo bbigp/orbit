@@ -11,6 +11,10 @@ import kotlinx.coroutines.withContext
 @Dao
 abstract class FolderDao(private val db: AppDatabase) {
 
+    suspend fun getFolders(userId: Long): List<Folder> {
+        return getFoldersByUserImpl(userId).map { it.to() }
+    }
+
     suspend fun getFolders(): List<Folder> {
         return getFoldersImpl().map { it.to() }
     }
@@ -42,4 +46,7 @@ abstract class FolderDao(private val db: AppDatabase) {
 
     @Query("select * from folders order by id desc")
     internal abstract suspend fun getFoldersImpl(): List<FolderEntity>
+
+    @Query("select * from folders where user_id = :userId order by id desc")
+    internal abstract suspend fun getFoldersByUserImpl(userId: Long): List<FolderEntity>
 }

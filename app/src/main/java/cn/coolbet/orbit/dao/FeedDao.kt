@@ -11,6 +11,10 @@ import kotlinx.coroutines.withContext
 @Dao
 abstract class FeedDao(private val db: AppDatabase) {
 
+    suspend fun getFeeds(userId: Long): List<Feed> {
+        return getFeedsByUserImpl(userId).map { it.to() }
+    }
+
     suspend fun getFeeds(): List<Feed> {
         return getFeedsImpl().map { it.to() }
     }
@@ -64,5 +68,8 @@ abstract class FeedDao(private val db: AppDatabase) {
 
     @Query("select * from feeds")
     internal abstract suspend fun getFeedsImpl(): List<FeedEntity>
+
+    @Query("select * from feeds where user_id = :userId")
+    internal abstract suspend fun getFeedsByUserImpl(userId: Long): List<FeedEntity>
 
 }
