@@ -30,15 +30,15 @@ class ProfileScreenModel(
 
 
     init {
-        combine(session.state, Env.settings.rootFolder.state) { user, rootFolderId ->
-            Pair(user, rootFolderId)
+        combine(session.state, Env.settings.rootFolder.state, cacheStore.foldersState) { user, rootFolderId, folders ->
+            Triple(user, rootFolderId, folders)
         }.onStart {
             _state.update { it.copy(isLoading = true) }
-        }.onEach { (user, rootFolderId) ->
+        }.onEach { (user, rootFolderId, folders) ->
             _state.update {
                 it.copy(
                     isLoading = false, user = user,
-                    rootFolder = cacheStore.folder(rootFolderId)
+                    rootFolder = folders.find { folder -> folder.id == rootFolderId } ?: Folder.EMPTY
                 )
             }
         }.launchIn(screenModelScope)

@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * 协调器
@@ -113,7 +114,10 @@ class ListDetailCoordinator(
         }
         delay(500)
         try {
-            val meta = metaDataFlow.first()
+            // Prefer a non-empty meta from cache, but avoid waiting forever when cache is unavailable.
+            val meta = withTimeoutOrNull(2_000) {
+                metaDataFlow.first { it.isNotEmpty }
+            } ?: metaDataFlow.first()
             val ldSettings = settings ?: ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
             val newData = entryManager.getPage(
                 query = ListDetailQuery(meta = meta, settings = ldSettings, search = search),
