@@ -3,6 +3,7 @@ package cn.coolbet.orbit.di
 import androidx.room.Room
 import cn.coolbet.orbit.dao.AppDatabase
 import cn.coolbet.orbit.dao.DATABASE_NAME
+import cn.coolbet.orbit.dao.MIGRATION_1_2
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -14,7 +15,7 @@ val roomModule = module {
             AppDatabase::class.java,
             DATABASE_NAME
         )
-//            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2)
             .build()
     }
     single { get<AppDatabase>().feedDao() }

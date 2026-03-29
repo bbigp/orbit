@@ -126,12 +126,12 @@ abstract class EntryDao(protected val db: AppDatabase) {
             readable_content = :readable, 
             lead_image_url = :leadImageURL,
             summary = :summary,
-            reader_page_state = :readerPageState
+            readable_content_state = :readableContentState
         where id = :id
     """)
     abstract suspend fun updateReadingModeData(
         readable: String, leadImageURL: String, summary: String,
-        readerPageState: ReaderPageState,
+        readableContentState: ReaderPageState,
         id: Long
     )
 

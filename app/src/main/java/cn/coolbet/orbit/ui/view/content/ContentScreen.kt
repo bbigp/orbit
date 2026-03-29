@@ -19,11 +19,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cn.coolbet.orbit.NavigatorBus
+import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.asColorState
 import cn.coolbet.orbit.model.domain.Entry
@@ -31,7 +32,6 @@ import cn.coolbet.orbit.model.domain.ReaderPageState
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -47,24 +47,31 @@ data class ContentScreen(
         val bgColor by Env.settings.articleBgColor.asColorState()
         val scrollState = rememberScrollState()
         val entry = state.entry
-        val coroutineScope = rememberCoroutineScope()
-        val showReaderLoading = state.readerModeOpened && entry.readerPageState == ReaderPageState.Fetching
-        val showReaderFailure = state.readerModeOpened && entry.readerPageState == ReaderPageState.Failure
+        val showReaderLoading = state.isReaderModeEnabled && entry.readableContentState == ReaderPageState.Fetching
+        val showReaderFailure = state.isReaderModeEnabled && entry.readableContentState == ReaderPageState.Failure
 
         LaunchedEffect(state.entry.id) {
-            coroutineScope.launch {
-                scrollState.scrollTo(0)
-            }
+            scrollState.scrollTo(0)
         }
 
         LaunchedEffect(data, settings) {
             model.loadData(data, settings)
         }
 
+        LaunchedEffect(model) {
+            model.effects.collect { effect ->
+                when (effect) {
+                    is ContentEffect.NavigateToEntry -> {
+                        NavigatorBus.replace(Route.Entry(effect.entry, model.state.value.settings))
+                    }
+                }
+            }
+        }
+
         CompositionLocalProvider(
-            LocalToggleReaderMode provides model::toggleReaderMode,
-            LocalChangeStarred provides model::changeStarred,
-            LocalNextEntry provides model::nextEntry,
+            LocalToggleReaderMode provides { model.onAction(ContentAction.ToggleReaderMode) },
+            LocalChangeStarred provides { model.onAction(ContentAction.ChangeStarred) },
+            LocalOpenNextEntry provides { model.onAction(ContentAction.OpenNextEntry) },
         ) {
             SystemBarAppearance(dark = false)
             Scaffold(
@@ -84,7 +91,7 @@ data class ContentScreen(
                             showReaderLoading -> ReaderModeLoadingSkeleton()
                             showReaderFailure -> ReaderModeFailure(
                                 onRetry = model::retryReaderMode,
-                                onExitReaderMode = model::toggleReaderMode,
+                                onExitReaderMode = { model.onAction(ContentAction.ToggleReaderMode) },
                             )
                             else -> Column(
                                 modifier = Modifier.fillMaxSize()

@@ -44,12 +44,12 @@ fun ArticleHtml(state: ContentState, scrollState: ScrollState){
     val fontSize by Env.settings.articleFontSize.asState()
 
     val payload = remember(
-        state.readerModeOpened, entry.readableContent, entry.content,
+        state.isReaderModeEnabled, entry.readableContent, entry.content,
         entry.title, entry.author,
         fontFamily, fontSize
     ) {
         Gson().toJson(ArticlePayload(
-            body = HtmlBuilderHelper.htmlBody(if (state.readerModeOpened) entry.readableContent else entry.content),
+            body = HtmlBuilderHelper.htmlBody(if (state.isReaderModeEnabled) entry.readableContent else entry.content),
             theme = "light",
             head = HtmlBuilderHelper.htmlHead(entry.title, entry.author),
             cssOptionString = HtmlBuilderHelper.rootStyle(fontSize, fontFamily)
