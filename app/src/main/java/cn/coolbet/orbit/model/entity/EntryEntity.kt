@@ -29,7 +29,7 @@ data class EntryEntity(
     @ColumnInfo(name = "summary", defaultValue = "") val summary: String = "",
     @ColumnInfo(name = "readable_content", defaultValue = "") val readableContent: String = "",
     @ColumnInfo(name = "lead_image_url", defaultValue = "") val leadImageURL: String = "",
-    @ColumnInfo(name = "reader_page_state", defaultValue = "Idle") val readerPageState: ReaderPageState = ReaderPageState.Idle,
+    @ColumnInfo(name = "readable_content_state", defaultValue = "Idle") val readableContentState: ReaderPageState = ReaderPageState.Idle,
 )
 
 
@@ -39,6 +39,6 @@ fun EntryEntity.to(): Entry {
         title = title, url = url, publishedAt = publishedAt, content = content, author = author,
         starred = starred, readingTime = readingTime, tags = tags.split(","), createdAt = createdAt, changedAt = createdAt,
         summary = summary, readableContent = readableContent, leadImageURL = leadImageURL,
-        readerPageState = readerPageState
+        readableContentState = readableContentState
     )
 }

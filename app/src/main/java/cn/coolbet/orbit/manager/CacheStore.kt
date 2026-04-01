@@ -1,4 +1,4 @@
-package cn.coolbet.orbit.manager
+﻿package cn.coolbet.orbit.manager
 
 import android.util.Log
 import cn.coolbet.orbit.common.increment
@@ -22,13 +22,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/**
- * Flow	Cold Stream（冷流）	Coroutines	异步数据流的基础。用于处理一次性数据序列（如 API 响应）或事件流（如点击事件）。
- * StateFlow	Hot Stream（热流）	Coroutines	只读的   可观察的状态持有者。始终包含一个最新值，并且会向新的收集者立即发送这个最新值。常用于 ViewModel。
- * MutableStateFlow	Hot Stream（热流）	Coroutines 刻修改的	StateFlow 的可变版本。用于在内部修改状态（通过设置其 .value 属性）。
- * State	Interface	Compose	Compose 运行时可追踪的状态接口。当它的 .value 属性被读取时，Compose 会记录下来，并在值改变时触发依赖它的 Composable 重组。
- * by	Kotlin Delegate	Kotlin	属性委托关键字。在 Compose 中，用于简化对 State<T> 值的访问。
- */
 class CacheStore(
     private val feedDao: FeedDao,
     private val folderDao: FolderDao,
@@ -40,29 +33,34 @@ class CacheStore(
 ) {
     private val _feeds = MutableStateFlow<List<Feed>>(emptyList())
     val feedsState: StateFlow<List<Feed>> = _feeds.asStateFlow()
+
     private val _folders = MutableStateFlow<List<Folder>>(emptyList())
     val foldersState: StateFlow<List<Folder>> = _folders.asStateFlow()
+
     private val _unreadCountMap = MutableStateFlow<Map<String, Int>>(emptyMap())
     val unreadMapState: StateFlow<Map<String, Int>> = _unreadCountMap.asStateFlow()
-    private val mutex = Mutex()
 
+    private val mutex = Mutex()
     private val storeScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    @Volatile private var currentLoadJob: Job? = null
+    @Volatile
+    private var currentLoadJob: Job? = null
 
     init {
         eventBus
             .subscribe<Evt.CacheInvalidated>(appScope) { event ->
-                Log.i("eventbus", "刷新缓存")
+                Log.i("eventbus", "refresh cache")
                 loadInitialData(event.userId)
             }
             .subscribe<Evt.EntryStatusUpdated>(appScope) { event ->
                 Log.i("eventbus", "EntryStatusUpdated newStatus: ${event.status} ${event.entryId}")
                 localDataManager.updateFlags(event.entryId, status = event.status)
                 val count = if (event.status.isUnread) 1 else -1
-                _unreadCountMap.increment(mapOf(
-                    "o${event.folderId}" to count,
-                    "e${event.feedId}" to count
-                ))
+                _unreadCountMap.increment(
+                    mapOf(
+                        "o${event.folderId}" to count,
+                        "e${event.feedId}" to count,
+                    )
+                )
             }
     }
 
@@ -100,31 +98,37 @@ class CacheStore(
         currentLoadJob?.cancel()
         currentLoadJob = storeScope.launch {
             if (userId == 0L) {
-                Log.i("store", "未登录，无法预加载")
+                Log.i("store", "not logged in, skip preload")
+                clearCache()
                 return@launch
             }
-            val feeds = feedDao.getFeeds()
-            val folders = folderDao.getFolders()
+
+            val feeds = feedDao.getFeeds(userId)
+            val folders = folderDao.getFolders(userId)
             _feeds.value = associateFolderWithFeed(feeds, folders)
             _folders.value = associateFeedsWithFolders(feeds, folders)
 
+            val feedUnreadCount = entryDao.countFeedUnread(userId)
+            val unreadMap = feedUnreadCount
+                .associate { unreadCount -> "e${unreadCount.feedId}" to unreadCount.count }
+                .toMutableMap()
 
-            val feedUnreadCount = entryDao.countFeedUnread()
-            val unreadMap = feedUnreadCount.associate { unreadCount -> "e${unreadCount.feedId}" to unreadCount.count }.toMutableMap()
             for (feed in feeds) {
-                val key = "o${feed.folderId}"
-                val oUnread = unreadMap.getOrElse(key, { 0 })
-                val eUnread = unreadMap.getOrElse("e${feed.id}", { 0 })
-                unreadMap[key] = oUnread + eUnread
+                val folderKey = "o${feed.folderId}"
+                val folderUnread = unreadMap[folderKey] ?: 0
+                val feedUnread = unreadMap["e${feed.id}"] ?: 0
+                unreadMap[folderKey] = folderUnread + feedUnread
             }
+
             _unreadCountMap.value = unreadMap
-            Log.i("store", "预加载完成 feed: ${_feeds.value.size} folder: ${_folders.value.size}")
+            Log.i("store", "preload complete feed=${_feeds.value.size} folder=${_folders.value.size}")
         }
     }
 
     fun clearCache() {
         _feeds.value = emptyList()
         _folders.value = emptyList()
+        _unreadCountMap.value = emptyMap()
     }
 
     suspend fun deleteLocalData() {
@@ -137,7 +141,7 @@ class CacheStore(
 
     fun associateFolderWithFeed(
         feeds: List<Feed>,
-        folders: List<Folder>
+        folders: List<Folder>,
     ): List<Feed> {
         val folderMap: Map<Long, Folder> = folders.associateBy { it.id }
         return feeds
@@ -153,10 +157,8 @@ class CacheStore(
         val folderFeedsMap = feeds.groupBy { it.folderId }
         return folders
             .asSequence()
-            .map { item ->
-                item.copy(
-                    feeds = folderFeedsMap[item.id] ?: emptyList() // 建议设置为 emptyList() 而不是 null
-                )
+            .map { folder ->
+                folder.copy(feeds = folderFeedsMap[folder.id] ?: emptyList())
             }
             .toList()
     }

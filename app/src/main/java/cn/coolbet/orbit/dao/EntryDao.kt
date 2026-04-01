@@ -30,7 +30,7 @@ import java.util.Date
 @Dao
 abstract class EntryDao(protected val db: AppDatabase) {
 
-    suspend fun getEntries(page: Int, size: Int, query: ListDetailQuery): List<Entry> {
+    suspend fun getEntries(page: Int, size: Int, query: ListDetailQuery, userId: Long): List<Entry> {
         val meta = query.meta
         val statuses = if (query.settings.unreadOnly) {
             listOf(EntryStatus.UNREAD)
@@ -38,6 +38,7 @@ abstract class EntryDao(protected val db: AppDatabase) {
             listOf(EntryStatus.UNREAD, EntryStatus.READ)
         }
         val whereClause = buildQuery(
+            userId = userId,
             feedIds = meta.feedIds,
             statuses = statuses,
             recentPubTime = meta.recentPubTime,
@@ -115,21 +116,22 @@ abstract class EntryDao(protected val db: AppDatabase) {
     @Query("""
         select feed_id, sum(case when status = 'unread' then 1 else 0 end) as count 
         from entries
+        where user_id = :userId
         group by feed_id
     """)
-    abstract suspend fun countFeedUnread(): List<UnreadCount>
+    abstract suspend fun countFeedUnread(userId: Long): List<UnreadCount>
 
     @Query("""
         update entries set 
             readable_content = :readable, 
             lead_image_url = :leadImageURL,
             summary = :summary,
-            reader_page_state = :readerPageState
+            readable_content_state = :readableContentState
         where id = :id
     """)
     abstract suspend fun updateReadingModeData(
         readable: String, leadImageURL: String, summary: String,
-        readerPageState: ReaderPageState,
+        readableContentState: ReaderPageState,
         id: Long
     )
 
@@ -154,6 +156,7 @@ abstract class EntryDao(protected val db: AppDatabase) {
     internal abstract suspend fun getEntriesRaw(query: SupportSQLiteQuery): List<EntryEntity>
 
     internal fun buildQuery(
+        userId: Long,
         feedIds: List<Long> = emptyList(),
         recentPubTime: Int = 0,
         recentAddTime: Int = 0,
@@ -162,6 +165,8 @@ abstract class EntryDao(protected val db: AppDatabase) {
     ): List<String> {
         val cond = mutableListOf<String>()
         val nowSeconds = System.currentTimeMillis()
+
+        cond.add("user_id = $userId")
 
         if (feedIds.isNotEmpty()) {
             val ids = feedIds.joinToString(separator = ", ")

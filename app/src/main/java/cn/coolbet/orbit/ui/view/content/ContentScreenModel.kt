@@ -18,8 +18,10 @@ import cn.coolbet.orbit.model.domain.ReaderPageState
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,6 +40,8 @@ class ContentScreenModel(
 
     private val mutableState = MutableStateFlow(ContentState())
     val state: StateFlow<ContentState> = mutableState.asStateFlow()
+    private val _effects = MutableSharedFlow<ContentEffect>(extraBufferCapacity = 1)
+    val effects = _effects.asSharedFlow()
 
     init {
         eventBus.subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
@@ -58,15 +62,15 @@ class ContentScreenModel(
             Log.i("entry-load-data", "entry index: $index")
             if (settings.autoReaderView) {
                 val newEntry = entry.copy(
-                    readerPageState =
-                        if (entry.readerPageState == ReaderPageState.Idle)
+                    readableContentState =
+                        if (entry.readableContentState == ReaderPageState.Idle)
                             ReaderPageState.Fetching
                         else
-                            entry.readerPageState
+                            entry.readableContentState
                 )
                 mutableState.update { ContentState(
                     entry = newEntry,
-                    readerModeOpened = newEntry.readerPageState != ReaderPageState.Failure,
+                    isReaderModeEnabled = true,
                     index = index,
                     settings = settings,
                 ) }
@@ -74,7 +78,7 @@ class ContentScreenModel(
             } else {
                 mutableState.update { ContentState(
                     entry = entry,
-                    readerModeOpened = entry.readableContent.isNotEmpty(),
+                    isReaderModeEnabled = entry.readableContent.isNotEmpty(),
                     index = index,
                     settings = settings,
                 ) }
@@ -83,25 +87,46 @@ class ContentScreenModel(
         }
     }
 
-    fun toggleReaderMode(){
-        val opened = !mutableState.value.readerModeOpened
+    fun onAction(action: ContentAction) {
+        when (action) {
+            is ContentAction.ToggleReaderMode -> toggleReaderMode()
+            is ContentAction.ChangeStarred -> changeStarred()
+            is ContentAction.OpenNextEntry -> openNextEntry()
+        }
+    }
+
+    private fun toggleReaderMode(){
+        val opened = !mutableState.value.isReaderModeEnabled
         mutableState.update {
+            val shouldFetch = opened && (
+                it.entry.readableContentState == ReaderPageState.Idle ||
+                    it.entry.readableContentState == ReaderPageState.Failure
+                )
             it.copy(
-                readerModeOpened = opened,
+                isReaderModeEnabled = opened,
                 entry = it.entry.copy(
-                    readerPageState =
-                        if (opened && it.entry.readerPageState == ReaderPageState.Idle)
-                            ReaderPageState.Fetching
-                        else
-                            it.entry.readerPageState,
+                    readableContentState = if (shouldFetch) ReaderPageState.Fetching else it.entry.readableContentState,
                 ),
             )
         }
         readerView(state.value.entry)
     }
 
+    fun retryReaderMode() {
+        val current = mutableState.value.entry
+        if (current.isEmpty) return
+        val retrying = current.copy(readableContentState = ReaderPageState.Fetching)
+        mutableState.update {
+            it.copy(
+                isReaderModeEnabled = true,
+                entry = retrying,
+            )
+        }
+        readerView(retrying)
+    }
+
     private fun readerView(entry: Entry) {
-        if (entry.readerPageState != ReaderPageState.Fetching) return
+        if (entry.readableContentState != ReaderPageState.Fetching) return
         appScope.launch {
             runCatching {
                 val readableDoc = oeeeed.fetchAndExtractContent(entry.url)
@@ -116,7 +141,7 @@ class ContentScreenModel(
                     readableContent = readableDoc.extracted.content,
                     leadImageURL = readableDoc.extracted.leadImageUrl,
                     summary = readableDoc.extracted.excerpt ?: "",
-                    readerPageState = ReaderPageState.Success,
+                    readableContentState = ReaderPageState.Success,
                 )
                 eventBus.post(Evt.EntryUpdated(newEntry))
             }.onFailure { e ->
@@ -125,13 +150,13 @@ class ContentScreenModel(
                     ReaderPageState.Failure, entry.id
                 )
                 eventBus.post(Evt.EntryUpdated(entry.copy(
-                    readerPageState = ReaderPageState.Failure
+                    readableContentState = ReaderPageState.Failure
                 )))
             }
         }
     }
 
-    fun changeStarred() {
+    private fun changeStarred() {
         screenModelScope.launch {
             val current = state.value.entry
             val value = current.copy(starred = !current.starred)
@@ -141,7 +166,7 @@ class ContentScreenModel(
         }
     }
 
-    fun nextEntry(): Entry? {
+    private fun nextEntry(): Entry? {
         val currentIndex = state.value.index
         val raw = coordinator.state.value
         val total = raw.total()
@@ -151,6 +176,9 @@ class ContentScreenModel(
         return raw.items[currentIndex + 1]
     }
 
+    private fun openNextEntry() {
+        nextEntry()?.let { _effects.tryEmit(ContentEffect.NavigateToEntry(it)) }
+    }
 
     fun autoRead() {
         if (!Env.settings.autoRead.value) {

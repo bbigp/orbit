@@ -11,12 +11,14 @@ import cn.coolbet.orbit.model.domain.MetaId
 import cn.coolbet.orbit.model.domain.update
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.ListLoadMoreState
+import cn.coolbet.orbit.ui.kit.PagingLoadState
 import cn.coolbet.orbit.ui.view.listdetail.component.LDItemListState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * 协调器
@@ -102,7 +104,7 @@ class ListDetailCoordinator(
     suspend fun initData(metaId: MetaId, settings: LDSettings? = null, search: String = "") {
         val value = state.value
         if (value.isRefreshing) return
-        update { it.copy(isRefreshing = true) }
+        update { it.copy(isRefreshing = true, appendError = null) }
         val metaDataFlow: Flow<Meta> = when {
             metaId.isFeed -> cacheStore.flowFeed(metaId.id)
             metaId.isFolder -> cacheStore.flowFolder(metaId.id)
@@ -110,9 +112,12 @@ class ListDetailCoordinator(
                 throw IllegalStateException("MetaId type is neither Feed nor Folder.")
             }
         }
-        delay(2000)
+        delay(500)
         try {
-            val meta = metaDataFlow.first()
+            // Prefer a non-empty meta from cache, but avoid waiting forever when cache is unavailable.
+            val meta = withTimeoutOrNull(2_000) {
+                metaDataFlow.first { it.isNotEmpty }
+            } ?: metaDataFlow.first()
             val ldSettings = settings ?: ldSettingsDao.get(metaId.toString()) ?: LDSettings.defaultSettings
             val newData = entryManager.getPage(
                 query = ListDetailQuery(meta = meta, settings = ldSettings, search = search),
@@ -126,7 +131,8 @@ class ListDetailCoordinator(
                     page = 1, hasMore = newData.size >= it.size,
                     meta = meta,
                     state = if (newData.isEmpty()) LoadingState.Empty else LoadingState.Loaded,
-                    isRefreshing = false
+                    isRefreshing = false,
+                    appendError = null
                 )
             }
         } catch (e: Exception) {
@@ -137,7 +143,7 @@ class ListDetailCoordinator(
     suspend fun loadMore() {
         if (!state.value.hasMore) return
         if (state.value.isLoadingMore) return
-        update { it.copy(isLoadingMore = true) }
+        update { it.copy(isLoadingMore = true, appendError = null) }
         try {
             val newData = entryManager.getPage(
                 query = ListDetailQuery(
@@ -154,11 +160,12 @@ class ListDetailCoordinator(
                     items = it.items + newData,
                     page = it.page + 1, hasMore = newData.size >= it.size,
                     isLoadingMore = false,
+                    appendError = null,
                     state = LoadingState.Loaded
                 )
             }
         } catch (e: Exception) {
-            update { it.copy(isLoadingMore = false) }
+            update { it.copy(isLoadingMore = false, appendError = e) }
             Log.e("BasePagingScreenModel", "加载数据出错.", e)
         }
     }
@@ -188,10 +195,11 @@ data class ListDetailState(
     override val hasMore: Boolean = false,
     override val isRefreshing: Boolean = false,
     override val isLoadingMore: Boolean = false,
+    override val appendError: Throwable? = null,
     override val settings: LDSettings = LDSettings.defaultSettings,
     val search: String = "",
     val state: LoadingState = LoadingState.Idle,
-): ILoadingState, LDItemListState, ListLoadMoreState
+): ILoadingState, LDItemListState, ListLoadMoreState, PagingLoadState
 
 fun ListDetailState.total(): Int {
     return this.items.size

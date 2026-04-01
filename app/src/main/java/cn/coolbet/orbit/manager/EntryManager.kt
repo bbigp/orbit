@@ -10,10 +10,16 @@ class EntryManager(
     private val entryDao: EntryDao,
     private val mediaDao: MediaDao,
     private val cacheStore: CacheStore,
+    private val session: Session,
 ) {
 
     suspend fun getPage(meta: Meta, page: Int = 1, size: Int = 20, search: String = ""): List<Entry> {
-        val entries = entryDao.getEntries(page, size, ListDetailQuery(meta = meta, search = search))
+        val entries = entryDao.getEntries(
+            page,
+            size,
+            ListDetailQuery(meta = meta, search = search),
+            userId = session.user.id
+        )
         if (entries.isEmpty()) return emptyList()
 
         val mediaMap = mediaDao.getMap(entryIds = entries.map { it.id }.toList())
@@ -26,7 +32,7 @@ class EntryManager(
     }
 
     suspend fun getPage(query: ListDetailQuery, page: Int = 1, size: Int = 20): List<Entry> {
-        val entries = entryDao.getEntries(page, size, query)
+        val entries = entryDao.getEntries(page, size, query, userId = session.user.id)
         if (entries.isEmpty()) return emptyList()
 
         val mediaMap = mediaDao.getMap(entryIds = entries.map { it.id }.toList())

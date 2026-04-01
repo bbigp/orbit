@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import cn.coolbet.orbit.NavigatorBus
 import cn.coolbet.orbit.R
-import cn.coolbet.orbit.Route
 import cn.coolbet.orbit.common.copyText
 import cn.coolbet.orbit.common.openURL
 import cn.coolbet.orbit.common.shareText
@@ -45,7 +44,7 @@ fun ContentOperate(
 ) {
     val toggleReaderMode = LocalToggleReaderMode.current
     val changeStarred = LocalChangeStarred.current
-    val nextEntry = LocalNextEntry.current
+    val openNextEntry = LocalOpenNextEntry.current
     val expandedState = remember { MutableTransitionState(false) }
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -82,15 +81,13 @@ fun ContentOperate(
                 }
             )
             ObIcon(
-                id = if (state.readerModeOpened) R.drawable.book else R.drawable.page,
+                id = if (state.isReaderModeEnabled) R.drawable.book else R.drawable.page,
                 modifier = Modifier.clickable { toggleReaderMode()  }
             )
             ObIcon(
                 id = R.drawable.chevron_down,
                 modifier = Modifier.clickable {
-                    val entry = nextEntry()
-                    if (entry == null)return@clickable
-                    NavigatorBus.replace(Route.Entry(entry, state.settings))
+                    openNextEntry()
                 }
             )
             Box{
