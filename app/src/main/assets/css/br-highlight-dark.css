@@ -1,0 +1,80 @@
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hljs {
+    color: var(--textPrimary);
+  }
+
+  /* 注释和引用 */
+  .hljs-comment
+  .hljs-quote {
+    color: #ffffff80;
+    font-style: italic;
+  }
+
+  /* Meta 标签 */
+  .hljs-meta {
+    color: #fff9;
+  }
+
+  /* 内置函数、类标题 */
+  .hljs-built_in,
+  .hljs-class
+  .hljs-title {
+    color: #e9950c;
+  }
+
+  /* 文档标签、公式、关键字、字面量 */
+  .hljs-doctag,
+  .hljs-formula,
+  .hljs-keyword,
+  .hljs-literal {
+    color: #2e95d3;
+  }
+
+  /* 添加、属性、元字符串、正则、字符串 */
+  .hljs-addition,
+  .hljs-attribute,
+  .hljs-meta-string,
+  .hljs-regexp,
+  .hljs-string {
+    color: #00a67d;
+  }
+
+  /* 属性、数字、选择器属性、选择器类、选择器伪类、模板变量、类型、变量 */
+  .hljs-attr,
+  .hljs-number,
+  .hljs-selector-attr,
+  .hljs-selector-class,
+  .hljs-selector-pseudo,
+  .hljs-template-variable,
+  .hljs-type,
+  .hljs-variable {
+    color: #df3079;
+  }
+
+  /* 项目符号、链接、选择器 ID、符号、标题 */
+  .hljs-bullet,
+  .hljs-link,
+  .hljs-selector-id,
+  .hljs-symbol,
+  .hljs-title {
+    color: #f22c3d;
+  }
+
+  /* 特殊样式 */
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-strong {
+    font-weight: 600;
+  }
+
+  .hljs-link {
+    text-decoration: underline;
+  }
+}

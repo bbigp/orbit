@@ -5,7 +5,7 @@ data class ArticlePayload(
     val head: String? = "",
     val body: String? = "",
     val theme: String? = "light",
-    val cssOptionString: String? = ""
+    val cssOptionString: String? = "",
 )
 
 class HtmlBuilderHelper {
@@ -74,6 +74,12 @@ class HtmlBuilderHelper {
                     <meta charset="UTF-8">
                     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
                     <link rel="stylesheet" type="text/css" href="file:///android_asset/css/main.css">
+                    <link rel="stylesheet" type="text/css" href="file:///android_asset/css/br-highlight.css">
+                    <link rel="stylesheet" type="text/css" href="file:///android_asset/css/br-highlight-dark.css">
+                    <link rel="stylesheet" type="text/css" href="file:///android_asset/css/heighlight-operate-container.css">
+                    <script src="file:///android_asset/js/format-html.js"></script>
+                    <script src="file:///android_asset/js/highlight.min.js"></script>
+                    <script src="file:///android_asset/js/highlight-operate-container.js"></script>
                     <style id="br-root-style"></style>
                     <script>${htmlJs}</script>
                 </head>

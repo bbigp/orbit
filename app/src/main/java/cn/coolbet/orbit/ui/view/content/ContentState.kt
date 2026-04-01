@@ -8,6 +8,7 @@ import cn.coolbet.orbit.model.entity.LDSettings
 sealed class ContentAction {
     object ToggleReaderMode : ContentAction()
     object ChangeStarred : ContentAction()
+    object OpenPreviousEntry : ContentAction()
     object OpenNextEntry : ContentAction()
 }
 
@@ -20,7 +21,14 @@ data class ContentState(
     val isReaderModeEnabled: Boolean = false,
     val index: Int = 0,
     val settings: LDSettings = LDSettings.defaultSettings,
+    val entryTransitionDirection: EntryTransitionDirection = EntryTransitionDirection.None,
 )
+
+enum class EntryTransitionDirection {
+    None,
+    Previous,
+    Next,
+}
 
 val LocalToggleReaderMode = compositionLocalOf<ConsumerUnit> {
     error("No function provided")

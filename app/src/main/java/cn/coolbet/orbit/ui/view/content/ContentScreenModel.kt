@@ -18,10 +18,8 @@ import cn.coolbet.orbit.model.domain.ReaderPageState
 import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.view.content.extractor.Oeeeed
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,8 +38,6 @@ class ContentScreenModel(
 
     private val mutableState = MutableStateFlow(ContentState())
     val state: StateFlow<ContentState> = mutableState.asStateFlow()
-    private val _effects = MutableSharedFlow<ContentEffect>(extraBufferCapacity = 1)
-    val effects = _effects.asSharedFlow()
 
     init {
         eventBus.subscribe<Evt.EntryUpdated>(screenModelScope) { event ->
@@ -51,7 +47,11 @@ class ContentScreenModel(
         }
     }
 
-    fun loadData(entry: Entry, settings: LDSettings) {
+    fun loadData(
+        entry: Entry,
+        settings: LDSettings,
+        direction: EntryTransitionDirection = EntryTransitionDirection.None,
+    ) {
         screenModelScope.launch {
             val raw = coordinator.state.value
             val index = raw.items.indexOfFirst { it.id == entry.id }
@@ -73,6 +73,7 @@ class ContentScreenModel(
                     isReaderModeEnabled = true,
                     index = index,
                     settings = settings,
+                    entryTransitionDirection = direction,
                 ) }
                 readerView(state.value.entry)
             } else {
@@ -81,6 +82,7 @@ class ContentScreenModel(
                     isReaderModeEnabled = entry.readableContent.isNotEmpty(),
                     index = index,
                     settings = settings,
+                    entryTransitionDirection = direction,
                 ) }
             }
             autoRead()
@@ -91,6 +93,7 @@ class ContentScreenModel(
         when (action) {
             is ContentAction.ToggleReaderMode -> toggleReaderMode()
             is ContentAction.ChangeStarred -> changeStarred()
+            is ContentAction.OpenPreviousEntry -> openPreviousEntry()
             is ContentAction.OpenNextEntry -> openNextEntry()
         }
     }
@@ -176,8 +179,33 @@ class ContentScreenModel(
         return raw.items[currentIndex + 1]
     }
 
+    private fun previousEntry(): Entry? {
+        val currentIndex = state.value.index
+        val raw = coordinator.state.value
+        val total = raw.total()
+        Log.i("previousEntry", "current: $currentIndex total: $total")
+        if (total == 0 || currentIndex <= 0) return null
+        return raw.items[currentIndex - 1]
+    }
+
     private fun openNextEntry() {
-        nextEntry()?.let { _effects.tryEmit(ContentEffect.NavigateToEntry(it)) }
+        nextEntry()?.let {
+            loadData(
+                entry = it,
+                settings = state.value.settings,
+                direction = EntryTransitionDirection.Next,
+            )
+        }
+    }
+
+    private fun openPreviousEntry() {
+        previousEntry()?.let {
+            loadData(
+                entry = it,
+                settings = state.value.settings,
+                direction = EntryTransitionDirection.Previous,
+            )
+        }
     }
 
     fun autoRead() {
