@@ -137,7 +137,7 @@ fun WebRenderLoadingOverlay(
     backgroundColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    var showBackground by remember { mutableStateOf(false) }
+    var showBackground by remember { mutableStateOf(visible) }
     var showSkeleton by remember { mutableStateOf(false) }
     var skeletonShownAtMs by remember { mutableLongStateOf(0L) }
 
@@ -167,7 +167,7 @@ fun WebRenderLoadingOverlay(
 
     val backgroundAlpha = animateFloatAsState(
         targetValue = if (showBackground) 1f else 0f,
-        animationSpec = tween(durationMillis = if (showBackground) 120 else 200),
+        animationSpec = tween(durationMillis = if (showBackground) 0 else 200),
         label = "web-render-overlay-background-alpha"
     ).value
     val skeletonAlpha = animateFloatAsState(

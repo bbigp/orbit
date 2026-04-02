@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -30,9 +31,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -45,6 +49,9 @@ import cn.coolbet.orbit.model.entity.LDSettings
 import cn.coolbet.orbit.ui.kit.NoMoreIndicator
 import cn.coolbet.orbit.ui.kit.SystemBarAppearance
 import kotlinx.parcelize.Parcelize
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Parcelize
 data class ContentScreen(
@@ -63,9 +70,8 @@ data class ContentScreen(
         val showReaderFailure = state.isReaderModeEnabled && entry.readableContentState == ReaderPageState.Failure
         val density = LocalDensity.current
         val swipeThresholdPx = with(density) { 72.dp.toPx() }
+        val scope = rememberCoroutineScope()
         var dragX by remember(state.entry.id) { mutableFloatStateOf(0f) }
-        var isWaitingForWebRender by remember { mutableStateOf(false) }
-        var showWebRenderOverlay by remember { mutableStateOf(false) }
         val webRenderKey = remember(
             entry.id,
             state.isReaderModeEnabled,
@@ -75,19 +81,19 @@ data class ContentScreen(
         ) {
             "${entry.id}:${state.isReaderModeEnabled}:${entry.readableContentState}:${entry.readableContent.hashCode()}:${entry.content.hashCode()}"
         }
+        val shouldWaitForWebRender = !entry.isEmpty && !showReaderLoading && !showReaderFailure
+        var isWaitingForWebRender by remember(webRenderKey) { mutableStateOf(shouldWaitForWebRender) }
+        var showWebRenderOverlay by remember(webRenderKey) { mutableStateOf(shouldWaitForWebRender) }
 
-        LaunchedEffect(webRenderKey, showReaderLoading, showReaderFailure) {
-            if (entry.isEmpty || showReaderLoading || showReaderFailure) {
+        LaunchedEffect(showReaderLoading, showReaderFailure, entry.id) {
+            if (!shouldWaitForWebRender) {
                 isWaitingForWebRender = false
                 showWebRenderOverlay = false
-                return@LaunchedEffect
             }
-
-            isWaitingForWebRender = true
-            showWebRenderOverlay = true
         }
 
         LaunchedEffect(state.entry.id) {
+            dragX = 0f
             scrollState.scrollTo(0)
         }
 
@@ -101,95 +107,124 @@ data class ContentScreen(
             LocalOpenNextEntry provides { model.onAction(ContentAction.OpenNextEntry) },
         ) {
             SystemBarAppearance(dark = false)
-            Scaffold(
-                containerColor = bgColor,
-                contentWindowInsets = WindowInsets(0, 0, 0,0 ),
-                bottomBar = { ContentOperate(state) }
-            ) { paddingValues ->
-                Box(
-                    modifier = Modifier.padding(paddingValues)
-                        .statusBarsPadding()
+            Box(modifier = Modifier.fillMaxSize()) {
+                AnimatedContent(
+                    modifier = Modifier
                         .fillMaxSize()
+                        .offset { IntOffset(dragX.roundToInt(), 0) }
                         .pointerInput(state.entry.id, swipeThresholdPx) {
                             detectHorizontalDragGestures(
+                                onDragStart = {
+                                },
                                 onHorizontalDrag = { _, dragAmount ->
                                     dragX += dragAmount
                                 },
                                 onDragEnd = {
                                     when {
-                                        dragX <= -swipeThresholdPx -> model.onAction(ContentAction.OpenNextEntry)
-                                        dragX >= swipeThresholdPx -> model.onAction(ContentAction.OpenPreviousEntry)
+                                        dragX <= -swipeThresholdPx -> {
+                                            val currentEntryId = state.entry.id
+                                            model.onAction(ContentAction.OpenNextEntry)
+                                            scope.launch {
+                                                delay(320L)
+                                                if (state.entry.id == currentEntryId) {
+                                                    dragX = 0f
+                                                }
+                                            }
+                                        }
+                                        dragX >= swipeThresholdPx -> {
+                                            val currentEntryId = state.entry.id
+                                            model.onAction(ContentAction.OpenPreviousEntry)
+                                            scope.launch {
+                                                delay(320L)
+                                                if (state.entry.id == currentEntryId) {
+                                                    dragX = 0f
+                                                }
+                                            }
+                                        }
+                                        else -> {
+                                            dragX = 0f
+                                        }
                                     }
-                                    dragX = 0f
                                 },
                                 onDragCancel = {
                                     dragX = 0f
                                 }
                             )
-                        }
-                ) {
-                    CompositionLocalProvider(
-                        LocalOverscrollFactory provides null,
-                    ) {
-                        AnimatedContent(
-                            targetState = Triple(state.entry.id, showReaderLoading, showReaderFailure),
-                            transitionSpec = {
-                                val enterDuration = 280
-                                val exitDuration = 220
-                                when (state.entryTransitionDirection) {
-                                    EntryTransitionDirection.Next -> {
-                                        (slideInHorizontally(
-                                            animationSpec = tween(enterDuration),
-                                            initialOffsetX = { fullWidth -> fullWidth }
-                                        ) + fadeIn(animationSpec = tween(enterDuration)))
-                                            .togetherWith(
-                                                slideOutHorizontally(
-                                                    animationSpec = tween(exitDuration),
-                                                    targetOffsetX = { fullWidth -> -fullWidth / 3 }
-                                                ) + fadeOut(animationSpec = tween(exitDuration))
-                                            )
-                                    }
-                                    EntryTransitionDirection.Previous -> {
-                                        (slideInHorizontally(
-                                            animationSpec = tween(enterDuration),
-                                            initialOffsetX = { fullWidth -> -fullWidth }
-                                        ) + fadeIn(animationSpec = tween(enterDuration)))
-                                            .togetherWith(
-                                                slideOutHorizontally(
-                                                    animationSpec = tween(exitDuration),
-                                                    targetOffsetX = { fullWidth -> fullWidth / 3 }
-                                                ) + fadeOut(animationSpec = tween(exitDuration))
-                                            )
-                                    }
-                                    EntryTransitionDirection.None -> {
-                                        fadeIn(animationSpec = tween(140))
-                                            .togetherWith(fadeOut(animationSpec = tween(140)))
-                                    }
-                                }.using(SizeTransform(clip = false))
+                        },
+                    targetState = Triple(state, showReaderLoading, showReaderFailure),
+                    transitionSpec = {
+                        val enterDuration = 280
+                        val exitDuration = 220
+                        when (state.entryTransitionDirection) {
+                            EntryTransitionDirection.Next -> {
+                                (slideInHorizontally(
+                                    animationSpec = tween(enterDuration),
+                                    initialOffsetX = { fullWidth -> fullWidth }
+                                ) + fadeIn(animationSpec = tween(enterDuration)))
+                                    .togetherWith(
+                                        slideOutHorizontally(
+                                            animationSpec = tween(exitDuration),
+                                            targetOffsetX = { fullWidth -> -fullWidth }
+                                        ) + fadeOut(animationSpec = tween(exitDuration))
+                                    )
                             }
-                        ) { animatedState ->
-                            val animatedShowReaderLoading = animatedState.second
-                            val animatedShowReaderFailure = animatedState.third
-                            if (animatedShowReaderLoading) {
-                                ReaderModeLoadingSkeleton()
-                            } else if (animatedShowReaderFailure) {
-                                ReaderModeFailure(
-                                    onRetry = model::retryReaderMode,
-                                    onExitReaderMode = { model.onAction(ContentAction.ToggleReaderMode) },
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
+                            EntryTransitionDirection.Previous -> {
+                                (slideInHorizontally(
+                                    animationSpec = tween(enterDuration),
+                                    initialOffsetX = { fullWidth -> -fullWidth }
+                                ) + fadeIn(animationSpec = tween(enterDuration)))
+                                    .togetherWith(
+                                        slideOutHorizontally(
+                                            animationSpec = tween(exitDuration),
+                                            targetOffsetX = { fullWidth -> fullWidth }
+                                        ) + fadeOut(animationSpec = tween(exitDuration))
+                                    )
+                            }
+                            EntryTransitionDirection.None -> {
+                                fadeIn(animationSpec = tween(140))
+                                    .togetherWith(fadeOut(animationSpec = tween(140)))
+                            }
+                        }.using(SizeTransform(clip = false))
+                    }
+                ) { animatedState ->
+                    val animatedContentState = animatedState.first
+                    val animatedEntry = animatedContentState.entry
+                    val animatedShowReaderLoading = animatedState.second
+                    val animatedShowReaderFailure = animatedState.third
+                    Scaffold(
+                        containerColor = bgColor,
+                        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                        bottomBar = { ContentOperate(animatedContentState) }
+                    ) { paddingValues ->
+                        Box(
+                            modifier = Modifier
+                                .padding(paddingValues)
+                                .statusBarsPadding()
+                                .fillMaxSize()
+                        ) {
+                            CompositionLocalProvider(
+                                LocalOverscrollFactory provides null,
+                            ) {
+                                if (animatedShowReaderLoading) {
+                                    ReaderModeLoadingSkeleton()
+                                } else if (animatedShowReaderFailure) {
+                                    ReaderModeFailure(
+                                        onRetry = model::retryReaderMode,
+                                        onExitReaderMode = { model.onAction(ContentAction.ToggleReaderMode) },
+                                    )
+                                } else {
                                     Column(
                                         modifier = Modifier.fillMaxSize()
                                             .verticalScroll(scrollState)
+                                            .graphicsLayer {
+                                                alpha = if (isWaitingForWebRender) 0f else 1f
+                                            }
                                     ) {
                                         Spacer(modifier = Modifier.height(20.dp))
-                                        ArticleCoverImage(entry)
-                                        ArticleMeta(entry, modifier = Modifier.padding(horizontal = 16.dp))
+                                        ArticleCoverImage(animatedEntry)
+                                        ArticleMeta(animatedEntry, modifier = Modifier.padding(horizontal = 16.dp))
                                         ArticleHtml(
-                                            state = state,
+                                            state = animatedContentState,
                                             scrollState = scrollState,
                                             onDomContentLoaded = { domEntryId ->
                                                 if (domEntryId != state.entry.id) return@ArticleHtml
@@ -201,19 +236,20 @@ data class ContentScreen(
                                             onArticleHeightChanged = { _, _ -> }
                                         )
                                         NoMoreIndicator(height = 40.dp)
-                                        ViewWebsite(entry.url)
+                                        ViewWebsite(animatedEntry.url)
                                         Spacer(modifier = Modifier.height(48.dp))
                                     }
-
-                                    WebRenderLoadingOverlay(
-                                        visible = showWebRenderOverlay,
-                                        backgroundColor = bgColor,
-                                    )
                                 }
                             }
                         }
                     }
                 }
+
+                WebRenderLoadingOverlay(
+                    visible = showWebRenderOverlay,
+                    backgroundColor = bgColor,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }
