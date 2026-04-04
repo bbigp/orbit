@@ -1,0 +1,95 @@
+.br-code-container {
+  position: relative;
+  border: 0.5px solid var(--borderThin);
+  border-radius: 12px;
+  margin: 1em 0;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 0.5px solid var(--borderThin);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background-color: var(--bgSecondary);
+  font-family: var(--font-family-base);
+  font-size: 0.875rem;
+  line-height: calc(var(--font-size-base) * var(--line-height-multiplier));
+  color: var(--text-primary);
+}
+
+.lang-name {
+  font-weight: 500;
+  padding-left: 8px;
+}
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: transparent;
+  -webkit-tap-highlight-color: transparent; /* 移动端点击高亮 */
+  outline: none;
+  color: var(--textPrimary);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.24s ease-in-out;
+}
+
+.copy-btn:hover,
+.copy-btn:focus,
+.copy-btn:active {
+  background: none;
+  background-color: transparent;
+  border: none;
+  color: var(--textPrimary);
+}
+
+.svg-color-container {
+  width: 20px;
+  height: 20px;
+}
+.copy-btn-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--textPrimary);
+}
+
+.copy-btn-text {
+  font-size: 0.875rem;
+  margin-left: 4px;
+  color: var(--textPrimary);
+}
+
+pre {
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  overflow: auto;
+  max-height: 360px;
+  max-width: 100%;
+  background-color: none;
+  font-family: var(--font-family-code);
+  font-size: 0.875rem;
+  line-height: calc(var(--font-size-base) * var(--line-height-multiplier));
+  white-space: pre;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+pre code {
+  padding: 16px;
+  margin: 0;
+  background: none;
+  overflow: auto;
+  max-height: 360px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+pre::has(code) {
+  overflow: hidden;
+}

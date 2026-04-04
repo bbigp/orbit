@@ -17,6 +17,7 @@ import cn.coolbet.orbit.manager.Env
 import cn.coolbet.orbit.manager.Session
 import cn.coolbet.orbit.remote.miniflux.MinIconFileApi
 import cn.coolbet.orbit.remote.miniflux.minifluxModule
+import cn.coolbet.orbit.ui.view.content.ArticleWebViewPreheater
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -49,6 +50,7 @@ class OrbitApp : Application(), SingletonImageLoader.Factory, Configuration.Prov
             session.startSession()
         }
         WebView.setWebContentsDebuggingEnabled(true)
+        ArticleWebViewPreheater.preload(this)
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {

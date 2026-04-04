@@ -3,6 +3,9 @@ package cn.coolbet.orbit.common
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.net.URI
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -62,6 +65,23 @@ object HTMLProcessingHelper {
         return if (found) linesBeforeFirst else null
     }
 
+    fun prepareArticleHtmlForWebView(
+        html: String?,
+        refererUrl: String?,
+    ): String {
+        if (html.isNullOrBlank()) return ""
+        return try {
+            val baseUri = refererUrl?.takeIf { it.isNotBlank() }.orEmpty()
+            val doc = Jsoup.parseBodyFragment(html, baseUri)
+            removeMediaFixedSizes(doc)
+            removeInlineStyles(doc)
+            convertImagesToBrewScheme(doc, refererUrl)
+            doc.body().html()
+        } catch (_: Exception) {
+            html
+        }
+    }
+
     private fun adjustIframes(doc: Document, screenWidth: Double) {
         val iframes = doc.select("iframe") ?: return
 
@@ -97,6 +117,48 @@ object HTMLProcessingHelper {
         for (node in nodes) {
             node.removeAttr("style")
         }
+    }
+
+    private fun convertImagesToBrewScheme(doc: Document, refererUrl: String?) {
+        val images = doc.select("img[src]") ?: return
+        for (img in images) {
+            val src = img.attr("src").orEmpty().trim()
+            if (src.isBlank()) continue
+            if (src.startsWith("data:", ignoreCase = true)) continue
+            if (src.startsWith("brew://", ignoreCase = true)) continue
+            if (src.startsWith("blob:", ignoreCase = true)) continue
+            if (src.startsWith("file:", ignoreCase = true)) continue
+
+            val absoluteSrc = when {
+                isHttpUrl(src) -> src
+                else -> img.absUrl("src").orEmpty()
+            }
+            if (!isHttpUrl(absoluteSrc)) continue
+
+            img.attr("data-original-src", absoluteSrc)
+            img.attr("src", buildBrewImageUrl(absoluteSrc, refererUrl))
+        }
+    }
+
+    private fun isHttpUrl(url: String): Boolean {
+        return runCatching {
+            val scheme = URI(url).scheme?.lowercase().orEmpty()
+            scheme == "http" || scheme == "https"
+        }.getOrDefault(false)
+    }
+
+    private fun buildBrewImageUrl(originalUrl: String, refererUrl: String?): String {
+        val urlPart = "url=${urlEncode(originalUrl)}"
+        val refererPart = refererUrl
+            ?.takeIf { isHttpUrl(it) }
+            ?.let { "&referer=${urlEncode(it)}" }
+            .orEmpty()
+        return "brew://image?$urlPart$refererPart"
+    }
+
+    private fun urlEncode(value: String): String {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+            .replace("+", "%20")
     }
 
 }

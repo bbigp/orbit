@@ -1,5 +1,8 @@
 package cn.coolbet.orbit.ui.view.content
 
+import android.os.SystemClock
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,14 +16,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import cn.coolbet.orbit.R
 import cn.coolbet.orbit.ui.kit.OButtonDefaults
@@ -117,6 +128,65 @@ fun ReaderModeFailure(
             colors = OButtonDefaults.stroked.copy(borderColor = Black08, contentColor = Black50),
             onClick = onExitReaderMode
         )
+    }
+}
+
+@Composable
+fun WebRenderLoadingOverlay(
+    visible: Boolean,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    var showBackground by remember { mutableStateOf(visible) }
+    var showSkeleton by remember { mutableStateOf(false) }
+    var skeletonShownAtMs by remember { mutableLongStateOf(0L) }
+
+    LaunchedEffect(visible) {
+        if (visible) {
+            showBackground = true
+            showSkeleton = false
+            skeletonShownAtMs = 0L
+            kotlinx.coroutines.delay(200L)
+            if (visible) {
+                showSkeleton = true
+                skeletonShownAtMs = SystemClock.elapsedRealtime()
+            }
+        } else {
+            if (showSkeleton) {
+                val elapsed = SystemClock.elapsedRealtime() - skeletonShownAtMs
+                val remain = (600L - elapsed).coerceAtLeast(0L)
+                if (remain > 0L) {
+                    kotlinx.coroutines.delay(remain)
+                }
+                showSkeleton = false
+                skeletonShownAtMs = 0L
+            }
+            showBackground = false
+        }
+    }
+
+    val backgroundAlpha = animateFloatAsState(
+        targetValue = if (showBackground) 1f else 0f,
+        animationSpec = tween(durationMillis = if (showBackground) 0 else 200),
+        label = "web-render-overlay-background-alpha"
+    ).value
+    val skeletonAlpha = animateFloatAsState(
+        targetValue = if (showSkeleton) 1f else 0f,
+        animationSpec = tween(durationMillis = if (showSkeleton) 180 else 200),
+        label = "web-render-overlay-skeleton-alpha"
+    ).value
+
+    if (backgroundAlpha <= 0.01f && skeletonAlpha <= 0.01f) return
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .alpha(backgroundAlpha)
+            .background(backgroundColor)
+    ) {
+        Box(modifier = Modifier.alpha(skeletonAlpha)) {
+            ReaderModeLoadingSkeleton()
+        }
     }
 }
 
